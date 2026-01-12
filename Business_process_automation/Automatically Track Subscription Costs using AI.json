@@ -1,0 +1,311 @@
+{
+  "name": "Track your competitors’ prices",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "056f47d7-5a06-4714-beb5-c53ffb663ed1",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        368,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1JmtRp_98N1rwCt3QwRzfjYPkCqaVANi9s7Drf2mCQ5c",
+          "mode": "list",
+          "cachedResultName": "Copy of DEMO - Monitor Pricing",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JmtRp_98N1rwCt3QwRzfjYPkCqaVANi9s7Drf2mCQ5c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JmtRp_98N1rwCt3QwRzfjYPkCqaVANi9s7Drf2mCQ5c/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "a8e5d613-bf15-4ebf-9191-4a17e86baba1",
+      "name": "Get Pricing URLs",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        592,
+        240
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pHD7VpgFc6oqjZU8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "extraction",
+        "operation": "query",
+        "sessionMode": "new",
+        "url": "={{ $json[\"Pricing URL\"] }}",
+        "prompt": "=This is a pricing page. Please summarize it concisely by including every plan. For each plan, list the price and the top 3 features it includes. Compare the current plan to the previous plan described here: \n[{{ $json.Pricing }}].\n\nRETURN ONLY 3 FIELDS:\n1. `pricing_summary` - A textual description of the pricing, including the  plan's name, price, and top 3 features.\n2. `differences_summary` - If there are significant differences in the PRICES between the previous plan and the current one, summarize the differences concisely in a textual description, focusing only on the changes in prices.\n3. `status` - In a status field, return [DIFF] if the new plan and pricing are substantially different from the previous one, [SIMILAR] if they are similar, or [NEW] if the previous pricing is empty.\n\n- important, do not guess or estimate, just report things that are clearly mentioned in pricing page\n",
+        "additionalFields": {
+          "outputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"pricing_summary\": {\n      \"type\": \"string\",\n      \"description\": \"A textual description of the pricing, including the plan's name, price, and top 3 features.\"\n    },\n    \"differences_summary\": {\n      \"type\": \"string\",\n      \"description\": \"A concise summary of the differences between the previous and current plans, focusing on changes.\"\n    },\n    \"status\": {\n      \"type\": \"string\",\n      \"description\": \"Indicates if the new plan is substantially different from the previous one.\"\n    }\n  },\n  \"required\": [\n    \"pricing_summary\",\n    \"differences_summary\",\n    \"status\"\n  ],\n  \"additionalProperties\": false,\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\"\n}"
+        }
+      },
+      "id": "7ee84bd6-cc49-46cd-bde2-04ec53773bb8",
+      "name": "Check pricing",
+      "type": "n8n-nodes-base.airtop",
+      "position": [
+        816,
+        160
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "airtopApi": {
+          "id": "kCno6KpHuHlN4JBT",
+          "name": "Airtop account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const response = JSON.parse($json.data.modelResponse)\n\nreturn { json: {\n  ...response,\n  row_number: $json['row_number'],\n  \"Pricing URL\": $json[\"Pricing URL\"]\n}}"
+      },
+      "id": "b6c89c9e-d87c-427d-a214-f5540036d3fd",
+      "name": "Parse response",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1248,
+        240
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "7783075b-3ae3-4032-9506-16d24e9f25f6",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1040,
+        240
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1JmtRp_98N1rwCt3QwRzfjYPkCqaVANi9s7Drf2mCQ5c",
+          "mode": "list",
+          "cachedResultName": "Copy of DEMO - Monitor Pricing",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JmtRp_98N1rwCt3QwRzfjYPkCqaVANi9s7Drf2mCQ5c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MER5ftlYyfPZR-N9ZwwVT7Ea0wwqQYxln8l1HuBqjhA/edit#gid=0",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Time": "={{ $now }}",
+            "Pricing": "={{ $json.pricing_summary }}",
+            "row_number": "={{ $json.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Pricing URL",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Pricing URL",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Pricing",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Pricing",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Time",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Time",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": true,
+              "required": false,
+              "displayName": "row_number",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7466f2a8-8b72-48f5-94a4-c150e6bc5584",
+      "name": "Update pricing",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1696,
+        144
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pHD7VpgFc6oqjZU8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "5142d433-519e-4e9d-ab8e-3a97d1177b51",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "SIMILAR"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "174132d5-3273-4b8b-a51f-ccbce9f21f93",
+      "name": "Filter out similar",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        1472,
+        240
+      ],
+      "typeVersion": 2.2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Parse response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check pricing": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse response": {
+      "main": [
+        [
+          {
+            "node": "Filter out similar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Pricing URLs": {
+      "main": [
+        [
+          {
+            "node": "Check pricing",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Filter out similar": {
+      "main": [
+        [
+          {
+            "node": "Update pricing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Pricing URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d888466e-a898-4b44-97cd-407732305b02",
+  "meta": {
+    "templateId": "3480",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b1c85ec0f1d89059933e75ba93bbfa790ff7415c9d3ecfdaab1b9d7357355ecb"
+  },
+  "id": "9nz3Md1V5oVEnYkl",
+  "tags": []
+}

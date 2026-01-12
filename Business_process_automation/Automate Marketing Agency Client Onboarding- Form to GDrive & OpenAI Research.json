@@ -1,0 +1,1676 @@
+{
+  "name": "My workflow 9",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $json['Brand name'] }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1RlvvstGymBHbmi9mlwh_v6J2UerTEsax",
+          "mode": "list",
+          "cachedResultName": "newTest",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1RlvvstGymBHbmi9mlwh_v6J2UerTEsax"
+        },
+        "options": {}
+      },
+      "id": "b996b886-e2f6-4040-9460-b860d13899b3",
+      "name": "Google Drive: Create Client Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -400,
+        1328
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09D02K8TB6",
+          "mode": "list",
+          "cachedResultName": "new-channel"
+        },
+        "messageType": "block",
+        "blocksUi": "={\n  \"blocks\": [\n    {\n      \"type\": \"header\",\n      \"text\": {\n        \"type\": \"plain_text\",\n        \"text\": \"🎯 New Client Intake Form Submitted\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Brand:* {{ $json['Brand name'] }}\\n*Email:* {{ $json['Your email'] }}\\n*Website:* {{ $json.Website }}\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Business Description:*\\n{{ $json['In 1-2 sentences, please describe your business in your own words:'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Origin Story:*\\n{{ $json['Can you go over the brand’s origin story/ founder story? Why did you start your business? What was your original vision/mission?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Main Differentiator:*\\n{{ $json['What makes your brand special/unique? What do you consider your main differentiator?'] }}\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"header\",\n      \"text\": {\n        \"type\": \"plain_text\",\n        \"text\": \"📦 Product Information\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Product Evolution:*\\n{{ $json['Can you talk about how your product offering has evolved?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Best Selling Products:*\\n{{ $json['What are your best selling products?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Common Negative Feedback:*\\n{{ $json['What negative feedback do you receive the most about your product?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Sales Channels:*\\n{{ $json['What other channels is your product sold on? (Amazon, Wholesale, Retail)'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Innovation Pipeline:*\\n{{ $json['What is your product innovation pipeline?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*First Ad Product:*\\n{{ $json['Which product should we focus on for our first ads that we make?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Product Page Link:*\\n{{ $json['Please share the product URL (this is for an AI Agent)'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Inventory/Shipping Issues:*\\n{{ $json['Have you had an inventory or shipping issues lately?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Shipping & Unboxing Experience:*\\n{{ $json['What is the shipping and unboxing experience of your product like?'] }}\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"header\",\n      \"text\": {\n        \"type\": \"plain_text\",\n        \"text\": \"🎯 Marketing Strategy\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*80% of Sales Product:*\\n{{ $json['What product makes up 80% of your sales?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Main Differentiator:*\\n{{ $json['What makes your brand special/unique? What do you consider your main differentiator?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Customer Persona:*\\n{{ $json['Describe your customer persona. Who do you think your audience is? What audience are you trying to penetrate but haven’t yet?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Current Customer Acquisition:*\\n{{\n  $json[Object.keys($json).find(key => key.includes('How do you currently acquire customers'))]\n}}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Influencer Programs:*\\n{{ $json['Do you have an influence program / ambassador program / seeding program, etc?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Offers & Promotions:*\\n{{ $json['What offers or promotions do you currently offer or have offered in the past?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Brand Guidelines (No-No's):*\\n{{ $json['Any No-No\\'s with the brand that we should be aware of?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Customer Objections:*\\n{{ $json['What are the main objections of your customers?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Aspirational Brands:*\\n{{ $json['Do you have brands you look up to? (Aspirational brands)'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Main Competitors:*\\n{{ $json['Who are your main competitors, both product and in your vertical)?'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Team Structure:*\\n{{ $json['What is the current structure of your team?'] }}\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"header\",\n      \"text\": {\n        \"type\": \"plain_text\",\n        \"text\": \"📊 Key Metrics\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"fields\": [\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*AOV (Average Order Value):*\\n{{ $json['What is your AOV? (average order value)'] }}\"\n        },\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*LTV & Return Rate:*\\n{{ $json['What\\'s your client LTV? (life-time value) and returning customer rate?'] }}\"\n        }\n      ]\n    },\n    {\n      \"type\": \"section\",\n      \"fields\": [\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*Target CPA:*\\n{{ $json['What is your target CPA? (cost per acquisition)'] }}\"\n        },\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"*Revenue Goals:*\\n{{ $json['What are your revenue / marketing goals for the year?'] }}\"\n        }\n      ]\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"header\",\n      \"text\": {\n        \"type\": \"plain_text\",\n        \"text\": \"🔑 Access & Integration\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Social Media Access:*\\n{{ $json['*Share Your Social Media Accesses with us (Meta/Facebook Ads)*'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Shopify Store URL:*\\n{{ $json['*What is the .myshopify.com URL of your store?*'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Images and Videos:*\\n{{ $json['*Images and Videos*'] }}\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*3rd Party Tracking:*\\n{{ $json['*Do you use any 3rd party tracking softwares? (Triple Whale, North Beam, etc.)*'] }}\"\n      }\n    }\n  ]\n}",
+        "text": "=New Client Intake Form Submitted by -  {{ $json['Brand name'] }}\n\nEmail: {{ $json['Your email'] }}\nWebsite: {{ $json.Website }}\nIn 1-2 sentences, please describe your business in your own words:{{ $json['In 1-2 sentences, please describe your business in your own words:'] }}\nCan you go over the brand’s origin story/ founder story? Why did you start your business? What was your original vision/mission?: {{ $json['Can you go over the brand’s origin story/ founder story? Why did you start your business? What was your original vision/mission?'] }}\nWhat makes your brand special/unique? What do you consider your main differentiator?: {{ $json['What makes your brand special/unique? What do you consider your main differentiator?'] }}\n\n-- Let's talk about your product --\nCan you talk about how your product offering has evolved?: {{ $json['Can you talk about how your product offering has evolved?'] }}\nWhat are your best selling products?: {{ $json['What are your best selling products?'] }}\nWhat negative feedback do you receive the most about your product?: {{ $json['What negative feedback do you receive the most about your product?'] }}\nWhat other channels is your product sold on? (Amazon, Wholesale, Retail): {{ $json['What other channels is your product sold on? (Amazon, Wholesale, Retail)'] }}\nWhat is your product innovation pipeline?: {{ $json['What is your product innovation pipeline?'] }}\nWhat product should we start building our first ads?: {{ $json['Which product should we focus on for our first ads that we make?'] }}\nCan you share the product page link?: {{ $json['Please share the product URL (this is for an AI Agent)'] }}\nHave you had an inventory or shipping issues lately?: {{ $json['Have you had an inventory or shipping issues lately?'] }}\nWhat is the shipping and unboxing experience of your product like?: {{ $json['What is the shipping and unboxing experience of your product like?'] }}\n\n-- Setting Up Your Marketing For Success --\nWhat product or service makes up 80% of your sales?: {{ $json['What product makes up 80% of your sales?'] }}\nWhat do you consider your main differentiator?: {{ $json['What makes your brand special/unique? What do you consider your main differentiator?'] }}\nDescribe your customer persona. Who do you think your audience is? What audience are you trying to penetrate but haven’t yet?: {{ $json['Describe your customer persona. Who do you think your audience is? What audience are you trying to penetrate but haven’t yet?'] }}\nHow do you currently acquire customers? What is the current ecosystem of your marketing efforts (paid media channels, organic, etc)?: {{\n  $json[Object.keys($json).find(key => key.includes('How do you currently acquire customers'))]\n}}Do you have an influence program / ambassador program / seeding program, etc?: {{ $json['Do you have an influence program / ambassador program / seeding program, etc?'] }}\nWhat offers or promotions do you currently offer or have offered in the past?: {{ $json['What offers or promotions do you currently offer or have offered in the past?'] }}\nAny No-No's with the brand that we should be aware of?: {{ $json['Any No-No\\'s with the brand that we should be aware of?'] }}\nWhat are the main objections of your customers?: {{ $json['What are the main objections of your customers?'] }}\nDo you have brands you look up to? (Aspirational brands): {{ $json['Do you have brands you look up to? (Aspirational brands)'] }}\nWho are your main competitors, both product and in your vertical)?: {{ $json['Who are your main competitors, both product and in your vertical)?'] }}\nWhat is the current structure of your team?: {{ $json['What is the current structure of your team?'] }}\n\n-- Let's Crunch the Numbers --\nWhat is your AOV? (average order value): {{ $json['What is your AOV? (average order value)'] }}\nWhat's your client LTV? (life-time value) and returning customer rate?: {{ $json['What\\'s your client LTV? (life-time value) and returning customer rate?'] }}\nWhat is your target CPA? (cost per acquisition): {{ $json['What is your target CPA? (cost per acquisition)'] }}\nWhat are your revenue / marketing goals for the year?: {{ $json['What are your revenue / marketing goals for the year?'] }}\n\n-- Sharing Accesses --\nShare Your Social Media Accesses with us (Meta/Facebook Ads): {{ $json['*Share Your Social Media Accesses with us (Meta/Facebook Ads)*'] }}\nWhat is the .myshopify.com URL of your store?: {{ $json['*What is the .myshopify.com URL of your store?*'] }}\nImages and Videos: {{ $json['*Images and Videos*'] }}\nDo you use any 3rd party tracking softwares? (Triple Whale, North Beam, etc.): {{ $json['*Do you use any 3rd party tracking softwares? (Triple Whale, North Beam, etc.)*'] }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "98b9e92c-7274-4a07-9cf6-88334e33ba77",
+      "name": "Slack: Post Answers from Intake Form in #new_clients channel",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        -384,
+        1936
+      ],
+      "webhookId": "70598ebd-0978-4b0e-a1aa-0105f697709e",
+      "executeOnce": false,
+      "retryOnFail": true,
+      "typeVersion": 2.3,
+      "alwaysOutputData": true,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "OuTD7X3xMDpyarmh",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Instruction:\nCreate a comprehensive Marketing Research Report for the brand using the structured inputs below. The report should be professional, organized, and easy to read. Use clear section headers, subheaders, bullet points, and short paragraphs where appropriate. The tone should be insightful, strategic, and actionable — written as if presenting to a marketing team or stakeholders.\nReport Structure\n1. Brand & Product Overview\nWebsite: {{ $('Customer Info').item.json.Website }}\nBusiness Description (1–2 sentences): {{ $('Customer Info').item.json['In 1-2 sentences, please describe your business in your own words'] }}\nBrand Origin: {{ $('Customer Info').item.json['Can you go over the brand’s origin story?'] }}\nUnique Differentiator: {{ $('Customer Info').item.json['What makes your brand special/unique?'] }}\nProduct Evolution: {{ $('Product info').item.json['Can you talk about how your product offering has evolved?'] }}\nBest-Selling Products: {{ $('Product info').item.json['What are your best selling products?'] }}\nNegative Feedback / Criticism: {{ $('Product info').item.json['What negative feedback do you receive the most about your product?'] }}\nSales Channels Beyond Shopify: {{ $('Product info').item.json['What other channels is your product sold on? (Amazon, Wholesale, Retail)'] }}\nMain Competitors: {{ $('Marketing & Customers').item.json['Who are your main competitors, both product and in your vertical?'] }}\nPrimary Product Focus for Ads: {{ $('Product info').item.json['Which product should we focus on for our first ads that we make?'] }}\nProduct URL / Description: {{ $('Product info').item.json['Please share the product URL'] }}\nTarget Audience (brand’s own view): {{ $('Marketing & Customers').item.json['Who do you think your audience is?'] }}\nBrand Guidelines / No-No’s:{{ $('Marketing & Customers').item.json['Any No-No\\'s with the brand that we should be aware of?'] }}\n2. Core Customer Insights\nFeatures – What the product offers\nBenefits – Why these features matter to customers\nPain Points – Core frustrations or problems the product solves\nObjections – Common reasons customers hesitate to purchase\nFailed Solutions – Other methods/products customers tried before\nEmotions – Emotional triggers tied to the purchase decision\nPrimary Motivations – e.g., Esteem, Empowerment, Belonging, Security\n3. Persona-Based Marketing\n(If enough data is available — otherwise optional)\nDemographics: Age, gender, income, education, etc.\nPsychographics: Values, lifestyles, habits, attitudes\nAwareness Levels: Unaware → Problem Aware → Solution Aware → Product Aware → Fully Aware\n4. Customer Voice & Social Proof\nStatic Headlines from Customer Reviews: Short, punchy lines that highlight key problems/solutions\nFirst-Person Testimonials: Lightly edited for clarity, written in customers’ own words\n5. Market Comparisons\nFailed Solutions List: 5 most common alternatives that disappointed customers\nCompetitive Positioning: How this brand can frame itself advantageously in “Us vs. Them” campaigns\n6. Trigger Events\nPurchase Triggers: Life events, emotional moments, or situational cues that make customers ready to buy\n7. Positioning Strategy\nPerception in Customer’s Mind: Where the product should sit relative to competitors\nMessaging Opportunities: Key storylines or brand narratives that resonate\n8. Awareness Stages Mapping\nProvide examples of how the customer moves through awareness stages for this product:\nUnaware → Problem Aware → Solution Aware → Product Aware → Aware (Purchase Ready)\n9. Marketing Angles & Hooks\nAngles to Test: Money-saving, premium/luxury, artisanal/local, gifting, practical benefits, emotional storytelling, etc.\nConcepts: Campaign ideas and narratives\nHooks: Short, scroll-stopping phrases/headlines to test in ads\nFormatting Notes\nUse Markdown formatting (### headers, bold text, bullet points).\nKeep each section concise but insightful.\nEnsure the report reads like a strategic deliverable — not just raw notes."
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "b06094d8-483b-4aa0-bfc5-b182a639424b",
+      "name": "OpenAI: Generate Research Brief",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -480,
+        2128
+      ],
+      "executeOnce": true,
+      "notesInFlow": true,
+      "typeVersion": 1.8,
+      "alwaysOutputData": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "Hb8scaDn3DEbAoqO",
+          "name": "OpenAi account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09E9H19BC3",
+          "mode": "list",
+          "cachedResultName": "testn8n"
+        },
+        "messageType": "block",
+        "blocksUi": "={{ JSON.stringify([\n  {\n    type: \"section\",\n    text: {\n      text: $json.message.content\n    }\n  }\n]) }}\n",
+        "text": "=Hi Team, |Please see here the Research brief of {{ $('Customer Info').item.json['Brand name'] }}  READY FOR YOUR APPROVAL...\n\n{{ JSON.stringify($json.message.content) }}\n\n",
+        "otherOptions": {}
+      },
+      "id": "63ff35bb-f385-4f62-bc54-9554d93588e5",
+      "name": "Slack: Send Research Brief Draft for Review",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        -96,
+        2128
+      ],
+      "webhookId": "c0fbafa2-f27b-476f-99f8-997ccc84688d",
+      "typeVersion": 2.3,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "OuTD7X3xMDpyarmh",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09E9H19BC3",
+          "mode": "list",
+          "cachedResultName": "testn8n"
+        },
+        "message": "=Is the Research Brief for  {{ $('Customer Info').item.json['Brand name'] }} approved or decline?",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "id": "da51666a-0e2c-4f3c-ae97-df98aef35e66",
+      "name": "Slack: Approval of Research Brief",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        128,
+        2128
+      ],
+      "webhookId": "16cfe2ea-8ac7-454b-99a6-4c4aa57715f6",
+      "typeVersion": 2.3,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "OuTD7X3xMDpyarmh",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ JSON.stringify($('OpenAI: Generate Research Brief').item.json.message.content) }}"
+            }
+          ]
+        }
+      },
+      "id": "24049831-3eb0-4280-932e-c852fd998391",
+      "name": "Google Docs: Update Document Research Brief",
+      "type": "n8n-nodes-base.googleDocs",
+      "position": [
+        1072,
+        2112
+      ],
+      "typeVersion": 2,
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "S4Qh9ywMDUi1y2UD",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09E9H19BC3",
+          "mode": "list",
+          "cachedResultName": "testn8n"
+        },
+        "text": "=Hi Team, Research Brief for {{ $('Customer Info').item.json['Brand name'] }} is now uploaded in our GDrive CLients Folder.\n{{ `https://docs.google.com/document/d/` }}{{ $('Create a document').item.json.id }}\n\n\n",
+        "otherOptions": {}
+      },
+      "id": "3faf5c8d-13b9-4ac0-b081-dd31ccf544f5",
+      "name": "Slack: Notify  Research brief is in Google Drive",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        1312,
+        2112
+      ],
+      "webhookId": "76c71130-842d-4a1d-a737-08e23144fe95",
+      "typeVersion": 2.3,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "OuTD7X3xMDpyarmh",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "01. Finished Ads",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "8a2941ea-9b71-4301-874c-564ee20ac8ae",
+      "name": "Google Drive: Subfolder 01. Finished Ads",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -96,
+        288
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Your email'] }}",
+        "subject": "Welcome to Marketing Agency! Your Quick-Start Guide",
+        "message": "=WRITE EMAIL HERE",
+        "options": {}
+      },
+      "id": "cdaa800e-cd93-487a-8e05-cc6de9e34fd9",
+      "name": "Gmail: Welcome Email",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -400,
+        1728
+      ],
+      "webhookId": "efd023d6-78fb-4c65-8021-17323b81f12f",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BAVHNoH0U8sqXr9X",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "02. Raw Footage",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "6fcaf518-7491-4c1e-9ef3-e6f02fc7ac78",
+      "name": "Google Drive: Subfolder 02. Raw Footage",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -96,
+        688
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "03. Product Images",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "68b565fe-1a00-4cf1-8d3b-02b831685d08",
+      "name": "Google Drive: Subfolder 03. Product Images",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -96,
+        1008
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "04. Ideas and Drafts",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "79660613-639b-45a0-a291-db7c6f42aa47",
+      "name": "Google Drive: Subfolder 04. Ideas and Drafts1",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -96,
+        1536
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "05. Research Assets",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "8d69d954-8761-4c4b-868f-2a807d9034c9",
+      "name": "Google Drive: Subfolder 05. Research Assets1",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -96,
+        1328
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "06. Archive",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "0aa61632-3f62-4337-93a9-bcd53aec6259",
+      "name": "Google Drive: Subfolder 06. Archive",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -96,
+        1728
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Customers Testimonials",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "2cf2e5da-5396-410e-94a8-165dd8efdae6",
+      "name": "Google Drive: Subfolder Customers Testimonials",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        128,
+        464
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "UGC Creators",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "372666cb-2e6a-4161-a9db-8a1f66626249",
+      "name": "Google Drive: Subfolder UGC Creators",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        288,
+        544
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Founder Content",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "c5db0906-5cc6-4a3a-864c-3124bf6c0163",
+      "name": "Google Drive: Subfolder Founder Content",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        416,
+        624
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Broll Library",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "450034e6-c82d-46fa-9d09-72a4c074c015",
+      "name": "Google Drive: Subfolder Broll Library",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        544,
+        736
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Current Products ONLY",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "45f5b676-63ec-43db-a070-d380234959d2",
+      "name": "Google Drive: Subfolder Current Products ONLY",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        656,
+        832
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Detail Shots",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "1b847a8a-3347-498e-acca-b015ea63c30a",
+      "name": "Google Drive: Subfolder Detail Shots",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        288,
+        992
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Hero Shots",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "9adf96a9-c6e2-48d2-958e-836f44d960cd",
+      "name": "Google Drive: Subfolder Hero Shots",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        128,
+        896
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Lifestyle Images",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "da4348a8-24f5-4acb-90be-e4e8e6745e33",
+      "name": "Google Drive: Lifestyle Images",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        416,
+        1072
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Before After",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "278f6d6e-2b2e-41ba-961a-edde88ed8578",
+      "name": "Google Drive: Before After",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        544,
+        1184
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Mockups Graphics",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "b4128903-a96a-4156-a2b2-24e4bf0289ed",
+      "name": "Google Drive: Mockups Graphics",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        688,
+        1296
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "d9a3d7b7-24dd-4773-9a82-365b45f03d6f",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": 0
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "35a6e3e0-84de-44d0-8c3e-31578220a082",
+      "name": "If: Slack Approval for Research Brief",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        336,
+        2128
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09E9H19BC3",
+          "mode": "list",
+          "cachedResultName": "testn8n"
+        },
+        "text": "=Please send feedback for revision of Research brief BY REPLYING TO THIS THREAD...",
+        "otherOptions": {}
+      },
+      "id": "1d5e8b6b-f8d2-4d0b-8377-f8b2d1860ef4",
+      "name": "Slack: Ask for Feedback",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        848,
+        2416
+      ],
+      "webhookId": "5be16e1e-707c-44f9-885c-a20385d9c4f5",
+      "typeVersion": 2.3,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "OuTD7X3xMDpyarmh",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "channel",
+        "operation": "replies",
+        "channelId": {
+          "__rl": true,
+          "value": "C09E9H19BC3",
+          "mode": "list",
+          "cachedResultName": "testn8n"
+        },
+        "ts": "={{ $json.message_timestamp }}",
+        "returnAll": true,
+        "filters": {}
+      },
+      "id": "92d97d43-09ba-4e4c-b5b2-b9bcaa62d9c3",
+      "name": "Slack: Capture Feedback",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        1056,
+        2416
+      ],
+      "webhookId": "35f092d7-eb6d-4745-8717-dd855ba87e35",
+      "typeVersion": 2.3,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "OuTD7X3xMDpyarmh",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "o3",
+          "cachedResultName": "O3"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Please make the revision of Research Brief for - , using the feedback - {{ $json.text }}  for the original Research Brief - {{ $('OpenAI: Generate Research Brief').item.json.message.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5e35c20e-9b0d-460c-acdc-468c0c222da1",
+      "name": "OpenAI: Revise Research Brief",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        1232,
+        2416
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "Hb8scaDn3DEbAoqO",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09E9H19BC3",
+          "mode": "list",
+          "cachedResultName": "testn8n"
+        },
+        "messageType": "block",
+        "blocksUi": "={{ JSON.stringify([\n  {\n    type: \"section\",\n    text: {\n      type: \"mrkdwn\",\n      text: $json[\"$json.message.content\"]\n    }\n  }\n]) }}\n",
+        "text": "=Hi Team, Please see REVISED  Research brief of  {{ $('Typeform: Client submit Intake Form').item.json['Brand name'] }} for {{ $('Typeform: Client submit Intake Form').item.json['What product should we start building our first ads?'] }} - FOR YOUR FINAL REVIEW. \n\n{{ $json.message.content }}\n\n",
+        "otherOptions": {}
+      },
+      "id": "097ea42b-5947-4b35-bba5-0f4023ba0547",
+      "name": "Slack: Send Revised Research Brief",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        1568,
+        2416
+      ],
+      "webhookId": "3a550515-8ade-4d45-8ece-1a02b0096b63",
+      "typeVersion": 2.3,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "OuTD7X3xMDpyarmh",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09E9H19BC3",
+          "mode": "list",
+          "cachedResultName": "testn8n"
+        },
+        "message": "For your final Approval. If this version is still not approve, please work on outside our n8n Automation. \n\nYou may also give feedback to Maricris for improvement of the automation.",
+        "options": {}
+      },
+      "id": "5d9550c5-064a-4208-9e38-33f2c0a32263",
+      "name": "Slack",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        1744,
+        2416
+      ],
+      "webhookId": "3841d29c-9f71-40a9-a728-c097b7f5f91d",
+      "typeVersion": 2.3,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "OuTD7X3xMDpyarmh",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ $('OpenAI: Revise Research Brief').item.json.message.content }}"
+            }
+          ]
+        }
+      },
+      "id": "ef4c6e9e-99b2-443f-8c62-b30c522be8a3",
+      "name": "Google Docs: Update Revised Document Research Brief",
+      "type": "n8n-nodes-base.googleDocs",
+      "position": [
+        2464,
+        2416
+      ],
+      "typeVersion": 2,
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "S4Qh9ywMDUi1y2UD",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09E9H19BC3",
+          "mode": "list",
+          "cachedResultName": "testn8n"
+        },
+        "text": "==A new Research Brief has been created for {{ $('Typeform: Client submit Intake Form').item.json['Brand name'] }}! 📄\nView it here: <https://docs.google.com/document/d/{{$item(0, 'Google Docs: Create a Document').$json.documentId}}/edit|Open the Research Brief>\n\n",
+        "otherOptions": {}
+      },
+      "id": "7fc8c32d-424d-4798-9519-0e0238c6511f",
+      "name": "Slack: Notify Revised Research brief is in Google Drive",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        2720,
+        2416
+      ],
+      "webhookId": "eab9f035-7b6c-432f-b6ba-0e35266b6a0b",
+      "typeVersion": 2.3,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "OuTD7X3xMDpyarmh",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Client Onboarding & Research Brief Automation\n\n## What this workflow does\nThis workflow automates the complete client onboarding process for marketing agencies, triggered when a new client submits an intake form via Typeform.\n\n## Key Features\n- Automatically creates organized Google Drive folder structure with 6 main folders and multiple subfolders for client assets\n- Posts comprehensive intake responses to Slack for team visibility  \n- Uses AI (OpenAI) to generate a detailed marketing research brief based on client inputs\n- Implements approval workflow with revision capability if changes are needed\n- Creates and updates Google Docs with the finalized research brief\n- Sends welcome email to new clients\n\n## Setup Requirements\n1. **Typeform account** with an intake form\n2. **Slack workspace** with appropriate channels\n3. **Google account** with Drive, Docs, and Gmail access\n4. **OpenAI API key** for AI content generation\n\n## How to set up\n1. Configure all values in the \"⚙️ Configuration\" node\n2. Connect your accounts (Typeform, Slack, Google, OpenAI)\n3. Set your Typeform webhook with your intake form ID\n4. Configure Slack channel IDs for notifications and approvals\n5. Specify the parent Google Drive folder for client folders\n6. Customize the welcome email template in the Gmail node\n7. Test with a sample form submission\n\n## Benefits\n- Saves 2-3 hours of manual setup per new client\n- Ensures consistent folder structure and documentation\n- Enables team collaboration through Slack notifications\n- Maintains quality control with built-in approval process",
+        "height": 1040,
+        "width": 784,
+        "color": 7
+      },
+      "id": "d2d87cef-5687-4595-9239-2ebf22f39ea1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1696,
+        1072
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Step 1: Form Submission\nConfigure your Typeform ID in the Configuration node, then this trigger will activate when a client submits your intake form.",
+        "height": 176
+      },
+      "id": "ced343c6-25db-433b-b967-3c0b87470ba7",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -848,
+        1744
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Step 2: Create Folder Structure\nCreates main client folder and all necessary subfolders in Google Drive"
+      },
+      "id": "89023fd9-0e6c-434e-b0a7-3aabe2c8cfef",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -576,
+        1184
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Subfolder Creation\nCreates organized folder structure for all client assets"
+      },
+      "id": "4a01b7ba-9018-4936-91b5-831aec4ebc05",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Step 3: Notify Team\nSends detailed intake form responses to Slack for team visibility"
+      },
+      "id": "de36820d-93c5-4055-b8ec-37bdca0f7d6c",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -208,
+        1904
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Step 4: Welcome Email\nSends automated welcome email to the new client"
+      },
+      "id": "556af291-01b9-4bd8-a7c7-d15a818a6ed1",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -448,
+        1568
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Step 5: AI Research Brief\nGenerates comprehensive marketing research document using OpenAI based on intake form responses",
+        "height": 192
+      },
+      "id": "1518b5e9-81e8-4db2-bee0-1955f4539bb2",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -656,
+        2192
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Step 6: Approval Workflow\nSends research brief for team review with approval/revision process"
+      },
+      "id": "fec1b792-e69d-47ae-80c3-42f4a4801a1f",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -128,
+        2288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Step 7: Create Document\nIf approved, creates Google Doc with the research brief"
+      },
+      "id": "60f9cea8-b8c3-4589-abae-fc93600c5a72",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        576,
+        2000
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Revision Process\nIf not approved, collect feedback and generate revised version"
+      },
+      "id": "ce74489e-f4ed-4719-ae70-0af5522e710a",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        576,
+        2576
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "folderId": "1wULhkoxfSxH08xevjPpApVFjyimGW0pN",
+        "title": "=Research Brief - {{ $('Customer Info').item.json['Brand name'] }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        672,
+        2160
+      ],
+      "id": "3e6c0182-29e1-415f-96ad-5b4a301a4688",
+      "name": "Create a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "S4Qh9ywMDUi1y2UD",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "folderId": "1wULhkoxfSxH08xevjPpApVFjyimGW0pN",
+        "title": "=Research Brief - {{ $('Typeform: Client submit Intake Form').item.json['Brand name'] }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        2416
+      ],
+      "id": "d173890b-af86-4e5b-b04e-6fa91662f96a",
+      "name": "Create a document1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "S4Qh9ywMDUi1y2UD",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Can you talk about how your product offering has evolved?",
+              "fieldType": "textarea"
+            },
+            {
+              "fieldLabel": "What are your best selling products?"
+            },
+            {
+              "fieldLabel": "What negative feedback do you receive the most about your product?",
+              "fieldType": "textarea"
+            },
+            {
+              "fieldLabel": "What other channels is your product sold on? (Amazon, Wholesale, Retail)"
+            },
+            {
+              "fieldLabel": "What other channels is your product sold on? ",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Amazon"
+                  },
+                  {
+                    "option": "Wholesale"
+                  },
+                  {
+                    "option": "Retail"
+                  }
+                ]
+              },
+              "limitSelection": "exact"
+            },
+            {
+              "fieldLabel": "What is your product innovation pipeline?",
+              "fieldType": "textarea"
+            },
+            {
+              "fieldLabel": "Which product should we focus on for our first ads that we make?"
+            },
+            {
+              "fieldLabel": "Please share the product URL"
+            },
+            {
+              "fieldLabel": "Have you had an inventory or shipping issues lately?",
+              "fieldType": "radio",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Yes"
+                  },
+                  {
+                    "option": "No"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        -1120,
+        1920
+      ],
+      "id": "f0cdf21e-f190-4580-830d-1370c861627e",
+      "name": "Product info",
+      "webhookId": "9d302f7e-85b5-438d-8a62-de749dccb1da"
+    },
+    {
+      "parameters": {
+        "formTitle": "Marketing Agency contact form",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Brand name"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "Website"
+            },
+            {
+              "fieldLabel": "In 1-2 sentences, please describe your business in your own words",
+              "fieldType": "textarea"
+            },
+            {
+              "fieldLabel": "Can you go over the brand’s origin story?",
+              "fieldType": "textarea"
+            },
+            {
+              "fieldLabel": "What makes your brand special/unique?",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -1264,
+        1920
+      ],
+      "id": "b7c7ea00-37c4-4cf4-96f7-a63868295545",
+      "name": "Customer Info",
+      "webhookId": "bc2b6786-e59e-4e40-bf04-ae136556c114"
+    },
+    {
+      "parameters": {
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "What product makes up 80% of your sales?"
+            },
+            {
+              "fieldLabel": "Who do you think your audience is?"
+            },
+            {
+              "fieldLabel": "What is the current ecosystem of your marketing efforts (paid media channels, organic, etc)?"
+            },
+            {
+              "fieldLabel": "Do you have an influence program / ambassador program / seeding program, etc?"
+            },
+            {
+              "fieldLabel": "What offers or promotions do you currently offer or have offered in the past?"
+            },
+            {
+              "fieldLabel": "Any No-No's with the brand that we should be aware of?"
+            },
+            {
+              "fieldLabel": "Do you have brands you look up to? (Aspirational brands)"
+            },
+            {
+              "fieldLabel": "Who are your main competitors, both product and in your vertical?"
+            },
+            {
+              "fieldLabel": "What is the current structure of your team?",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        -960,
+        1920
+      ],
+      "id": "b2c9f76b-e22c-4506-8c08-7dd1a17b2092",
+      "name": "Marketing & Customers",
+      "webhookId": "1ceeb0f9-6719-42da-8240-8cf29acb64dd"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Slack": {
+      "main": [
+        [
+          {
+            "node": "Create a document1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: Ask for Feedback": {
+      "main": [
+        [
+          {
+            "node": "Slack: Capture Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: Capture Feedback": {
+      "main": [
+        [
+          {
+            "node": "OpenAI: Revise Research Brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI: Revise Research Brief": {
+      "main": [
+        [
+          {
+            "node": "Slack: Send Revised Research Brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI: Generate Research Brief": {
+      "main": [
+        [
+          {
+            "node": "Slack: Send Research Brief Draft for Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: Approval of Research Brief": {
+      "main": [
+        [
+          {
+            "node": "If: Slack Approval for Research Brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive: Create Client Folder": {
+      "main": [
+        [
+          {
+            "node": "Google Drive: Subfolder 01. Finished Ads",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Subfolder 02. Raw Footage",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Subfolder 03. Product Images",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Subfolder 06. Archive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Subfolder 04. Ideas and Drafts1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Subfolder 05. Research Assets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: Send Revised Research Brief": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If: Slack Approval for Research Brief": {
+      "main": [
+        [
+          {
+            "node": "Create a document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack: Ask for Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive: Subfolder 02. Raw Footage": {
+      "main": [
+        [
+          {
+            "node": "Google Drive: Subfolder Customers Testimonials",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Subfolder UGC Creators",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Subfolder Founder Content",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Subfolder Broll Library",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Subfolder Current Products ONLY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive: Subfolder 03. Product Images": {
+      "main": [
+        [
+          {
+            "node": "Google Drive: Subfolder Hero Shots",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Subfolder Detail Shots",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Lifestyle Images",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Before After",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Mockups Graphics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs: Update Document Research Brief": {
+      "main": [
+        [
+          {
+            "node": "Slack: Notify  Research brief is in Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: Send Research Brief Draft for Review": {
+      "main": [
+        [
+          {
+            "node": "Slack: Approval of Research Brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs: Update Revised Document Research Brief": {
+      "main": [
+        [
+          {
+            "node": "Slack: Notify Revised Research brief is in Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document": {
+      "main": [
+        [
+          {
+            "node": "Google Docs: Update Document Research Brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document1": {
+      "main": [
+        [
+          {
+            "node": "Google Docs: Update Revised Document Research Brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product info": {
+      "main": [
+        [
+          {
+            "node": "Marketing & Customers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Info": {
+      "main": [
+        [
+          {
+            "node": "Product info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marketing & Customers": {
+      "main": [
+        [
+          {
+            "node": "OpenAI: Generate Research Brief",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Drive: Create Client Folder",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gmail: Welcome Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Slack: Post Answers from Intake Form in #new_clients channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d9a5593a-b87e-4366-99d7-56e7d2ab08fd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "98b510ca4dbbabb609e24c83189c67f6ae0083179272377aca703df4038b384f"
+  },
+  "id": "v7MxUi0aX5rshnuD",
+  "tags": []
+}

@@ -1,0 +1,299 @@
+{
+  "name": "tavily_telegram_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a73e848c-f7e7-4b3a-ae99-930c577b47be",
+              "name": "results",
+              "type": "object",
+              "value": "={{ $json.results.first() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "25169958-2e8d-4d79-b2a0-afb280288831",
+      "name": "Get Top Result",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        672,
+        64
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n    \"api_key\": \"{{ $json.api_key }}\",\n    \"query\": \"{{ $('Telegram Trigger').item.json.message.text }}\",\n    \"search_depth\": \"advanced\",\n    \"include_answer\": false,\n    \"include_images\": false,\n    \"include_image_descriptions\": false,\n    \"include_raw_content\": false,\n    \"max_results\": 5,\n    \"include_domains\": [],\n    \"exclude_domains\": []\n}",
+        "options": {}
+      },
+      "id": "71271a69-344b-41aa-aa27-b52b39ceafa5",
+      "name": "Tavily Search Topic",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        288,
+        64
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Summarize this web content and provide in Markdown v2 format: {{ $json.results.content }}. If there's no data provided for a category, don't include that in the response."
+      },
+      "id": "d8ae55bf-6b9b-4e2f-ab36-20e636b1c96b",
+      "name": "Summarize Web Page Content",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        896,
+        64
+      ],
+      "typeVersion": 1.5
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "035660a9-bb58-4ecb-bad3-7f4d017fa69f",
+              "name": "api_key",
+              "type": "string",
+              "value": "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"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "137e9e93-7a00-48f8-847e-54eb3477488b",
+      "name": "Tavily API Key",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        64,
+        64
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        848,
+        256
+      ],
+      "id": "977ba82a-42a1-4cf7-9b7d-5d6a1d59f9d2",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "wIXy1qZotSXCZ3Ho",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        64
+      ],
+      "id": "a9a62477-fc54-4c34-8a9e-03fb50ddd2cc",
+      "name": "Telegram Trigger",
+      "webhookId": "491ae883-6575-4b1c-b324-b27781c1aa48",
+      "credentials": {
+        "telegramApi": {
+          "id": "wz0PpDwYHUjN9Nsi",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        64
+      ],
+      "id": "822e2cef-cd8e-4dcd-878b-53d80a283d3b",
+      "name": "Send a text message",
+      "webhookId": "96265859-7c25-41f3-b697-766c54321eec",
+      "credentials": {
+        "telegramApi": {
+          "id": "wz0PpDwYHUjN9Nsi",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8fd0cfc4-7adc-45f9-a278-d217e362ebfb",
+              "name": "results",
+              "type": "array",
+              "value": "={{ $json.results.filter(item => item.score > 0.75) }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "db154780-c803-4137-8eff-bf3bb6484a8b",
+      "name": "Filter > 75%",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        496,
+        64
+      ],
+      "typeVersion": 3.4
+    }
+  ],
+  "pinData": {
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 208760558,
+          "message": {
+            "message_id": 24,
+            "from": {
+              "id": 7493883462,
+              "is_bot": false,
+              "first_name": "Nayma",
+              "language_code": "en"
+            },
+            "chat": {
+              "id": 7493883462,
+              "first_name": "Nayma",
+              "type": "private"
+            },
+            "date": 1756018153,
+            "text": "tell me about yuki onna"
+          }
+        }
+      }
+    ],
+    "Tavily API Key": [
+      {
+        "json": {
+          "api_key": "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"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Get Top Result": {
+      "main": [
+        [
+          {
+            "node": "Summarize Web Page Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily API Key": {
+      "main": [
+        [
+          {
+            "node": "Tavily Search Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily Search Topic": {
+      "main": [
+        [
+          {
+            "node": "Filter > 75%",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarize Web Page Content",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Tavily API Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize Web Page Content": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter > 75%": {
+      "main": [
+        [
+          {
+            "node": "Get Top Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ad97da85-60dd-43d0-882f-4d2bd2634f6f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8d401f885e1d55f4ab54b9409be28c0a99616546f3fde5dcc217c9802d0a05db"
+  },
+  "id": "z7ZD1XxZjsNXr25P",
+  "tags": []
+}

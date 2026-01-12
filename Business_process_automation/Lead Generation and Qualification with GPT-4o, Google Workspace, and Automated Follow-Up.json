@@ -1,0 +1,1403 @@
+{
+  "name": "Lead Generation and Qualification with GPT-4o, Google Workspace, and Automated Follow-Up",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ $('Input Form').item.json.Email }}",
+        "subject": "Re: Your Inquiry ",
+        "emailType": "text",
+        "message": "=Hello {{ $('Input Form').item.json.Name }},\n\nThank you for your message and interest.\n\nRegarding your inquiry:\n\"{{ $('Input Form').item.json.Message }}\"\n\nUnfortunately, {{ $('Input Form').item.json.Company }} does not currently meet our requirements for a partnership. We focus exclusively on companies that meet our specific criteria for size, location, and service needs.\n\nShould your situation change or if you have any questions, please feel free to reach out.\n\nBest regards,\nLetterTree Team\n\nP.S. Feel free to visit our website for more information: https://www.youtube.com/watch?v=WQCPl5rTMDQ",
+        "options": {}
+      },
+      "id": "85694a10-6a58-4faa-b550-2ae2d7e98783",
+      "name": "Send Drop Message",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -560,
+        -288
+      ],
+      "webhookId": "41aa7448-9067-42d9-af9f-878c002cf565",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QWWa9kDebonTCSAV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e339805a-db3b-426b-80fe-bcb3de317e93",
+              "name": "ICP",
+              "type": "string",
+              "value": "ICP Criteria: \"Company Size: Minimum: 50 employees Ideal: 200–1000+ employees Industry: Primary: SaaS / Technology, Financial Services, Healthcare, E-commerce, Manufacturing Secondary: Logistics, Education (Private Sector), Professional Services Geography: Primary Regions: North America (USA & Canada), Western Europe (UK, Germany, France, Netherlands), Australia Secondary: Southeast Asia (Singapore, Malaysia), UAE Pain Points We Solve: Manual workflows slowing operations High operational costs due to inefficiencies Difficulty scaling processes as team grows Compliance & security issues with current tools Lack of visibility across departments or teams Other Requirements: Annual Revenue: $5M+ (or equivalent funding for startups) Tech Stack: Modern SaaS infrastructure (e.g., Salesforce, HubSpot, Slack, GSuite, AWS/Azure) Buying Committee: Has IT/Operations/Finance team involved in purchasing decisions\""
+            },
+            {
+              "id": "d46ed2e4-fb27-46c8-b02a-59be7d0a1136",
+              "name": "demo-ready",
+              "type": "string",
+              "value": "Demo-Ready: \"High-Intent Prospects with Clear Needs\"\n\nDefine criteria for demo-ready leads. Example:\n\nRequired: [Your primary requirement, e.g., specific region or company size]\n\nQualifying Criteria (need 2+ of these):\n- Company Size: [Your threshold]\n- Industries: [Your target industries]\n- Volume/Usage: [Expected usage levels]\n- Has relevant team/department\n- Message indicates: urgent needs, specific challenges, requests demo, mentions pain points\n\nExamples:\n1. Large Enterprise (1000+ employees) - Message: \"We need to automate our processes\"\n2. Mid-Market Company (200+ employees) - Message: \"Looking for solution to reduce costs\"\n3. Growing Startup (50+ employees) - Message: \"Need to scale our operations\""
+            },
+            {
+              "id": "4df8d682-7975-4632-847e-e51753128780",
+              "name": "nurture",
+              "type": "string",
+              "value": "Nurture: \"Prospects with Future Potential\"\n\nDefine criteria for nurture leads. Example:\n\nRequired: [Your basic requirement]\n\nQualifying Criteria (ANY of these):\n- Company Size: [Lower threshold]\n- ANY company in target industry\n- Message indicates: general interest, exploring options, budget constraints, future planning\n\nKey Rule: If they meet basic requirements and could benefit from your solution, default to nurture\n\nExamples:\n1. Small Company (20+ employees) - Message: \"Interested in learning about your solutions\"\n2. Growing Startup (30+ employees) - Message: \"Planning to implement next year\"\n3. Mid-size Company - Message: \"What are the benefits of your solution?\""
+            },
+            {
+              "id": "f38c081d-8390-4ee5-82ef-f5c6b6b2080b",
+              "name": "drop",
+              "type": "string",
+              "value": "Drop: \"Only Non-Target or No Relevance\"\n\nDrop ONLY if:\n- Does NOT meet geographic requirements\n- OR meets location but:\n  - Below minimum size threshold AND no growth potential\n  - Wrong industry (B2C when you serve B2B)\n  - Individual consumers or very small businesses\n  - Already using competitor with long-term contract\n  - Government with multi-year procurement cycles\n- Message indicates: spam, unrelated request, explicitly states no need\n\nExamples:\n1. International company outside target region\n2. B2C retail shop (when you serve B2B)\n3. Individual freelancer\n4. Company using competitor - Message: \"Happy with current solution\"\n5. Test messages or spam"
+            },
+            {
+              "id": "567620aa-5eff-4537-bc1e-bed577effe1d",
+              "name": "output",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9488e021-646d-4507-963e-5a5a31fa9c7d",
+      "name": "Define ICP and Lead Criteria",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1360,
+        -576
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst transformedItems = items.map((item) => {\n  try {\n    item.json.output = JSON.parse(item.json.output);\n    item.json[\"lead classification\"] = \"demo-ready\";\n  } catch (error) {\n    console.log(\"Error parsing JSON\", error);\n  }\n  return item;\n});\nreturn transformedItems;\n"
+      },
+      "id": "7681cda6-d642-45e6-b451-0ec6d89113bf",
+      "name": "Demo-ready Data Processing",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -560,
+        -864
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "formTitle": "Contact Information",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Company",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Job Title",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Message",
+              "fieldType": "textarea",
+              "placeholder": "Tell us about your needs and challenges...",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4ae76350-e70a-4536-819d-84f4ff464e01",
+      "name": "Input Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        -2384,
+        -576
+      ],
+      "webhookId": "4e517e10-a1b2-475e-9e7f-35ea4f4778c8",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = items;\nconst lastRow = rows[rows.length - 1];\nreturn [lastRow];"
+      },
+      "id": "28cf3af1-6860-4a0e-9ce2-3a9bcacac135",
+      "name": "Return latest column",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1936,
+        -576
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1conuVpIOurrVRW2iz_SAZY_lOvozUakkjv1RYnemLxQ",
+          "mode": "list",
+          "cachedResultName": "leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1conuVpIOurrVRW2iz_SAZY_lOvozUakkjv1RYnemLxQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1conuVpIOurrVRW2iz_SAZY_lOvozUakkjv1RYnemLxQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $json.submittedAt }}",
+            "Name": "={{ $json.Name }}",
+            "Company": "={{ $json.Company }}",
+            "Message": "={{ $json.Message }}",
+            "Job Title": "={{ $json['Job Title'] }}",
+            "Email": "={{ $json.Email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Number of Employees",
+              "displayName": "Number of Employees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Geography",
+              "displayName": "Geography",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Annual Revenue",
+              "displayName": "Annual Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Technology",
+              "displayName": "Technology",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pain Points",
+              "displayName": "Pain Points",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lead Classification",
+              "displayName": "Lead Classification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "e8f23b6e-870e-42ea-926d-365448efe913",
+      "name": "Log Lead to Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -2160,
+        -576
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "iMcYpugC9J96z78r",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Complete the following lead information by using your knowledge and web search. Make sure not to include uncertain information.\n\nEnrich the following input company lead:\n\"{{ $json.Company }}\"\n\nUser Message:\n\"{{ $json.Message }}\"\n\nAnalyze the message to extract pain points and specific needs. Include these in the painpoints field.\n\nFill as much of the information schema below as clearly possible. Use appropriate number formatting for your region.\n\n{\n\"Number of Employees\": \"\",\n\"Industry\": \"\",\n\"geography\": \"\",\n\"annual revenue\": \"\",\n\"technology\": \"\",\n\"painpoints\": \"[Extract from message + research]\"\n}\n\nYour output MUST adhere to the JSON format defined above. No other text is allowed. DO NOT enclose the JSON in ```json ... ```",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a helpful assistant that enriches a lead with relevant information and extracts pain points from their message."
+        }
+      },
+      "id": "c165bce3-1a18-40aa-afb5-7cbaa8fe8783",
+      "name": "AI Lead Enrichment",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1712,
+        -576
+      ],
+      "retryOnFail": false,
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "996fc8f1-eb66-45d6-8629-9d96c47a62c2",
+      "name": "OpenAI Search Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -1640,
+        -352
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "gloxAk4YxhQzY28L",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "=Company: {{ $('Input Form').item.json.Company }},\nMessage: {{ $('Input Form').item.json.Message }},\nLead enriched by AI: {{ $('AI Lead Enrichment').item.json.output }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "demo-ready",
+              "description": "={{ $json['demo-ready'] }}"
+            },
+            {
+              "category": "nurture",
+              "description": "={{ $json.nurture }}"
+            },
+            {
+              "category": "drop",
+              "description": "={{ $json.drop }}"
+            }
+          ]
+        },
+        "options": {
+          "multiClass": false,
+          "systemPromptTemplate": "=You are an expert B2B sales qualification agent. Analyze leads based on our Ideal Customer Profile (ICP) and their message content.\n\n{{ $json.ICP }}\n\nIMPORTANT: Pay special attention to the user's message. Strong pain points or urgent needs in the message can upgrade a lead's classification. Be inclusive - when in doubt, choose nurture over drop.\n\nMake sure to only select exactly ONE classification category!"
+        }
+      },
+      "id": "b6ea9fe8-30ed-45c8-ac22-1814d21e2f39",
+      "name": "AI Lead Classifier",
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "position": [
+        -1136,
+        -576
+      ],
+      "typeVersion": 1.1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o"
+        },
+        "options": {}
+      },
+      "id": "4fc58091-5582-4313-b69b-57850c2427c2",
+      "name": "OpenAI Chat",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -1064,
+        -320
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "gloxAk4YxhQzY28L",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "285ef269-e5ca-4753-8c6e-334ac57131f3",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.output }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6f5c85dd-06fb-4126-a943-73ffd480920d",
+      "name": "If demo-ready not empty",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -784,
+        -960
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "49fb9489-7940-4a49-846b-ebd87e229e94",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.output }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9797f678-9894-4914-9f69-3ce387a15f72",
+      "name": "If nurture not empty",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -784,
+        -576
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "49fb9489-7940-4a49-846b-ebd87e229e94",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.output }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "78eb4731-37c3-4bf8-aa4a-b1b8c21980e5",
+      "name": "If drop not empty",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -784,
+        -192
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "nstamanna19@gmail.com",
+          "mode": "list",
+          "cachedResultName": "nstamanna19@gmail.com"
+        },
+        "start": "={{ \n  $now.weekday === 5 ? \n    $now.plus(3, 'day').set({ hour: 12, minute: 0, second: 0 }) : \n  $now.weekday === 6 ? \n    $now.plus(2, 'day').set({ hour: 12, minute: 0, second: 0 }) : \n    $now.plus(1, 'day').set({ hour: 12, minute: 0, second: 0 }) \n}}",
+        "end": "={{ \n  $now.weekday === 5 ? \n    $now.plus(3, 'day').set({ hour: 13, minute: 0, second: 0 }) : \n  $now.weekday === 6 ? \n    $now.plus(2, 'day').set({ hour: 13, minute: 0, second: 0 }) : \n    $now.plus(1, 'day').set({ hour: 13, minute: 0, second: 0 }) \n}}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $('Input Form').item.json.Email }}"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "description": "=Hello {{ $('Input Form').item.json.Name }}, \n\nThank you for your interest. We're confident our solution can revolutionize operations at {{ $('Input Form').item.json.Company }}. This demo will cover:\n\n- Your specific use case\n- Product walkthrough\n- Pricing and implementation\n- Q&A\n\nLooking forward to meeting you!\n\nBest regards,\nLetterTree Team",
+          "guestsCanInviteOthers": true,
+          "guestsCanModify": true,
+          "sendUpdates": "all",
+          "summary": "LetterTree Product Demo"
+        }
+      },
+      "id": "ac71d323-9b7e-40a9-a80f-5810921e6ef8",
+      "name": "Schedule Demo - High Intent",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        -560,
+        -1056
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "hjEu8Zq7TP115Ccz",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1conuVpIOurrVRW2iz_SAZY_lOvozUakkjv1RYnemLxQ",
+          "mode": "list",
+          "cachedResultName": "leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1conuVpIOurrVRW2iz_SAZY_lOvozUakkjv1RYnemLxQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1conuVpIOurrVRW2iz_SAZY_lOvozUakkjv1RYnemLxQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Industry": "={{ $json.output.Industry }}",
+            "Geography": "={{ $json.output.geography }}",
+            "Technology": "={{ $json.output.technology }}",
+            "row_number": "={{ $('Return latest column').item.json.row_number }}",
+            "Pain Points": "={{ $json.output.painpoints }}",
+            "Annual Revenue": "={{ $json.output['annual revenue'] }}",
+            "Lead Classification": "={{ $json['lead classification'] }}",
+            "Number of Employees": "={{ $json.output['Number of Employees'] }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Number of Employees",
+              "displayName": "Number of Employees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Geography",
+              "displayName": "Geography",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Annual Revenue",
+              "displayName": "Annual Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Technology",
+              "displayName": "Technology",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Pain Points",
+              "displayName": "Pain Points",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lead Classification",
+              "displayName": "Lead Classification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "3309f5f0-2c77-4acd-bcd4-5f9844f86253",
+      "name": "Update Sheet - Demo Ready",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -336,
+        -864
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "iMcYpugC9J96z78r",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst transformedItems = items.map((item) => {\n  try {\n    item.json.output = JSON.parse(item.json.output);\n    item.json[\"lead classification\"] = \"nurture\";\n  } catch (error) {\n    console.log(\"Error parsing JSON\", error);\n  }\n  return item;\n});\nreturn transformedItems;\n"
+      },
+      "id": "53b1beb0-e4d2-4998-8fac-1022351cc95e",
+      "name": "Nurture Data Processing",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -560,
+        -480
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst transformedItems = items.map((item) => {\n  try {\n    item.json.output = JSON.parse(item.json.output);\n    item.json[\"lead classification\"] = \"drop\";\n  } catch (error) {\n    console.log(\"Error parsing JSON\", error);\n  }\n  return item;\n});\nreturn transformedItems;\n"
+      },
+      "id": "494a050d-2b58-444d-9637-6e58932643cd",
+      "name": "Drop Data Processing",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -560,
+        -96
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1conuVpIOurrVRW2iz_SAZY_lOvozUakkjv1RYnemLxQ",
+          "mode": "list",
+          "cachedResultName": "leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1conuVpIOurrVRW2iz_SAZY_lOvozUakkjv1RYnemLxQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1conuVpIOurrVRW2iz_SAZY_lOvozUakkjv1RYnemLxQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $('Input Form').item.json.submittedAt }}",
+            "Number of Employees": "={{ $json.output['Number of Employees'] }}",
+            "Industry": "={{ $json.output.Industry }}",
+            "Geography": "={{ $json.output.geography }}",
+            "Annual Revenue": "={{ $json.output['annual revenue'] }}",
+            "Technology": "={{ $json.output.technology }}",
+            "Pain Points": "={{ $json.output.painpoints }}",
+            "Lead Classification": "={{ $json['lead classification'] }}",
+            "Company": "={{ $('Log Lead to Sheet').item.json.Company }}",
+            "row_number": 0
+          },
+          "matchingColumns": [
+            "Company"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Number of Employees",
+              "displayName": "Number of Employees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Geography",
+              "displayName": "Geography",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Annual Revenue",
+              "displayName": "Annual Revenue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Technology",
+              "displayName": "Technology",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pain Points",
+              "displayName": "Pain Points",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lead Classification",
+              "displayName": "Lead Classification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "05108ddc-a22c-4d49-b6c0-63e9ed7c62d8",
+      "name": "Update Sheet - Drop",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -336,
+        -96
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "iMcYpugC9J96z78r",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YOUR_GOOGLE_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Leads"
+        },
+        "columns": {
+          "value": {
+            "Industry": "={{ $json.output.Industry }}",
+            "Geography": "={{ $json.output.geography }}",
+            "Technology": "={{ $json.output.technology }}",
+            "row_number": "={{ $('Return latest column').item.json.row_number }}",
+            "Pain Points": "={{ $json.output.painpoints }}",
+            "Annual Revenue": "={{ $json.output['annual revenue'] }}",
+            "Lead Classification": "={{ $json['lead classification'] }}",
+            "Number of Employees": "={{ $json.output['Number of Employees'] }}"
+          },
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "row_number"
+          ]
+        },
+        "options": {}
+      },
+      "id": "b64fe700-cc9c-43da-ac91-ff0cd5e7f9a3",
+      "name": "Update Sheet - Nurture",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -336,
+        -480
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "iMcYpugC9J96z78r",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Input Form').item.json.Email }}",
+        "subject": "=Welcome to LetterTree - Resources for You",
+        "emailType": "text",
+        "message": "=Hello {{ $('Input Form').item.json.Name }},\n\nThank you for your message:\n\"{{ $('Input Form').item.json.Message }}\"\n\nWe're excited about your interest! Based on your inquiry, we see great potential for collaboration.\n\nOur solution can help you:\n✓  Reduce processing time by 80%\n✓  Improve accuracy and compliance\n✓  Scale your operations efficiently\n\nWe'd love to show you how our solution can specifically help {{ $('Input Form').item.json.Company }}. A member of our team will reach out shortly to schedule a personalized demo.\n\nIn the meantime, check out our resource: https://www.youtube.com/watch?v=WQCPl5rTMDQ\n\nBest regards,\nLetterTree Team",
+        "options": {}
+      },
+      "id": "23dfaba8-ef9b-4e4d-af31-63ceec4bda8f",
+      "name": "Send Nurture Email - Resources",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -336,
+        -672
+      ],
+      "webhookId": "bd13cf35-3f46-4d65-abba-ab2087774a9d",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QWWa9kDebonTCSAV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Input Form').item.json.Email }}",
+        "subject": "Join Our Upcoming Webinar -  AI automation",
+        "emailType": "text",
+        "message": "=Hello {{ $('Input Form').item.json.Name }}, \n\nStill exploring how LetterTree can transform your operations at {{ $('Input Form').item.json.Company }}?\n\nJoin our upcoming webinar where we'll showcase:\n- Latest industry trends\n- Best practices and case studies\n- Live Q&A with our experts\n\nRegister from our website if it sounds like worth checking out!\n\nCan't make it? Reply to schedule a personalized demo instead.\n\nBest regards,\nLetterTree Team",
+        "options": {}
+      },
+      "id": "1c4bd896-a085-48e9-bc0c-81f07c100988",
+      "name": "Send Nurture Email - Event",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        112,
+        -672
+      ],
+      "webhookId": "4e04df56-8f4f-45a8-868d-9e3b7c9d9b88",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QWWa9kDebonTCSAV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "nstamanna19@gmail.com",
+          "mode": "list",
+          "cachedResultName": "nstamanna19@gmail.com"
+        },
+        "start": "={{ \n  $now.weekday === 5 ? \n    $now.plus(3, 'day').set({ hour: 12, minute: 0, second: 0 }) : \n  $now.weekday === 6 ? \n    $now.plus(2, 'day').set({ hour: 12, minute: 0, second: 0 }) : \n    $now.plus(1, 'day').set({ hour: 12, minute: 0, second: 0 }) \n}}",
+        "end": "={{ \n  $now.weekday === 5 ? \n    $now.plus(3, 'day').set({ hour: 13, minute: 0, second: 0 }) : \n  $now.weekday === 6 ? \n    $now.plus(2, 'day').set({ hour: 13, minute: 0, second: 0 }) : \n    $now.plus(1, 'day').set({ hour: 13, minute: 0, second: 0 }) \n}}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $('Input Form').item.json.Email }}"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "description": "=Hello {{ $('Input Form').item.json.Name }}, \n\nThank you for your continued interest. We're excited to show you how our solution can transform {{ $('Input Form').item.json.Company }}'s operations.\n\nThis demo will be tailored to your needs and cover:\n- Your specific challenges\n- Solution demonstration\n- Implementation roadmap\n- Investment options\n\nSee you soon!\n\nLetterTree Team",
+          "guestsCanInviteOthers": true,
+          "guestsCanModify": true,
+          "sendUpdates": "all",
+          "summary": "LetterTree Product Demo"
+        }
+      },
+      "id": "3041dec9-07e5-4106-b991-f15bd763b33a",
+      "name": "Schedule Demo - After Nurture",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        560,
+        -672
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "hjEu8Zq7TP115Ccz",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "id": "58ea1ee3-f343-4367-84a7-4a47da15738c",
+      "name": "Wait 1 Day (3)",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        336,
+        -672
+      ],
+      "webhookId": "ef2dd4dc-5fe7-4ac3-bb88-c2ce71417cb4",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "id": "f7fe3270-6a81-4964-b5e8-0729d6566cf3",
+      "name": "Wait 1 Day (2)",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        -112,
+        -672
+      ],
+      "webhookId": "767fb3c7-2c14-457c-9ccd-d4971fa115ec",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "id": "ddc162da-dff6-4671-bfa0-0b6cca290cbd",
+      "name": "Wait 1 Day (1)",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        -560,
+        -672
+      ],
+      "webhookId": "e84026b3-64ce-4c46-abcf-cab03d04d9ca",
+      "typeVersion": 1.1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Input Form": {
+      "main": [
+        [
+          {
+            "node": "Log Lead to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Lead Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1 Day (1)": {
+      "main": [
+        [
+          {
+            "node": "Send Nurture Email - Resources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1 Day (2)": {
+      "main": [
+        [
+          {
+            "node": "Send Nurture Email - Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 1 Day (3)": {
+      "main": [
+        [
+          {
+            "node": "Schedule Demo - After Nurture",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If drop not empty": {
+      "main": [
+        [
+          {
+            "node": "Drop Data Processing",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Drop Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Lead to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Return latest column",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Lead Classifier": {
+      "main": [
+        [
+          {
+            "node": "If demo-ready not empty",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If nurture not empty",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If drop not empty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Lead Enrichment": {
+      "main": [
+        [
+          {
+            "node": "Define ICP and Lead Criteria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Search Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Lead Enrichment",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drop Data Processing": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet - Drop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If nurture not empty": {
+      "main": [
+        [
+          {
+            "node": "Nurture Data Processing",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait 1 Day (1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return latest column": {
+      "main": [
+        [
+          {
+            "node": "AI Lead Enrichment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If demo-ready not empty": {
+      "main": [
+        [
+          {
+            "node": "Demo-ready Data Processing",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Schedule Demo - High Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nurture Data Processing": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet - Nurture",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Demo-ready Data Processing": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet - Demo Ready",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Nurture Email - Event": {
+      "main": [
+        [
+          {
+            "node": "Wait 1 Day (3)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define ICP and Lead Criteria": {
+      "main": [
+        [
+          {
+            "node": "AI Lead Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Nurture Email - Resources": {
+      "main": [
+        [
+          {
+            "node": "Wait 1 Day (2)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e169d1fe-e0f7-462e-8b9b-222cbc7ff2e7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5b21c7165de5a46f2ef9d804a5b8a3b067ca026abd6ebc70001d590b25d7eddb"
+  },
+  "id": "Y9eytoNoogq8OTW5",
+  "tags": []
+}

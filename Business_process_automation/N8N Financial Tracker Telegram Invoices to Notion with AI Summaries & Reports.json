@@ -1,0 +1,500 @@
+{
+  "name": "N8N Financial Tracker Telegram Invoices to Notion with AI Summaries & Reports",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=I have a base64 invoice. Summarize the expenses from the invoice, including the item names, quantity, and the individual cost of each item, along with the total. The output should not be long. Just provide:\ndate: DD-MM-YYYY (If the date is missing from OCR, use today’s date)\nid:\nname:\nqty:\nprice:\ntotal:\ncategory:\ntax: (If the total differs from the sum of the items, it means there is tax. Please calculate and include the tax here.)\nFor category options: Food & Beverage / Transportation / Utilities / Shopping / Healthcare / Entertainment / Housing / Education.\nReturn this in the form of a JSON array object and also include a message key with a summary of the data, including the total expenses, item names, and quantities. If applicable, include tax information.",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "type": "HumanMessagePromptTemplate",
+              "messageType": "imageBinary"
+            }
+          ]
+        }
+      },
+      "id": "fd2ddfc6-2561-4849-9c7e-1a2b2c5024c2",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        832,
+        144
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "ef22e71f-ebf4-4ff6-97b5-cdf08ebb60c7",
+      "name": "Schedule Trigger | for send chart report",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        176,
+        592
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "28befe55-a676-80f3-bfe1-d0992986e83a",
+          "mode": "list",
+          "cachedResultName": "Invoice Tracker",
+          "cachedResultUrl": "https://www.notion.so/28befe55a67680f3bfe1d0992986e83a"
+        },
+        "returnAll": true,
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Date|date",
+              "condition": "past_month"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "331a0fae-f4fe-4c41-a48b-915ed54293df",
+      "name": "Get Recent Data from Notions",
+      "type": "n8n-nodes-base.notion",
+      "position": [
+        400,
+        592
+      ],
+      "typeVersion": 2.2,
+      "credentials": {
+        "notionApi": {
+          "id": "SY8PMnW5qX1hoRsX",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "property_total"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "property_category",
+        "options": {}
+      },
+      "id": "88312220-ee5a-468f-859f-f712b0c53803",
+      "name": "Summarize Transaction Data",
+      "type": "n8n-nodes-base.summarize",
+      "position": [
+        624,
+        592
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "labelsMode": "array",
+        "labelsArray": "={{ $json.chart.data.labels }}",
+        "data": "={{ $json.chart.data.datasets[0].data }}",
+        "chartOptions": {},
+        "datasetOptions": {}
+      },
+      "id": "942152ec-0e22-47f3-9a30-17db73d504bb",
+      "name": "Generate Chart",
+      "type": "n8n-nodes-base.quickChart",
+      "position": [
+        1072,
+        592
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "7493883462",
+        "binaryData": true,
+        "additionalFields": {
+          "fileName": "chart"
+        }
+      },
+      "id": "4b5e5750-0e4c-4595-9e07-a0cb782cfa06",
+      "name": "Send Chart Image to Group or Private Chat",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1296,
+        592
+      ],
+      "webhookId": "66cce6e1-819c-487b-b8ad-3f02aebd40cb",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "k6FQDrgUTp9I0tF6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const labels = [];\nconst values = [];\n\nfor (const item of items) {\n  labels.push(item.json.property_category);\n  values.push(item.json.sum_property_total);\n}\n\nreturn [\n  {\n    json: {\n      chart: {\n        type: 'bar',\n        data: {\n          labels,\n          datasets: [\n            {\n              label: 'Spending by Category',\n              data: values,\n              backgroundColor: 'rgba(54, 162, 235, 0.6)',\n              borderColor: 'rgba(54, 162, 235, 1)',\n              borderWidth: 1\n            }\n          ]\n        },\n        options: {\n          plugins: {\n            title: {\n              display: true,\n              text: 'Spending Summary by Category'\n            }\n          },\n          scales: {\n            y: {\n              beginAtZero: true\n            }\n          }\n        }\n      }\n    }\n  }\n];"
+      },
+      "id": "a3571cd8-d3a7-411b-9c93-240dca8137ed",
+      "name": "Convert Data to JSON chart payload",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        848,
+        592
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "1633b4df-67e6-4488-99d5-a95fe5b11426",
+      "name": "Telegram Trigger | When recive photo",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        160,
+        144
+      ],
+      "webhookId": "cac4ce91-ed1f-42ea-aebe-97ac3612aea6",
+      "typeVersion": 1.1,
+      "credentials": {
+        "telegramApi": {
+          "id": "k6FQDrgUTp9I0tF6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "information"
+      },
+      "id": "57d49de0-70aa-45b5-9c5d-3db26e2f4923",
+      "name": "Get Image Info",
+      "type": "n8n-nodes-base.editImage",
+      "position": [
+        608,
+        144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.summary",
+        "options": {}
+      },
+      "id": "f016c1a2-fb35-48ec-87f9-12a386181e46",
+      "name": "Split Out | data transaction",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        1184,
+        48
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger | When recive photo').item.json.message.chat.id }}",
+        "text": "={{ $json.output.message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "c63a859a-a26c-4fd3-a18d-063f1346f132",
+      "name": "Sendback to chat and give summarize text",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1184,
+        240
+      ],
+      "webhookId": "f90475fa-69cd-4e19-bc93-bffdceae8324",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "k6FQDrgUTp9I0tF6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "28befe55-a676-80f3-bfe1-d0992986e83a",
+          "mode": "list",
+          "cachedResultName": "Invoice Tracker",
+          "cachedResultUrl": "https://www.notion.so/28befe55a67680f3bfe1d0992986e83a"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Category|rich_text",
+              "textContent": "={{ $json.category }}"
+            },
+            {
+              "key": "Date|date",
+              "includeTime": false,
+              "date": "={{ $json.date.split('-').reverse().join('-') }}"
+            },
+            {
+              "key": "Name|title",
+              "title": "={{ $json.name }}"
+            },
+            {
+              "key": "Price|number",
+              "numberValue": "={{ $json.price }}"
+            },
+            {
+              "key": "Quantity|number",
+              "numberValue": "={{ $json.qty }}"
+            },
+            {
+              "key": "Tax|number",
+              "numberValue": "={{ $json.tax }}"
+            },
+            {
+              "key": "Total|number",
+              "numberValue": "={{ $json.total }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e0d77ef5-560f-4b07-91ce-77139a23ae5c",
+      "name": "Record To Notion Database",
+      "type": "n8n-nodes-base.notion",
+      "position": [
+        1408,
+        48
+      ],
+      "typeVersion": 2.2,
+      "credentials": {
+        "notionApi": {
+          "id": "SY8PMnW5qX1hoRsX",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.photo[3].file_id }}",
+        "additionalFields": {}
+      },
+      "id": "5eb6bdf0-41b2-450b-9b00-1064087cf462",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        384,
+        144
+      ],
+      "webhookId": "6e801e0b-72d1-42a9-ac47-61ac113a01d2",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "k6FQDrgUTp9I0tF6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"message\": {\n      \"type\": \"string\"\n    },\n    \"summary\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\"date\": { \"type\": \"date\" },\n          \"id\": { \"type\": \"integer\" },\n          \"name\": { \"type\": \"string\" },\n          \"qty\": { \"type\": \"integer\" },\n          \"price\": { \"type\": \"number\" },\n          \"tax\": { \"type\": \"number\" },\n          \"total\": { \"type\": \"number\" },\"category\": { \"type\": \"string\" }\n        },\n        \"required\": [\"id\", \"name\", \"qty\", \"price\", \"total\",\"category\"]\n      }\n    }\n  },\n  \"required\": [\"message\", \"summary\"]\n}\n"
+      },
+      "id": "1e62d87a-2254-4906-a91b-a211d7223d92",
+      "name": "Parse To your object | Table",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        928,
+        352
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        720,
+        352
+      ],
+      "id": "cd6a5585-6faa-4505-a55d-d4ae0d7a3fe1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QwWmWL8Rm3D4JPmn",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "Get Image Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Chart": {
+      "main": [
+        [
+          {
+            "node": "Send Chart Image to Group or Private Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image Info": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Split Out | data transaction",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sendback to chat and give summarize text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize Transaction Data": {
+      "main": [
+        [
+          {
+            "node": "Convert Data to JSON chart payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Data from Notions": {
+      "main": [
+        [
+          {
+            "node": "Summarize Transaction Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out | data transaction": {
+      "main": [
+        [
+          {
+            "node": "Record To Notion Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Data to JSON chart payload": {
+      "main": [
+        [
+          {
+            "node": "Generate Chart",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger | When recive photo": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger | for send chart report": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Data from Notions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse To your object | Table": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e621e78d-2344-47c9-8921-e9fb080ceda8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3dce95668c598f6d0f9da090194a9974b22afc001733834edfd3cbd3f84e9927"
+  },
+  "id": "IllEgLgf7Vw9J0H5",
+  "tags": []
+}

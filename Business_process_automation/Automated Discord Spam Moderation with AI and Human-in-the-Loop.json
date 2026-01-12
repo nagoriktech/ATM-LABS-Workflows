@@ -1,0 +1,836 @@
+{
+  "name": "Automated Discord Spam Moderation with AI and Human-in-the-Loop",
+  "nodes": [
+    {
+      "parameters": {
+        "inputText": "={{ $json.content }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "is_spam",
+              "description": "This text is a promotion, sales pitch or likely spam message to get members to visit another site."
+            },
+            {
+              "category": "is_not_spam",
+              "description": "This text is not spam."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ebfb3a32-b810-46db-9e2f-2a6443a32d1b",
+      "name": "Spam Detection",
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "position": [
+        2048,
+        688
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "getAll",
+        "guildId": {
+          "__rl": true,
+          "value": "1407615225607487588",
+          "mode": "list",
+          "cachedResultName": "Nayma's server",
+          "cachedResultUrl": "https://discord.com/channels/1407615225607487588"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1407615265524420659",
+          "mode": "list",
+          "cachedResultName": "n8n_testing",
+          "cachedResultUrl": "https://discord.com/channels/1407615225607487588/1407615265524420659"
+        },
+        "options": {}
+      },
+      "id": "b2794f35-9b5e-4ad2-b564-925bcf7993de",
+      "name": "Get Recent Messages",
+      "type": "n8n-nodes-base.discord",
+      "position": [
+        848,
+        816
+      ],
+      "webhookId": "7aa72e1f-06f4-4fe8-82ec-ad0e87a5b6b9",
+      "typeVersion": 2,
+      "credentials": {
+        "discordBotApi": {
+          "id": "3KVEn1cySHYImshb",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.id }}",
+        "options": {
+          "historySize": 200
+        }
+      },
+      "id": "88fd88ac-3526-4117-b187-46f18438da8e",
+      "name": "Only Once",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "position": [
+        1024,
+        816
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "cdc3dcef-cb67-4157-80bd-cfdd0378df5e",
+      "name": "Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        2128,
+        912
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "MSc3TfAJP9UrPlCe",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "1407615225607487588",
+          "mode": "list",
+          "cachedResultName": "Nayma's server",
+          "cachedResultUrl": "https://discord.com/channels/1407615225607487588"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1407615265524420659",
+          "mode": "list",
+          "cachedResultName": "n8n_testing",
+          "cachedResultUrl": "https://discord.com/channels/1407615225607487588/1407615265524420659"
+        },
+        "content": "=Warning: Please do not spam our channels\nYour message was deleted to be in violation of our community terms & conditions and was subsequently deleted.\n\nFurther violations will result in a ban.\n\nIf you think this is a mistake, please message the moderation team.",
+        "options": {}
+      },
+      "id": "c0e2040b-cb48-4ea9-8e54-197bedaff372",
+      "name": "Warn User",
+      "type": "n8n-nodes-base.discord",
+      "position": [
+        4192,
+        624
+      ],
+      "webhookId": "88bdd468-8eb9-41b8-b017-1deec91c9498",
+      "typeVersion": 2,
+      "credentials": {
+        "discordBotApi": {
+          "id": "3KVEn1cySHYImshb",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "1407615225607487588",
+          "mode": "list",
+          "cachedResultName": "Nayma's server",
+          "cachedResultUrl": "https://discord.com/channels/1407615225607487588"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1407615265524420659",
+          "mode": "list",
+          "cachedResultName": "n8n_testing",
+          "cachedResultUrl": "https://discord.com/channels/1407615225607487588/1407615265524420659"
+        },
+        "content": "=Warning: Please do not spam our channels\nYour message was flagged to be in violation of our community terms & conditions. Please consider other members before posting.\n\nFurther violations will result in a ban.\n\nIf you think this is a mistake, please message the moderation team.",
+        "options": {}
+      },
+      "id": "7862e057-389e-4ac6-b6c9-be332d9bb191",
+      "name": "Warn User Only",
+      "type": "n8n-nodes-base.discord",
+      "position": [
+        3744,
+        816
+      ],
+      "webhookId": "88bdd468-8eb9-41b8-b017-1deec91c9498",
+      "typeVersion": 2,
+      "credentials": {
+        "discordBotApi": {
+          "id": "3KVEn1cySHYImshb",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const groupByUser = {};\n\nfor (const item of $input.all()) {\n  if (!groupByUser[item.json.author.id]) {\n    groupByUser[item.json.author.id] = [];\n  }\n  groupByUser[item.json.author.id].push(item.json);\n}\n\nreturn { json : { groupByUser } };"
+      },
+      "id": "5e248753-6df7-4b44-a822-3454b7c3d415",
+      "name": "Group By User",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1216,
+        816
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "d94085e8-e564-479d-88d2-11921ee4f95f",
+      "name": "For Each User...",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        1600,
+        816
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "groupByUser",
+        "options": {}
+      },
+      "id": "68dba846-42da-4d8e-ae84-f5f066c9fae0",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        1376,
+        816
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "const messages = $input.first().json;\nreturn Object.keys(messages).map(key => messages[key]);"
+      },
+      "id": "45f4d650-a553-49e8-a546-78d1b57f1b58",
+      "name": "Message to List",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1824,
+        688
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendAndWait",
+        "guildId": {
+          "__rl": true,
+          "value": "1407615225607487588",
+          "mode": "list",
+          "cachedResultName": "Nayma's server",
+          "cachedResultUrl": "https://discord.com/channels/1407615225607487588"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1407615225607487591",
+          "mode": "list",
+          "cachedResultName": "general",
+          "cachedResultUrl": "https://discord.com/channels/1407615225607487588/1407615225607487591"
+        },
+        "message": "=**Spam Detected**\nUser: @{{ $json.author.username }}\nMessage:\n{{\n$input.all().map(item =>\n  `* [${DateTime.fromISO(item.json.timestamp).format('yyyy-MM-dd @ hh:mm')}] ${item.json.content}`).join('\\n')\n}}",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Action",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Delete Message and Warn User"
+                  },
+                  {
+                    "option": "Do nothing and Warn User"
+                  },
+                  {
+                    "option": "Do nothing"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7b9b5b86-59b2-4f8d-81b1-62286a010c34",
+      "name": "Notify Moderators with Send & Wait",
+      "type": "n8n-nodes-base.discord",
+      "position": [
+        3296,
+        816
+      ],
+      "webhookId": "644a85f3-5add-4321-9d8a-bcc4acfa33f1",
+      "executeOnce": true,
+      "typeVersion": 2,
+      "credentials": {
+        "discordBotApi": {
+          "id": "3KVEn1cySHYImshb",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1eddfbe-c32d-4a3b-9660-07800f52f4c4",
+              "name": "is_spam",
+              "type": "boolean",
+              "value": true
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "7e2c102f-aa52-44e1-bc5a-a27f4f6c1106",
+      "name": "Flag as Spam",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2400,
+        592
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1eddfbe-c32d-4a3b-9660-07800f52f4c4",
+              "name": "is_spam",
+              "type": "boolean",
+              "value": false
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "9a5177c0-799b-4c3b-bb0f-b4cb21d0f612",
+      "name": "Flag as Not Spam",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2400,
+        784
+      ],
+      "typeVersion": 3.4,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {},
+      "id": "fe08b3ee-361b-473b-bd5a-61cf272e1982",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        2624,
+        688
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "f1dd7aa3-4215-47b5-830c-0d8d17e97c17",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.is_spam }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "78b7ecf7-4196-4087-b1df-049bcb8c2953",
+      "name": "Spam Messages Only",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        2848,
+        688
+      ],
+      "typeVersion": 2.2,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "f085cf62-e82d-4a15-806b-4a740e3b119c",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ac18e8c8-10d6-4461-847e-7556af9eca5d",
+      "name": "Has Flagged Messages?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3072,
+        816
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      id: $('Message to List').first().json.id\n    }\n  }\n];"
+      },
+      "id": "516efd18-f93c-4cd9-b621-72eade96047d",
+      "name": "Get Message IDs",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        3744,
+        624
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "deleteMessage",
+        "guildId": {
+          "__rl": true,
+          "value": "1407615225607487588",
+          "mode": "list",
+          "cachedResultName": "Nayma's server",
+          "cachedResultUrl": "https://discord.com/channels/1407615225607487588"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1407615265524420659",
+          "mode": "list",
+          "cachedResultName": "n8n_testing",
+          "cachedResultUrl": "https://discord.com/channels/1407615225607487588/1407615265524420659"
+        },
+        "messageId": "={{ $json.id }}"
+      },
+      "id": "af117d65-00ad-47c4-ad34-72c96df82c12",
+      "name": "Delete Messages",
+      "type": "n8n-nodes-base.discord",
+      "position": [
+        3968,
+        624
+      ],
+      "webhookId": "6fa8bb1c-c5b7-4498-af63-dbe43691e602",
+      "executeOnce": false,
+      "typeVersion": 2,
+      "credentials": {
+        "discordBotApi": {
+          "id": "3KVEn1cySHYImshb",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "c9a82ef5-49f7-4196-9ee3-977d34bd1ec9",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.data.Action }}",
+                    "rightValue": "Delete Message and Warn User"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Delete & Warn"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "0e0d56da-bae0-4624-b712-fa44413eb17f",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.data.Action }}",
+                    "rightValue": "Do nothing and Warn User"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Warn User Only"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "2f85cdf6-db7b-4e30-9577-20ddee437807",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.data.Action }}",
+                    "rightValue": "Do nothing"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Do nothing"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "031b3f3c-20b0-4fa7-92fd-8d8835be1532",
+      "name": "Receive Instructions",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        3520,
+        800
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {},
+      "id": "4be6088c-8476-4268-9d26-2336677c8212",
+      "name": "No Action Taken",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        3744,
+        1008
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "f921857c-c94d-4bcc-bba9-54f023d173fb",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        672,
+        816
+      ],
+      "typeVersion": 1.2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Spam Messages Only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Spam Detection",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only Once": {
+      "main": [
+        [
+          {
+            "node": "Group By User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "For Each User...",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flag as Spam": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Group By User": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Spam Detection": {
+      "main": [
+        [
+          {
+            "node": "Flag as Spam",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Flag as Not Spam",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Messages": {
+      "main": [
+        [
+          {
+            "node": "Warn User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Message IDs": {
+      "main": [
+        [
+          {
+            "node": "Delete Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message to List": {
+      "main": [
+        [
+          {
+            "node": "Spam Detection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flag as Not Spam": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "For Each User...": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Message to List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Spam Messages Only": {
+      "main": [
+        [
+          {
+            "node": "Has Flagged Messages?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Messages": {
+      "main": [
+        [
+          {
+            "node": "Only Once",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive Instructions": {
+      "main": [
+        [
+          {
+            "node": "Get Message IDs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Warn User Only",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Action Taken",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Flagged Messages?": {
+      "main": [
+        [
+          {
+            "node": "Notify Moderators with Send & Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "For Each User...",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Moderators with Send & Wait": {
+      "main": [
+        [
+          {
+            "node": "Receive Instructions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "any"
+  },
+  "versionId": "2917462c-db79-4679-b59f-0e60d3b9d0f4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ca0aeb06c64520f624090add2832ae0c0affc16d150c0ae028c346987209f147"
+  },
+  "id": "BZiFMq3jjBnWvJDt",
+  "tags": []
+}

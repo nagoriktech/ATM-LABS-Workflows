@@ -1,0 +1,724 @@
+{
+  "name": "Scrape Emails from Google Maps and Cold Email Outreach",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        16
+      ],
+      "id": "d92a83c9-54bd-48a2-8ac4-10d6ad1a5252",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        48,
+        16
+      ],
+      "id": "58142852-bc1f-4803-8f6c-46a2ec74de11",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        160
+      ],
+      "id": "634b713e-7dd5-4b6b-8cf4-c9dc0bf25c14",
+      "name": "Wait",
+      "webhookId": "dcb34ed5-67f0-4cc3-bac4-520de93a19cd"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "BcxfKXZV5X6pypvZ",
+          "mode": "list",
+          "cachedResultName": "EmailScraper"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        256,
+        160
+      ],
+      "id": "9a33ec31-cf8d-42d1-be4a-5b255ea52050",
+      "name": "Extract Emails",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Queries Sender",
+        "height": 528,
+        "width": 1200,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -224,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "bf7c4ebe-bcbf-4734-89aa-958dcc3d7f50",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"title\": \"EmailTemplate\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"to\": {\n      \"type\": \"string\",\n      \"description\": \"Recipient email address\"\n    },\n    \"subject\": {\n      \"type\": \"string\",\n      \"description\": \"The subject of the email\"\n    },\n    \"message\": {\n      \"type\": \"string\",\n      \"description\": \"The body of the email in HTML format\"\n    },\n    \"emailType\": {\n      \"type\": \"string\",\n      \"enum\": [\"HTML\", \"Plain Text\"],\n      \"description\": \"Type of email message\"\n    }\n  },\n  \"required\": [\"to\", \"subject\", \"message\", \"emailType\"]\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        32
+      ],
+      "id": "c9086ded-994d-487a-972b-2c9fdd589d66",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Client Email :  {{ $json.Emails }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are an AI assistant. When you receive any email, automatically reply with the following exact template:  Subject: Meet Jarvis - Your AI Assistant  \n <p>Hi there!</p>\n\n<p>I want to introduce you to Jarvis - an AI assistant that I've created to automate your daily tasks.</p>\n\n<p><strong>What Jarvis Can Do:</strong></p>\n<ul>\n  <li>Email Management - Read and send your emails</li>\n  <li>Appointment Management - Schedule meetings and send reminders to you</li>\n  <li>News Updates - Get daily news briefings</li>\n  <li>To-Do Lists - Create and manage your tasks</li>\n</ul>\n\n<p><strong>Extra Features:</strong></p>\n<ul>\n  <li>Use ElevenLabs for voice commands</li>\n  <li>You can also use Jarvis with Telegram</li>\n</ul>\n\n<p><strong>How to Use Jarvis:</strong></p>\n<ul>\n  <li>\"Jarvis, what's my schedule today?\"</li>\n  <li>\"Jarvis, read my latest email\"</li>\n  <li>\"What's today's news?\"</li>\n  <li>\"Add meeting to my task list\"</li>\n</ul>\n\n<p>Jarvis is ready to assist you 24/7!</p>\n\n<br>\n<p>Best regards,</p>\n<p>My WhatsApp number: +923136795522<br>\nEmail: zi95448@gmail.com</p>\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        352,
+        -128
+      ],
+      "id": "39d91c9a-cc50-4abb-9f75-e5b8e29a5101",
+      "name": "Prepare"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.output.to }}",
+        "subject": "={{ $json.output.subject }}",
+        "message": "={{ $json.output.message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        752,
+        -128
+      ],
+      "id": "f19bc44c-c57d-467b-ac13-a03c0d11910d",
+      "name": "Send gmail",
+      "webhookId": "f5ec3be3-bc13-42bd-8487-f5697b66d188"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        336,
+        16
+      ],
+      "id": "7a7ebc2e-edde-49ab-a3a3-cbaf68aeb645",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "url",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        -96
+      ],
+      "id": "9fb066bc-fd2b-44cd-aaa3-3acb8f7ba7a0",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2128,
+        -96
+      ],
+      "id": "ab85c934-0180-44d2-ac8d-af3018bf4466",
+      "name": "Loop Over Items",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1184,
+        192
+      ],
+      "id": "9cd78d9c-755e-481c-bcbb-cda8d4d9c1d2",
+      "name": "Loop Over Items1",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "emails"
+            }
+          ]
+        },
+        "options": {
+          "mergeLists": true
+        }
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        176
+      ],
+      "id": "4044f5ed-d582-4444-9813-845c3bb0d526",
+      "name": "Aggregate",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "url": "=https://www.google.com/maps/search/ {{ $json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1296,
+        -96
+      ],
+      "id": "75e02dda-942a-491c-bccb-1b94520b48b9",
+      "name": "scrape the google maps"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json.data\n \nconst regex = /https?:\\/\\/[^\\/]+/g\n \nurls = data.match(regex)\n \nreturn urls.map(url => ({json: {url: url}}))"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        -96
+      ],
+      "id": "921aad26-cffb-47c6-9091-e1d6251d5965",
+      "name": "extract urls"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "972f3e27-9d89-4339-820f-cf0c2f3c9b5b",
+              "leftValue": "={{ $json.url }}",
+              "rightValue": "(google|gstatic|ggpht|schema|example)",
+              "operator": {
+                "type": "string",
+                "operation": "notRegex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1712,
+        -96
+      ],
+      "id": "d4abbc45-c376-4aaf-9f87-253166f54172",
+      "name": "get the business domains"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2400,
+        -80
+      ],
+      "id": "a35043fc-bae7-4103-87e4-7b278eb28043",
+      "name": "scrape the website",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "emails",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        176
+      ],
+      "id": "1ae8fcca-0fca-4138-9737-c589fe947ac2",
+      "name": "Split Out",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "emails",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        1968,
+        176
+      ],
+      "id": "144b91b8-aab6-43fe-be71-27333116e072",
+      "name": "Remove Duplicates1",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1PfL9iq3Bgvdz6UAtSVreytJvI8MVjSxp7nYkm3v-8S8",
+          "mode": "list",
+          "cachedResultName": "GMEmails",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PfL9iq3Bgvdz6UAtSVreytJvI8MVjSxp7nYkm3v-8S8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PfL9iq3Bgvdz6UAtSVreytJvI8MVjSxp7nYkm3v-8S8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Emails": "={{ $json.validEmails }}"
+          },
+          "matchingColumns": [
+            "Emails"
+          ],
+          "schema": [
+            {
+              "id": "Emails",
+              "displayName": "Emails",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2736,
+        176
+      ],
+      "id": "b2a38af9-7798-48a6-ab71-05d62a487623",
+      "name": "Add emails to sheet"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "validEmails",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2384,
+        176
+      ],
+      "id": "fb4d08e0-e454-4240-82ad-796968825e95",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map((item) => item.json);\nconst emailRegex = /\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b/g;\n\nconst validEmails = items.reduce((acc, item) => {\n  const emails = item.emails.match(emailRegex);\n  if (emails) {\n    emails.forEach((email) => {\n      if (\n        !email.includes(\".jpg\") &&\n        !email.includes(\".jpeg\") &&\n        !email.includes(\".png\") &&\n        !email.includes(\"@3x.svg\") &&\n        !email.includes(\".svg\") &&\n        !email.includes(\".webp\") &&\n        !email.includes(\"@2x.png\")\n      ) {\n        acc.push(email);\n      }\n    });\n  }\n  return acc;\n}, []);\n\nreturn { validEmails };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2176,
+        176
+      ],
+      "id": "da9b4504-3486-460d-9bf6-6cb6c3bfa052",
+      "name": "Remove image extensions like png or svgg etc",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json.data;\n\nconst emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g;\n\nlet emails = (data.match(emailRegex) || []).map(e =>\n  e.replace(/@[^ ]+\\.webp$/i, \"\").replace(/\\.webp$/i, \"\")\n);\n\n// Remove empty ya corrupted emails\nemails = emails.filter(e => e.includes(\"@\"));\n\nconsole.log(emails);\n\nreturn { json: { emails } };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        288
+      ],
+      "id": "e60bfe12-23a7-4d3e-872f-db7a97bc68a9",
+      "name": "Extract Emails1"
+    },
+    {
+      "parameters": {
+        "content": "## EMAILS SCRAPER",
+        "height": 672,
+        "width": 1856,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1120,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "feb60e45-b1f1-4203-83fe-33b47f69d0fd",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1056,
+        -112
+      ],
+      "id": "7cbb3ab4-a3ff-41dd-a4d0-e380e332bc8f",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {
+          "query": "new+york+mechanic"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [
+          {
+            "node": "Prepare",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Emails": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Prepare",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare": {
+      "main": [
+        [
+          {
+            "node": "Send gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Prepare",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "scrape the website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Emails1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "scrape the google maps": {
+      "main": [
+        [
+          {
+            "node": "extract urls",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract urls": {
+      "main": [
+        [
+          {
+            "node": "get the business domains",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get the business domains": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "scrape the website": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates1": {
+      "main": [
+        [
+          {
+            "node": "Remove image extensions like png or svgg etc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Add emails to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove image extensions like png or svgg etc": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Emails1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "scrape the google maps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "56fdaa9c-8c86-498c-bb2d-4587ffbd8e72",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c0c3fe71cadf27e20e684308c0530c747e9c1a4ed38a7f10a34a9b19fa0b1bce"
+  },
+  "id": "viVGDSkLeLzSNe76",
+  "tags": []
+}

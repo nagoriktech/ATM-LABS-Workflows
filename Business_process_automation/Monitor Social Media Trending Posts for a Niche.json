@@ -1,0 +1,1092 @@
+{
+  "name": "Monitor Social Media Trending Posts for a Niche",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        16
+      ],
+      "id": "1766fc14-9934-4eb1-b7b9-ad9f3247ecc2",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0c530415-7950-4898-bf3e-a328f9b058c0",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "0b2eaa56-ae3a-46ba-9bd7-9e658ce6ada7",
+              "name": "timestamp",
+              "value": "={{ $json.timestamp }}",
+              "type": "string"
+            },
+            {
+              "id": "535c85b2-103d-475b-8368-0ded1c8c56f0",
+              "name": "Source",
+              "value": "X",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        -176
+      ],
+      "id": "63cc4748-ce51-4f8d-9a6f-89e6cf28469b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2bae4f41-d107-4650-95a1-36d2b052134c",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "16da90ce-30b3-4bde-844b-1847fb2a73e3",
+              "name": "timestamp",
+              "value": "={{ $json.createdAt }}",
+              "type": "string"
+            },
+            {
+              "id": "39259d7b-cd1a-4667-9bda-7f0af162ff62",
+              "name": "Source",
+              "value": "Reddit",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        16
+      ],
+      "id": "fa7c78bb-ed89-476f-a8d3-fc353ad6b9d3",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6cf64b6d-ee30-4609-b873-7084c66c2771",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "c01be147-3c43-4a39-8920-3c07b2363211",
+              "name": "timestamp",
+              "value": "={{ $json.postedAtISO }}",
+              "type": "string"
+            },
+            {
+              "id": "e52c5d3e-b5de-4b1d-8c8c-9da37c554707",
+              "name": "Source",
+              "value": "LinkedIn",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        208
+      ],
+      "id": "9af5015a-e921-4c61-bd79-68d9d095a88b",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1g6FqkzLlrnIdlDTJKVkNVLxmOLBh_owCLvNdXkmae70",
+          "mode": "list",
+          "cachedResultName": "Trending Posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1g6FqkzLlrnIdlDTJKVkNVLxmOLBh_owCLvNdXkmae70/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1g6FqkzLlrnIdlDTJKVkNVLxmOLBh_owCLvNdXkmae70/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Source": "={{ $json.Source }}",
+            "Post URL": "={{ $json.url }}",
+            "Timestamp": "={{ $json.timestamp }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post URL",
+              "displayName": "Post URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        16
+      ],
+      "id": "208af17c-8a14-4be4-a3c8-d683cec57e78",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pRREoPysXbFJnhqS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1g6FqkzLlrnIdlDTJKVkNVLxmOLBh_owCLvNdXkmae70",
+          "mode": "list",
+          "cachedResultName": "Trending Posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1g6FqkzLlrnIdlDTJKVkNVLxmOLBh_owCLvNdXkmae70/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1g6FqkzLlrnIdlDTJKVkNVLxmOLBh_owCLvNdXkmae70/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        784,
+        16
+      ],
+      "id": "d47810d1-74b0-4c22-a70a-c07d49331ac6",
+      "name": "Get row(s) in sheet",
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pRREoPysXbFJnhqS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "kzsakib@gmail.com",
+        "subject": "Trending Posts",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1232,
+        -80
+      ],
+      "id": "ca3f8c6c-b08f-4c17-bcb1-cdef9d1a705a",
+      "name": "Send a message",
+      "webhookId": "e736bee8-933f-461b-a95f-b0022d29224a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gQMd9uPwdWeJnp9Z",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Use <br> tags for HTML line breaks\nconst formattedList = items\n  .map((item, index) => `${index + 1}. <a href=\"${item.json[\"Post URL\"]}\">${item.json[\"Post URL\"]}</a>`)\n  .join('<br>');\n\nreturn [\n  {\n    json: {\n      html: `<p>Here are the recent top posts:</p><p>${formattedList}</p>`\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        -80
+      ],
+      "id": "e9de197f-4c63-4d26-bd80-793d08aea928",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Join URLs with actual newlines for plain text\nconst formattedList = items\n  .map((item, index) => `${index + 1}. ${item.json[\"Post URL\"]}`)\n  .join('\\n');\n\n// Return text ready for email (as plain text)\nreturn [\n  {\n    json: {\n      text: `Here are the recent top posts:\\n\\n${formattedList}`\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        112
+      ],
+      "id": "f3c699c2-5600-4f21-8935-29637c2cbb19",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "chatId": "6617255993",
+        "text": "={{ $json.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1232,
+        112
+      ],
+      "id": "0ac2cf35-d8ca-46c5-ba06-be173c54238a",
+      "name": "Send a text message",
+      "webhookId": "e1dcb7ac-55dc-4f03-a63a-a0ee823ff4ab",
+      "credentials": {
+        "telegramApi": {
+          "id": "w95Vkcyop8EytPo0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/web.harvester~easy-twitter-search-scraper/run-sync-get-dataset-items?token=apify_api_94h7xF7SGXw6GCGFuaZROyBvukyZtz2r7432",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"excludeImages\": false,\n    \"excludeLinks\": false,\n    \"excludeMedia\": false,\n    \"excludeNativeRetweets\": false,\n    \"excludeNativeVideo\": false,\n    \"excludeNews\": false,\n    \"excludeProVideo\": false,\n    \"excludeQuote\": false,\n    \"excludeReplies\": false,\n    \"excludeSafe\": false,\n    \"excludeVerified\": false,\n    \"excludeVideos\": false,\n    \"images\": false,\n    \"includeUserInfo\": false,\n    \"language\": \"any\",\n    \"links\": false,\n    \"media\": false,\n    \"minLikes\": 50,\n    \"minRetweets\": 10,\n    \"nativeRetweets\": false,\n    \"nativeVideo\": false,\n    \"news\": false,\n    \"proVideo\": false,\n    \"proxyConfig\": {\n        \"useApifyProxy\": true,\n        \"apifyProxyGroups\": [\n            \"RESIDENTIAL\"\n        ]\n    },\n    \"quote\": false,\n    \"replies\": false,\n    \"repliesDepth\": 0,\n    \"safe\": false,\n    \"searchQueries\": [\n        \"ux design\"\n    ],\n    \"since\": \"2025-10-10\",\n    \"tweetsDesired\": 5,\n    \"verified\": false,\n    \"videos\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        112,
+        -176
+      ],
+      "id": "8a1e028a-37c9-4371-8f4d-4c3af1ce69c2",
+      "name": "X"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/trudax~reddit-scraper-lite/run-sync-get-dataset-items?token=apify_api_94h7xF7SGXw6GCGFuaZROyBvukyZtz2r7432",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"debugMode\": false,\n    \"ignoreStartUrls\": false,\n    \"includeNSFW\": true,\n    \"maxComments\": 0,\n    \"maxCommunitiesCount\": 2,\n    \"maxItems\": 10,\n    \"maxPostCount\": 5,\n    \"maxUserCount\": 2,\n    \"proxy\": {\n        \"useApifyProxy\": true,\n        \"apifyProxyGroups\": [\n            \"RESIDENTIAL\"\n        ]\n    },\n    \"scrollTimeout\": 40,\n    \"searchComments\": false,\n    \"searchCommunities\": false,\n    \"searchPosts\": true,\n    \"searchUsers\": false,\n    \"searches\": [\n        \"ux design\"\n    ],\n    \"skipComments\": true,\n    \"skipCommunity\": false,\n    \"skipUserPosts\": false,\n    \"sort\": \"top\",\n    \"time\": \"day\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        112,
+        16
+      ],
+      "id": "7289eebe-4552-45c0-9104-5a4b1c59e893",
+      "name": "Reddit"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/supreme_coder~linkedin-post/run-sync-get-dataset-items?token=apify_api_94h7xF7SGXw6GCGFuaZROyBvukyZtz2r7432",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"deepScrape\": false,\n    \"limitPerSource\": 10,\n    \"rawData\": false,\n    \"urls\": [\n        \"https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords=ux&origin=FACETED_SEARCH\"\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        112,
+        208
+      ],
+      "id": "d780fae5-a7c8-4cfd-be01-a7ec42d4eeba",
+      "name": "LinkedIn"
+    }
+  ],
+  "pinData": {
+    "Edit Fields": [
+      {
+        "json": {
+          "url": "https://x.com/TosinOlugbenga/status/1976977828605235655",
+          "timestamp": "2025-10-11T11:46:00.000Z",
+          "Source": "X"
+        }
+      },
+      {
+        "json": {
+          "url": "https://x.com/Abmankendrick/status/1976919960049123482",
+          "timestamp": "2025-10-11T07:57:00.000Z",
+          "Source": "X"
+        }
+      },
+      {
+        "json": {
+          "url": "https://x.com/omoalhajaabiola/status/1976902585698140603",
+          "timestamp": "2025-10-11T06:48:00.000Z",
+          "Source": "X"
+        }
+      },
+      {
+        "json": {
+          "url": "https://x.com/Bitcoin_Teej/status/1976754366469071333",
+          "timestamp": "2025-10-10T20:59:00.000Z",
+          "Source": "X"
+        }
+      },
+      {
+        "json": {
+          "url": "https://x.com/SaddatSalman/status/1976615708424380713",
+          "timestamp": "2025-10-10T11:48:00.000Z",
+          "Source": "X"
+        }
+      }
+    ],
+    "Edit Fields1": [
+      {
+        "json": {
+          "url": "https://www.reddit.com/r/gridfinity/comments/1o3zmjs/gridfinitylabels_v20_complete_rebuild_with_batch/",
+          "timestamp": "2025-10-11T16:13:46.000Z",
+          "Source": "Reddit"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.reddit.com/r/selfhosted/comments/1o3w7nw/what_self_hosted_services_you_actually_rely_on/",
+          "timestamp": "2025-10-11T13:53:18.000Z",
+          "Source": "Reddit"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.reddit.com/r/MacOS/comments/1o3pbtt/tahoe_what_a_mess/",
+          "timestamp": "2025-10-11T07:25:59.000Z",
+          "Source": "Reddit"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.reddit.com/r/iOSProgramming/comments/1o3pje3/roastmyapp_im_looking_for_brutally_honest/",
+          "timestamp": "2025-10-11T07:39:45.000Z",
+          "Source": "Reddit"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.reddit.com/r/civitai/comments/1o3tv9a/mapic2_final_version_released_can_read_lora/",
+          "timestamp": "2025-10-11T12:03:08.000Z",
+          "Source": "Reddit"
+        }
+      }
+    ],
+    "Edit Fields2": [
+      {
+        "json": {
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382674258193321984?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382674258193321984%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "timestamp": "2025-10-11T07:11:46.608Z",
+          "Source": "LinkedIn"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382799304203206656?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382799304203206656%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "timestamp": "2025-10-11T15:28:39.900Z",
+          "Source": "LinkedIn"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382734177135239168?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382734177135239168%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "timestamp": "2025-10-11T11:09:52.397Z",
+          "Source": "LinkedIn"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382950643856101376?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382950643856101376%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "timestamp": "2025-10-12T01:30:02.085Z",
+          "Source": "LinkedIn"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382842770383671297?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382842770383671297%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "timestamp": "2025-10-11T18:21:23.045Z",
+          "Source": "LinkedIn"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382656203350323200?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382656203350323200%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "timestamp": "2025-10-11T06:00:01.998Z",
+          "Source": "LinkedIn"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382851006080057344?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382851006080057344%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "timestamp": "2025-10-11T18:54:06.588Z",
+          "Source": "LinkedIn"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382849225757196288?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382849225757196288%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "timestamp": "2025-10-11T18:47:02.126Z",
+          "Source": "LinkedIn"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382779938279616512?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382779938279616512%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "timestamp": "2025-10-11T14:11:42.704Z",
+          "Source": "LinkedIn"
+        }
+      },
+      {
+        "json": {
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382851006080057344?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382851006080057344%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "timestamp": "2025-10-11T18:54:06.588Z",
+          "Source": "LinkedIn"
+        }
+      }
+    ],
+    "X": [
+      {
+        "json": {
+          "id": "1976977828605235655",
+          "url": "https://x.com/TosinOlugbenga/status/1976977828605235655",
+          "verified": true,
+          "username": "@TosinOlugbenga",
+          "fullname": "Tosin Olugbenga",
+          "avatar": "https://pbs.twimg.com/profile_images/1972221571998666752/XQuaaTac.jpg",
+          "timestamp": "2025-10-11T11:46:00.000Z",
+          "text": "So @GammsApp has no landing page yet, the focus is more on the user and community Dashboard. \n\nBut @1Stephanieobi offered to design the UI/UX for free to appreciate whatever I am doing here. \n\nAlso @_H_O_V has offered to develop the website. \n\nPlease help me appreciate and follow them.",
+          "links": [
+            "https://x.com/GammsApp",
+            "https://x.com/1Stephanieobi",
+            "https://x.com/_H_O_V"
+          ],
+          "isQuote": false,
+          "isRetweet": false,
+          "isReply": false,
+          "likes": 76,
+          "replies": 10,
+          "retweets": 10,
+          "quotes": 1,
+          "searchQuery": "ux design"
+        }
+      },
+      {
+        "json": {
+          "id": "1976919960049123482",
+          "url": "https://x.com/Abmankendrick/status/1976919960049123482",
+          "verified": true,
+          "username": "@Abmankendrick",
+          "fullname": "Abraham John 🦄🦓",
+          "avatar": "https://pbs.twimg.com/profile_images/1765313219344646144/s2Tfsq2u.jpg",
+          "images": [
+            "https://pbs.twimg.com/media/G29uOTTXsAA0jm4.jpg",
+            "https://pbs.twimg.com/media/G29uOTQWwAAl4zX.jpg"
+          ],
+          "timestamp": "2025-10-11T07:57:00.000Z",
+          "text": "UI/UX Designers, here’s a beautiful color palette inspiration for your UI design this weekend with example.\n\nBookmark it for later 🩵",
+          "links": [],
+          "isQuote": false,
+          "isRetweet": false,
+          "isReply": false,
+          "likes": 565,
+          "replies": 16,
+          "retweets": 40,
+          "quotes": 0,
+          "searchQuery": "ux design"
+        }
+      },
+      {
+        "json": {
+          "id": "1976902585698140603",
+          "url": "https://x.com/omoalhajaabiola/status/1976902585698140603",
+          "verified": true,
+          "username": "@omoalhajaabiola",
+          "fullname": "Omoalhaja",
+          "avatar": "https://pbs.twimg.com/profile_images/1689914317594927104/TXxZcFtn.jpg",
+          "timestamp": "2025-10-11T06:48:00.000Z",
+          "text": "A few minutes ago, we officially separated our design students into two specialization tracks. UI/UX Design and Motion Design.\n\nThis came after four intensive weeks of learning design fundamentals:\n\n✅ Design philosophy and principles,\n✅ Visual hierarchy and layout,\n✅ Typography and color theory, and\n✅ Human-centered design thinking\n\nBy now, they’ve gained a strong grasp of how to think and create like real designers, especially in areas like problem-solving through design, user experience strategy, and visual storytelling.\n\nTheir decision to choose between Motion Design or UI/UX Design is grounded in this solid understanding of design theory and application.\n\nSuper grateful to our Design Lead and Mentor for his dedication, clarity of teaching, and commitment to raising the next generation of world-class designers.\n\nThis  is what you get when you’re a member of @skill_afrika_. You get clarity, structure, mentorship, and real growth.",
+          "links": [
+            "https://x.com/skill_afrika_"
+          ],
+          "isQuote": false,
+          "isRetweet": false,
+          "isReply": false,
+          "likes": 105,
+          "replies": 20,
+          "retweets": 11,
+          "quotes": 1,
+          "searchQuery": "ux design"
+        }
+      },
+      {
+        "json": {
+          "id": "1976754366469071333",
+          "url": "https://x.com/Bitcoin_Teej/status/1976754366469071333",
+          "verified": true,
+          "username": "@Bitcoin_Teej",
+          "fullname": "Bitcoin Teej 🟧⚡️",
+          "avatar": "https://pbs.twimg.com/profile_images/1974366400991862784/DvC_lBok.jpg",
+          "timestamp": "2025-10-10T20:59:00.000Z",
+          "text": "You don’t escape a 9-5 by complaining.\nYou escape by learning leverage.\n\nTech pays.\nTrades pay.\nSales pays.\n\nCert paths nobody’s talking about:\n– HVAC / Electrical (NCCER, NATE)\n– Google UX Design\n– Microsoft Power BI\n– Solar PV Installation\n– Digital Marketing Analytics (Meta Blueprint)\n\nThere’s no shortage of opportunity.\nOnly focus.",
+          "links": [],
+          "isQuote": false,
+          "isRetweet": false,
+          "isReply": false,
+          "likes": 285,
+          "replies": 20,
+          "retweets": 20,
+          "quotes": 0,
+          "searchQuery": "ux design"
+        }
+      },
+      {
+        "json": {
+          "id": "1976615708424380713",
+          "url": "https://x.com/SaddatSalman/status/1976615708424380713",
+          "verified": true,
+          "username": "@SaddatSalman",
+          "fullname": "Engr Salman Saddat",
+          "avatar": "https://pbs.twimg.com/profile_images/1474009690765938697/Tdq9iPJH.jpg",
+          "timestamp": "2025-10-10T11:48:00.000Z",
+          "text": "🎨 Big Update from YADA! 🚀\nWe’ve officially completed the full UI/UX design for YADA — the world’s first Shariah-compliant decentralized social media platform 🌐✨\nHere’s a look at the YADA Dashboard — designed for simplicity, speed, and a seamless user experience! 💻💫\nThis is a big step forward toward the future of ethical Web3 social networking 🔗\nStay tuned — the next phase is going to be even more exciting! 🔥",
+          "links": [],
+          "isQuote": false,
+          "isRetweet": false,
+          "isReply": false,
+          "likes": 58,
+          "replies": 13,
+          "retweets": 20,
+          "quotes": 1,
+          "searchQuery": "ux design"
+        }
+      }
+    ],
+    "Reddit": [
+      {
+        "json": {
+          "id": "t3_1o3zmjs",
+          "parsedId": "1o3zmjs",
+          "url": "https://www.reddit.com/r/gridfinity/comments/1o3zmjs/gridfinitylabels_v20_complete_rebuild_with_batch/",
+          "username": "kamilpajak",
+          "userId": "t2_624sk8sh",
+          "title": "GridfinityLabels v2.0 - Complete rebuild with batch mode and more",
+          "communityName": "r/gridfinity",
+          "parsedCommunityName": "gridfinity",
+          "body": "Hey r/gridfinity community!\n\nJust released a major update to **gridfinitylabels.com**. Actually, it's more than an update - I ended up rebuilding the whole thing from scratch.\n\n## Background\n\nA few months back, I shared a Google Forms survey here asking about issues and feature ideas. Got way more responses than expected (thank you!), and it became clear that the app needed more than just patches.\n\n## Main changes in v2.0\n\n### **Batch Mode** \nThis was by far the most requested feature. You can now generate multiple labels as a single PNG with cutting guides. No more creating labels one at a time.\n\n### **Better Layout Algorithm**\nSpent a lot of time improving how images, text, and QR codes are positioned. The limited label space is now used much more efficiently, which really helps with readability on smaller labels.\n\n### **New UI/UX**\nStarted fresh with a cleaner, more intuitive design. Should be faster to go from idea to printed label now.\n\n### **Other improvements**\n- Label length range changed to 35-100mm (35mm fits perfectly on 1U bins)\n- Added thread pitch notation for fasteners (requested feature)\n\n## Why rebuild from scratch?\n\nHonestly, the old codebase was becoming a mess. Adding the features you all requested would've meant endless workarounds. Starting fresh let me properly implement things like batch mode that would've been nearly impossible before.\n\n## What's next?\n\nStill monitoring the feedback and bug reports. Already have a list of smaller improvements for v2.1.\n\nThe app is live at **[gridfinitylabels.com](https://gridfinitylabels.com)**\n\nIf you find any bugs or have suggestions, please let me know. The survey responses really helped shape this version, so community feedback is always valuable.\n\nThanks to everyone who's been using the tool and providing feedback!",
+          "html": "&lt;!-- SC_OFF --&gt;&lt;div class=\"md\"&gt;&lt;p&gt;Hey &lt;a href=\"/r/gridfinity\"&gt;r/gridfinity&lt;/a&gt; community!&lt;/p&gt;\n\n&lt;p&gt;Just released a major update to &lt;strong&gt;gridfinitylabels.com&lt;/strong&gt;. Actually, it&amp;#39;s more than an update - I ended up rebuilding the whole thing from scratch.&lt;/p&gt;\n\n&lt;h2&gt;Background&lt;/h2&gt;\n\n&lt;p&gt;A few months back, I shared a Google Forms survey here asking about issues and feature ideas. Got way more responses than expected (thank you!), and it became clear that the app needed more than just patches.&lt;/p&gt;\n\n&lt;h2&gt;Main changes in v2.0&lt;/h2&gt;\n\n&lt;h3&gt;&lt;strong&gt;Batch Mode&lt;/strong&gt;&lt;/h3&gt;\n\n&lt;p&gt;This was by far the most requested feature. You can now generate multiple labels as a single PNG with cutting guides. No more creating labels one at a time.&lt;/p&gt;\n\n&lt;h3&gt;&lt;strong&gt;Better Layout Algorithm&lt;/strong&gt;&lt;/h3&gt;\n\n&lt;p&gt;Spent a lot of time improving how images, text, and QR codes are positioned. The limited label space is now used much more efficiently, which really helps with readability on smaller labels.&lt;/p&gt;\n\n&lt;h3&gt;&lt;strong&gt;New UI/UX&lt;/strong&gt;&lt;/h3&gt;\n\n&lt;p&gt;Started fresh with a cleaner, more intuitive design. Should be faster to go from idea to printed label now.&lt;/p&gt;\n\n&lt;h3&gt;&lt;strong&gt;Other improvements&lt;/strong&gt;&lt;/h3&gt;\n\n&lt;ul&gt;\n&lt;li&gt;Label length range changed to 35-100mm (35mm fits perfectly on 1U bins)&lt;/li&gt;\n&lt;li&gt;Added thread pitch notation for fasteners (requested feature)&lt;/li&gt;\n&lt;/ul&gt;\n\n&lt;h2&gt;Why rebuild from scratch?&lt;/h2&gt;\n\n&lt;p&gt;Honestly, the old codebase was becoming a mess. Adding the features you all requested would&amp;#39;ve meant endless workarounds. Starting fresh let me properly implement things like batch mode that would&amp;#39;ve been nearly impossible before.&lt;/p&gt;\n\n&lt;h2&gt;What&amp;#39;s next?&lt;/h2&gt;\n\n&lt;p&gt;Still monitoring the feedback and bug reports. Already have a list of smaller improvements for v2.1.&lt;/p&gt;\n\n&lt;p&gt;The app is live at &lt;strong&gt;&lt;a href=\"https://gridfinitylabels.com\"&gt;gridfinitylabels.com&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;\n\n&lt;p&gt;If you find any bugs or have suggestions, please let me know. The survey responses really helped shape this version, so community feedback is always valuable.&lt;/p&gt;\n\n&lt;p&gt;Thanks to everyone who&amp;#39;s been using the tool and providing feedback!&lt;/p&gt;\n&lt;/div&gt;&lt;!-- SC_ON --&gt;",
+          "link": "https://i.redd.it/s86hm1iabiuf1.png",
+          "numberOfComments": 23,
+          "flair": null,
+          "upVotes": 205,
+          "upVoteRatio": 1,
+          "isVideo": false,
+          "isAd": false,
+          "over18": false,
+          "thumbnailUrl": "https://b.thumbs.redditmedia.com/Fq8_vPCm_WaLKkoOlaT0g8NWUQ9xx-onVrj3uuJ9wCs.jpg",
+          "imageUrls": [
+            "https://i.redd.it/s86hm1iabiuf1.png"
+          ],
+          "createdAt": "2025-10-11T16:13:46.000Z",
+          "scrapedAt": "2025-10-12T06:38:59.074Z",
+          "dataType": "post"
+        }
+      },
+      {
+        "json": {
+          "id": "t3_1o3w7nw",
+          "parsedId": "1o3w7nw",
+          "url": "https://www.reddit.com/r/selfhosted/comments/1o3w7nw/what_self_hosted_services_you_actually_rely_on/",
+          "username": "v0id09",
+          "userId": "t2_11w3xl",
+          "title": "What self hosted services you actually rely on",
+          "communityName": "r/selfhosted",
+          "parsedCommunityName": "selfhosted",
+          "body": "I’ll be very honest and admit that I often fail to fully settle on self-hosted apps to replace a paid or cloud-based version I currently use, even though I really enjoy the fun, value privacy, and control. A common pattern is to set things up, try it for some toy workload, hit something I don’t like, then switch back to normal life. \n\nMy recent failed attempts include: tried to use Planka to replace Trello, tried Memos/Vikunja to replace Things. Tried to use Trilium to replace Notion.\n\nThe reasons I switched back are typically UX not being as polished and/or long-term concerns:\n\n\n- UX: OSS is very individualistic when it comes to UI design. Some I like (eg I use KDE), but some I don’t (eg esp those modern and slick ones). I found their pad alternative to be less opinionated sometimes. Plus, there are also other aspects of UX, such as ease of onboarding other users, etc. \n- Breaking changes. Not having enough bandwidth to read all update notices, breaking changes in configurations have caused problems in the past. Not hard to fix if one investigates, but it was a disruption and distraction. \n- Losing access. I have dynamic DNS, but I still worry about home power not being reliable, my fiber service sometimes going down, etc.\n- OSS going out of maintenance. Several projects I’ve tried last years are now not popular anymore. \n\nI’m curious what you guys actually rely on. For me, HA is something I actually use, because it’s truly not replaceable by a paid alternative, and I use it for sheer convenience and not critical missions. I also use Nextcloud for cloud storage for unimportant things but still pay for Dropbox for immediate access to files that my livelihood depends on. ADG and Pi-hole are enjoyable as they are local, so is Plex. \n",
+          "html": "&lt;!-- SC_OFF --&gt;&lt;div class=\"md\"&gt;&lt;p&gt;I’ll be very honest and admit that I often fail to fully settle on self-hosted apps to replace a paid or cloud-based version I currently use, even though I really enjoy the fun, value privacy, and control. A common pattern is to set things up, try it for some toy workload, hit something I don’t like, then switch back to normal life. &lt;/p&gt;\n\n&lt;p&gt;My recent failed attempts include: tried to use Planka to replace Trello, tried Memos/Vikunja to replace Things. Tried to use Trilium to replace Notion.&lt;/p&gt;\n\n&lt;p&gt;The reasons I switched back are typically UX not being as polished and/or long-term concerns:&lt;/p&gt;\n\n&lt;ul&gt;\n&lt;li&gt;UX: OSS is very individualistic when it comes to UI design. Some I like (eg I use KDE), but some I don’t (eg esp those modern and slick ones). I found their pad alternative to be less opinionated sometimes. Plus, there are also other aspects of UX, such as ease of onboarding other users, etc. &lt;/li&gt;\n&lt;li&gt;Breaking changes. Not having enough bandwidth to read all update notices, breaking changes in configurations have caused problems in the past. Not hard to fix if one investigates, but it was a disruption and distraction. &lt;/li&gt;\n&lt;li&gt;Losing access. I have dynamic DNS, but I still worry about home power not being reliable, my fiber service sometimes going down, etc.&lt;/li&gt;\n&lt;li&gt;OSS going out of maintenance. Several projects I’ve tried last years are now not popular anymore. &lt;/li&gt;\n&lt;/ul&gt;\n\n&lt;p&gt;I’m curious what you guys actually rely on. For me, HA is something I actually use, because it’s truly not replaceable by a paid alternative, and I use it for sheer convenience and not critical missions. I also use Nextcloud for cloud storage for unimportant things but still pay for Dropbox for immediate access to files that my livelihood depends on. ADG and Pi-hole are enjoyable as they are local, so is Plex. &lt;/p&gt;\n&lt;/div&gt;&lt;!-- SC_ON --&gt;",
+          "link": "https://www.reddit.com/r/selfhosted/comments/1o3w7nw/what_self_hosted_services_you_actually_rely_on/",
+          "numberOfComments": 153,
+          "flair": "Need Help",
+          "upVotes": 134,
+          "upVoteRatio": 0.93,
+          "isVideo": false,
+          "isAd": false,
+          "over18": false,
+          "thumbnailUrl": "self",
+          "imageUrls": [],
+          "createdAt": "2025-10-11T13:53:18.000Z",
+          "scrapedAt": "2025-10-12T06:38:59.988Z",
+          "dataType": "post"
+        }
+      },
+      {
+        "json": {
+          "id": "t3_1o3pbtt",
+          "parsedId": "1o3pbtt",
+          "url": "https://www.reddit.com/r/MacOS/comments/1o3pbtt/tahoe_what_a_mess/",
+          "username": "MX010",
+          "userId": "t2_7tnmn5g2",
+          "title": "Tahoe: What a mess",
+          "communityName": "r/MacOS",
+          "parsedCommunityName": "MacOS",
+          "body": "Pretty sad to see Apple having to push out a new OS in about a year that fixes all of Tahoe issues and makes the OS actually usable instead of actually getting out an OS that is better than Sequoia from the start. \n\nSequoia is near perfect when it comes to UX/ UI design. And with Tahoe they created the stupid extremely rounded corners, weird side-bar and glass effects that make the OS worse.\n\nAnd worst of all the memory leaks, bugs and lagginess of the UI even on powerful M-SOC's.\n\nIt's really like Apple's Vista moment unfortunately.\n\nI will stick with Sequoia for as long as possible and hopefully Apple will revert some of the stupid mistakes next year.",
+          "html": "&lt;!-- SC_OFF --&gt;&lt;div class=\"md\"&gt;&lt;p&gt;Pretty sad to see Apple having to push out a new OS in about a year that fixes all of Tahoe issues and makes the OS actually usable instead of actually getting out an OS that is better than Sequoia from the start. &lt;/p&gt;\n\n&lt;p&gt;Sequoia is near perfect when it comes to UX/ UI design. And with Tahoe they created the stupid extremely rounded corners, weird side-bar and glass effects that make the OS worse.&lt;/p&gt;\n\n&lt;p&gt;And worst of all the memory leaks, bugs and lagginess of the UI even on powerful M-SOC&amp;#39;s.&lt;/p&gt;\n\n&lt;p&gt;It&amp;#39;s really like Apple&amp;#39;s Vista moment unfortunately.&lt;/p&gt;\n\n&lt;p&gt;I will stick with Sequoia for as long as possible and hopefully Apple will revert some of the stupid mistakes next year.&lt;/p&gt;\n&lt;/div&gt;&lt;!-- SC_ON --&gt;",
+          "link": "https://www.reddit.com/r/MacOS/comments/1o3pbtt/tahoe_what_a_mess/",
+          "numberOfComments": 73,
+          "flair": "Discussion",
+          "upVotes": 98,
+          "upVoteRatio": 0.67,
+          "isVideo": false,
+          "isAd": false,
+          "over18": false,
+          "thumbnailUrl": "self",
+          "imageUrls": [],
+          "createdAt": "2025-10-11T07:25:59.000Z",
+          "scrapedAt": "2025-10-12T06:39:01.094Z",
+          "dataType": "post"
+        }
+      },
+      {
+        "json": {
+          "id": "t3_1o3pje3",
+          "parsedId": "1o3pje3",
+          "url": "https://www.reddit.com/r/iOSProgramming/comments/1o3pje3/roastmyapp_im_looking_for_brutally_honest/",
+          "username": "zach-builds",
+          "userId": "t2_84y78bl8h",
+          "title": "#RoastMyApp: I'm looking for brutally honest feedback on ButterKit (App Store Screenshots &amp; Localization), 25 x Free Pro Lifetime license codes included",
+          "communityName": "r/iOSProgramming",
+          "parsedCommunityName": "iOSProgramming",
+          "body": "Hey all, I've been working on a project for the past 9 months or so called [ButterKit](https://butterkit.app/) ( [r/ButterKit](https://www.reddit.com/r/ButterKit/) ) and would *greatly* appreciate your brutally honest feedback as fellow iOS devs. Good or bad, I'm curious what your pain points are and how to make screenshot capture/design/translation as streamlined as possible on macOS.\n\nScreenshots are so important when marketing on the App Store, and I built ButterKit because I was spending many many hours creating hundreds of translated/localized artboards in traditional design tools and wasn't satisfied with the other options out there (either too expensive with subscriptions required, or too limited, or painful to use).\n\n*ButterKit is free to download, offers a one-time purchase to unlock Pro features, and is designed to be the smooth way to ship effective, localized screenshots to the App Store and help you reach more users:*\n\n# Features\n\n* Capture directly from Xcode Simulator, right into photorealistic devices editable in 3D\n* On-device translation engine (20 languages) or via OpenAI API (bring your own API key for all 39 App Store Connect languages)\n* Growing library of 1-click templates, or build from scratch\n* Fully-featured design tool with custom fonts, gradients, artboard sizes, and more\n* App Store Preview: see how your designs will look on the App Store before you export\n* Upload directly to App Store Connect (via API Key) or batch export PNGs into organized folders\n* Intuitive UX, light mode/dark mode, file saving, liquid glass, undo/redo, infinite canvas, gestures, and all of that good stuff you expect in a modern design tool\n* Built for privacy: no accounts or data collection, anonymous crash/usage data can be disabled in settings\n* High performance 3D renderer built on Metal for 60/120fps on M-series macs\n* **Pro License is available as a one-time purchase (removes watermark, unlocks OpenAI API bring-your-own key usage)**\n\n# Download\n\n* [On the ButterKit website](https://butterkit.app)\n* [On the Mac App Store](https://apps.apple.com/us/app/butterkit/id6751829199) (discount codes only work on the website version)\n\n# Free &amp; Discounted Pro License Codes\n\n**I**'m giving away 25x free lifetime Pro licenses to use on the website (not applicable for the App Store version). Please comment below when you use one so folks know how many are left:\n\n~~25 x Free Pro Licenses (Lifetime):~~ **~~AZNZCYNG (all have been claimed)~~**\n\n40% off (Lifetime code, enter on website during checkout): **EYNTI2NQ** (available while they last)\n\nIf you try ButterKit, your honest feedback would mean a lot. I hope it helps you ship faster and reach more users. Thanks all,  \n\\- Zach",
+          "html": "&lt;!-- SC_OFF --&gt;&lt;div class=\"md\"&gt;&lt;p&gt;Hey all, I&amp;#39;ve been working on a project for the past 9 months or so called &lt;a href=\"https://butterkit.app/\"&gt;ButterKit&lt;/a&gt; ( &lt;a href=\"https://www.reddit.com/r/ButterKit/\"&gt;r/ButterKit&lt;/a&gt; ) and would &lt;em&gt;greatly&lt;/em&gt; appreciate your brutally honest feedback as fellow iOS devs. Good or bad, I&amp;#39;m curious what your pain points are and how to make screenshot capture/design/translation as streamlined as possible on macOS.&lt;/p&gt;\n\n&lt;p&gt;Screenshots are so important when marketing on the App Store, and I built ButterKit because I was spending many many hours creating hundreds of translated/localized artboards in traditional design tools and wasn&amp;#39;t satisfied with the other options out there (either too expensive with subscriptions required, or too limited, or painful to use).&lt;/p&gt;\n\n&lt;p&gt;&lt;em&gt;ButterKit is free to download, offers a one-time purchase to unlock Pro features, and is designed to be the smooth way to ship effective, localized screenshots to the App Store and help you reach more users:&lt;/em&gt;&lt;/p&gt;\n\n&lt;h1&gt;Features&lt;/h1&gt;\n\n&lt;ul&gt;\n&lt;li&gt;Capture directly from Xcode Simulator, right into photorealistic devices editable in 3D&lt;/li&gt;\n&lt;li&gt;On-device translation engine (20 languages) or via OpenAI API (bring your own API key for all 39 App Store Connect languages)&lt;/li&gt;\n&lt;li&gt;Growing library of 1-click templates, or build from scratch&lt;/li&gt;\n&lt;li&gt;Fully-featured design tool with custom fonts, gradients, artboard sizes, and more&lt;/li&gt;\n&lt;li&gt;App Store Preview: see how your designs will look on the App Store before you export&lt;/li&gt;\n&lt;li&gt;Upload directly to App Store Connect (via API Key) or batch export PNGs into organized folders&lt;/li&gt;\n&lt;li&gt;Intuitive UX, light mode/dark mode, file saving, liquid glass, undo/redo, infinite canvas, gestures, and all of that good stuff you expect in a modern design tool&lt;/li&gt;\n&lt;li&gt;Built for privacy: no accounts or data collection, anonymous crash/usage data can be disabled in settings&lt;/li&gt;\n&lt;li&gt;High performance 3D renderer built on Metal for 60/120fps on M-series macs&lt;/li&gt;\n&lt;li&gt;&lt;strong&gt;Pro License is available as a one-time purchase (removes watermark, unlocks OpenAI API bring-your-own key usage)&lt;/strong&gt;&lt;/li&gt;\n&lt;/ul&gt;\n\n&lt;h1&gt;Download&lt;/h1&gt;\n\n&lt;ul&gt;\n&lt;li&gt;&lt;a href=\"https://butterkit.app\"&gt;On the ButterKit website&lt;/a&gt;&lt;/li&gt;\n&lt;li&gt;&lt;a href=\"https://apps.apple.com/us/app/butterkit/id6751829199\"&gt;On the Mac App Store&lt;/a&gt; (discount codes only work on the website version)&lt;/li&gt;\n&lt;/ul&gt;\n\n&lt;h1&gt;Free &amp;amp; Discounted Pro License Codes&lt;/h1&gt;\n\n&lt;p&gt;&lt;strong&gt;I&lt;/strong&gt;&amp;#39;m giving away 25x free lifetime Pro licenses to use on the website (not applicable for the App Store version). Please comment below when you use one so folks know how many are left:&lt;/p&gt;\n\n&lt;p&gt;&lt;del&gt;25 x Free Pro Licenses (Lifetime):&lt;/del&gt; &lt;strong&gt;&lt;del&gt;AZNZCYNG (all have been claimed)&lt;/del&gt;&lt;/strong&gt;&lt;/p&gt;\n\n&lt;p&gt;40% off (Lifetime code, enter on website during checkout): &lt;strong&gt;EYNTI2NQ&lt;/strong&gt; (available while they last)&lt;/p&gt;\n\n&lt;p&gt;If you try ButterKit, your honest feedback would mean a lot. I hope it helps you ship faster and reach more users. Thanks all,&lt;br/&gt;\n- Zach&lt;/p&gt;\n&lt;/div&gt;&lt;!-- SC_ON --&gt;",
+          "link": "https://www.reddit.com/gallery/1o3pje3",
+          "numberOfComments": 44,
+          "flair": "App Saturday",
+          "upVotes": 54,
+          "upVoteRatio": 0.92,
+          "isVideo": false,
+          "isAd": false,
+          "over18": false,
+          "thumbnailUrl": "https://b.thumbs.redditmedia.com/RhLkUw3kzAHfdIeVuVF-A8K8D_g_J4fqidkT9zUAdfo.jpg",
+          "imageUrls": [
+            "https://i.redd.it/3s2kky712fuf1.jpg",
+            "https://i.redd.it/22jgdd2v1fuf1.jpg"
+          ],
+          "createdAt": "2025-10-11T07:39:45.000Z",
+          "scrapedAt": "2025-10-12T06:39:01.763Z",
+          "dataType": "post"
+        }
+      },
+      {
+        "json": {
+          "id": "t3_1o3tv9a",
+          "parsedId": "1o3tv9a",
+          "url": "https://www.reddit.com/r/civitai/comments/1o3tv9a/mapic2_final_version_released_can_read_lora/",
+          "username": "Majika007",
+          "userId": "t2_pavbijfe",
+          "title": "🧩 MaPic2 – Final Version Released - Can read LoRA...",
+          "communityName": "r/civitai",
+          "parsedCommunityName": "civitai",
+          "body": "After months of development MaPic2 has finally reached its final version.\n\nIt’s a compact, cross-platform image viewer and LoRA metadata extractor built entirely in PyQt6 — no HTML, no CSS, no web components.\n\n✅ Main Features\n\nThumbnail grid view with smooth navigation and caching\n\nFast switching between thumbnail and full-view mode\n\nExtracts LoRA data from EXIF, UserComment, and &lt;lora:Name:0.8&gt; formats\n\nHandles missing or malformed metadata safely\n\n💡 Technical Notes\n\nMaPic2 runs on both Linux and Windows.\n\nIt’s written purely in Python + PyQt6 with minimal dependencies, designed for stability simplicity.\n\n🛠️ Feedback Welcome\n\nI’m open to feature ideas, UI/UX suggestions, or code improvements.\n\nThe goal is to keep MaPic2 as a stable, practical tool for everyday use.\n\nDondload:  \n[https://civitai.com/articles/19392](https://civitai.com/articles/19392)  \nor:  \n[https://github.com/Majika007/mapic2](https://github.com/Majika007/mapic2)",
+          "html": "&lt;!-- SC_OFF --&gt;&lt;div class=\"md\"&gt;&lt;p&gt;After months of development MaPic2 has finally reached its final version.&lt;/p&gt;\n\n&lt;p&gt;It’s a compact, cross-platform image viewer and LoRA metadata extractor built entirely in PyQt6 — no HTML, no CSS, no web components.&lt;/p&gt;\n\n&lt;p&gt;✅ Main Features&lt;/p&gt;\n\n&lt;p&gt;Thumbnail grid view with smooth navigation and caching&lt;/p&gt;\n\n&lt;p&gt;Fast switching between thumbnail and full-view mode&lt;/p&gt;\n\n&lt;p&gt;Extracts LoRA data from EXIF, UserComment, and &amp;lt;lora:Name:0.8&amp;gt; formats&lt;/p&gt;\n\n&lt;p&gt;Handles missing or malformed metadata safely&lt;/p&gt;\n\n&lt;p&gt;💡 Technical Notes&lt;/p&gt;\n\n&lt;p&gt;MaPic2 runs on both Linux and Windows.&lt;/p&gt;\n\n&lt;p&gt;It’s written purely in Python + PyQt6 with minimal dependencies, designed for stability simplicity.&lt;/p&gt;\n\n&lt;p&gt;🛠️ Feedback Welcome&lt;/p&gt;\n\n&lt;p&gt;I’m open to feature ideas, UI/UX suggestions, or code improvements.&lt;/p&gt;\n\n&lt;p&gt;The goal is to keep MaPic2 as a stable, practical tool for everyday use.&lt;/p&gt;\n\n&lt;p&gt;Dondload:&lt;br/&gt;\n&lt;a href=\"https://civitai.com/articles/19392\"&gt;https://civitai.com/articles/19392&lt;/a&gt;&lt;br/&gt;\nor:&lt;br/&gt;\n&lt;a href=\"https://github.com/Majika007/mapic2\"&gt;https://github.com/Majika007/mapic2&lt;/a&gt;&lt;/p&gt;\n&lt;/div&gt;&lt;!-- SC_ON --&gt;",
+          "link": "https://i.redd.it/do8o74w43huf1.png",
+          "numberOfComments": 10,
+          "flair": null,
+          "upVotes": 35,
+          "upVoteRatio": 0.95,
+          "isVideo": false,
+          "isAd": false,
+          "over18": false,
+          "thumbnailUrl": "https://b.thumbs.redditmedia.com/2KZ2JVLEy2iUzGM0XAPjOP5p1YitdJfukmacgiZ1Cig.jpg",
+          "imageUrls": [
+            "https://i.redd.it/do8o74w43huf1.png"
+          ],
+          "createdAt": "2025-10-11T12:03:08.000Z",
+          "scrapedAt": "2025-10-12T06:39:02.872Z",
+          "dataType": "post"
+        }
+      }
+    ],
+    "LinkedIn": [
+      {
+        "json": {
+          "urn": "urn:li:activity:7382674258193321984",
+          "text": "التغذية البصرية للUX Writers\n\nمش بس الgraphic designers و UI designers اللي محتاجين يعملوا تغذية بصرية علشان يبنوا عليها في شغلهم.\n\nالUX Writer محتاج نفس الشيء في Microcopy .\n\nعلشان تعمل ده صح لازم يكون عندك أساس الأول تحكم بيه على Microcopy \nوإلا هتنقل عن منتجات مش أحسن حاجة\n\n\nمن أشهر المواقع اللي بتوفر شاشات تبص عليها في تخصصات كتير \n\n١- mobbin - مدفوع \n٢- chamjo- مجاني\n\nبس أنا عندي تحفظات على microcopy في تطبيقات هناك فهما مناسبين أكتر للUI designers\n\nلكن أنا بستفيد منهم في information architecture و Content pattern و بالتأكيد Microcopy من وقت للتاني بما إنه بالإنجليزي فدا يفرق معاك لو هتكتب ENG",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382674258193321984?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382674258193321984%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "postedAtTimestamp": 1760166706608,
+          "postedAtISO": "2025-10-11T07:11:46.608Z",
+          "timeSincePosted": "23h",
+          "isRepost": false,
+          "authorType": "Person",
+          "authorProfileUrl": "https://www.linkedin.com/in/ACoAAB6fpD4B2T9QlcMTOAwoL1zqS94d2tVL81w?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAAB6fpD4B2T9QlcMTOAwoL1zqS94d2tVL81w",
+          "authorProfileId": "ACoAAB6fpD4B2T9QlcMTOAwoL1zqS94d2tVL81w",
+          "authorHeadline": "UX Writer 🔅 Content Designer → Ex- Nahdi KSA | Healthcare | Digital Health | FoodTech | Retail | E-commerce | Web& App",
+          "authorName": "Mohamed Ramadan",
+          "inputUrl": "https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords=ux&origin=FACETED_SEARCH"
+        }
+      },
+      {
+        "json": {
+          "urn": "urn:li:activity:7382799304203206656",
+          "text": "في تصميم تجربة المستخدم (UX)، لا تنتهي رحلة البحث بالمقابلات أو الاستبيانات…\nبل تبدأ عندما نحول كل تلك الملاحظات والقصص إلى رؤى عميقة توجه قرارات التصميم.\n\n📍من خلال تحليل السلوكيات والأنماط، نصنع ما يُعرف بـ Archetypes —\nنماذج تمثل أنماط المستخدمين وسلوكهم الحقيقي، لا مجرد أعمارهم أو وظائفهم.\nكل Archetype يحكي قصة، ويقودنا لتجربة أكثر إنسانية وسلاسة.\n\n💡 UX isn’t about data — it’s about meaning.\nTurn insights into design direction.\nTransform users’ stories into experiences that matter.\n\n#UXDesign #UserInsights #Innovation #DesignThinking #تجربة_المستخدم #الابتكار",
+          "title": "رؤى عميقة توجة قرارات التصميم",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382799304203206656?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382799304203206656%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "postedAtTimestamp": 1760196519900,
+          "postedAtISO": "2025-10-11T15:28:39.900Z",
+          "timeSincePosted": "14h",
+          "isRepost": false,
+          "authorType": "Person",
+          "authorProfileUrl": "https://www.linkedin.com/in/ACoAADN93eoBA6Vwk12RzB2ml1aKQMLi-j-uckA?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAADN93eoBA6Vwk12RzB2ml1aKQMLi-j-uckA",
+          "authorProfileId": "ACoAADN93eoBA6Vwk12RzB2ml1aKQMLi-j-uckA",
+          "authorHeadline": "Blending Creativity & Technology | Salesforce Certified Admin | UX/UI Designer | CRM Innovator",
+          "authorName": "Rawabi ‏Abdulrahman",
+          "inputUrl": "https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords=ux&origin=FACETED_SEARCH"
+        }
+      },
+      {
+        "json": {
+          "urn": "urn:li:activity:7382734177135239168",
+          "text": "\"بطل تذاكر عشوائي، وابدأ ذاكر اللي السوق فعلاً \nمحتاجه\"\n\nصدقني المشكله مش ف انك بتذاكر او مش بتتعب\nالمشكلة انك ممكن تذاكر شهور وسنين، وف الآخر تكتشف ان الحاجات اللي اتعلمتها ملهاش اي علاقه بالشغل اللي السوق طالبه دلوقتي \n\nواحد بيتعلم Machine Learning، والتاني UX، والتالت Python، وكل واحد ماشي لوحده من غير ما يسأل أهم سؤال \nهو السوق أصلًا محتاج ايه دلوقتي \nتعالا اقولك ازاي\nفيه حاجات انا ماشيه عليها وفرقت معايا جدًا ف الشغل او الانترنشيبس اللي دخلتها\nاول خطوه واهمهم\nعلشان اعرف اشوف اتجاه السوق \nكنت بدخل ع مواقع زي \nLinkedIn jobs ،Wuzzuf , Forasna, Glassdoor\nوبسرش ب fresh , junior developer, graduate \nوابدأ اشوف اكتر وظايف بتتكرر بشكل دائم \nواهم حاجة انك هتركز في المتطلبات بتاعت كل وظيفه\nهتلاقي ان فيه حاجات بتتطلب بكثره مثلًا\nReact / Node.js\n.NET\nSQL & Databases\nREST APIs\nGit & Version Control\nيبقى دي الحاجات اللي المفروض تركّز عليها\n\nالخطوه التانيه والتالته والرابعه والخمسه \nهقولهم ف بوستات جايه منفصله، علشان البوست ميطوّلش وميبقاش ممل",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382734177135239168?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382734177135239168%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "postedAtTimestamp": 1760180992397,
+          "postedAtISO": "2025-10-11T11:09:52.397Z",
+          "timeSincePosted": "19h",
+          "isRepost": false,
+          "authorType": "Person",
+          "authorProfileUrl": "https://www.linkedin.com/in/ACoAAFkJupcB5E8hWOI4Mo004FVNGNesEW6LQyA?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAAFkJupcB5E8hWOI4Mo004FVNGNesEW6LQyA",
+          "authorProfileId": "ACoAAFkJupcB5E8hWOI4Mo004FVNGNesEW6LQyA",
+          "authorHeadline": "Tech Content Creator | Fullstack .Net Developer",
+          "authorName": "Mennatullah Ahmed",
+          "inputUrl": "https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords=ux&origin=FACETED_SEARCH"
+        }
+      },
+      {
+        "json": {
+          "urn": "urn:li:activity:7382950643856101376",
+          "text": "UX is not only about making things look nice in Figma.\n\nUX is about:\n\n1. Understanding problem space\n2. Advocating user needs\n3. Navigating office politics\n4. Reducing complexity\n5. Prioritizing functionality\n6. Influencing without authority\n7. Making decisions without data\n8. Navigating constraints\n9. Driving impact and compromising\n10. Detaching symbols\n\nDesign is not easy, let's celebrate our craft.\n\nCheers!",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382950643856101376?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382950643856101376%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "postedAtTimestamp": 1760232602085,
+          "postedAtISO": "2025-10-12T01:30:02.085Z",
+          "timeSincePosted": "4h",
+          "isRepost": false,
+          "authorType": "Person",
+          "authorProfileUrl": "https://www.linkedin.com/in/ACoAAAdfEv0B5u0WiknbvfVbs6zSaf1fTwcKu-E?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAAAdfEv0B5u0WiknbvfVbs6zSaf1fTwcKu-E",
+          "authorProfileId": "ACoAAAdfEv0B5u0WiknbvfVbs6zSaf1fTwcKu-E",
+          "authorHeadline": "UX & Product Expert | Sharing a decade of design experience and resources",
+          "authorName": "Simonas Maciulis",
+          "image": "https://media.licdn.com/dms/image/v2/D4D22AQFJj0KNtri2uQ/feedshare-shrink_800/B4DZbQPityHsAk-/0/1747250457982?e=1762992000&v=beta&t=QJc7hGjZ8H-Nu8-W0uruqjGye0D1b3IcDnfLn3jP88w",
+          "inputUrl": "https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords=ux&origin=FACETED_SEARCH"
+        }
+      },
+      {
+        "json": {
+          "urn": "urn:li:activity:7382842770383671297",
+          "text": "Have you heard of OOUX (Object-Oriented UX)?\n\nI didn't know about this until a few weeks ago my mentor Anna Shannon introduced me to this concept. I am changing to approach design with OOUX. Instead of starting with screens or flows, OOUX begins with objects — the core things in your user’s world (like users, tasks, or playlists) — and maps how they connect.\n\nMany say “isn’t this just IA or user flows?” Not quite — OOUX comes before them. It helps uncover the right structure first, making your flows more logical and scalable later.\n\nI wrote about how it shifted my thinking here: https://lnkd.in/g4i-zNMH\n\nHave you tried OOUX in your projects? Would love to hear your take!\n\n#OOUX #UXDesign",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382842770383671297?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382842770383671297%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "postedAtTimestamp": 1760206883045,
+          "postedAtISO": "2025-10-11T18:21:23.045Z",
+          "timeSincePosted": "12h",
+          "isRepost": false,
+          "authorType": "Person",
+          "authorProfileUrl": "https://www.linkedin.com/in/ACoAACjNKZcB1J8ZUZ13bAxuLBEhOCffHhRzROQ?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAACjNKZcB1J8ZUZ13bAxuLBEhOCffHhRzROQ",
+          "authorProfileId": "ACoAACjNKZcB1J8ZUZ13bAxuLBEhOCffHhRzROQ",
+          "authorHeadline": "Actively Seeking Opportunities | UX Designer at Texas A&M University | Boosting Usability, Accessibility & Engagement in AI + EdTech + SaaS",
+          "authorName": "Aayushi Gandhi",
+          "image": "https://media.licdn.com/dms/image/v2/D5622AQHhVhdpjpBnbg/feedshare-shrink_20/B56ZnUgYRXIsA0-/0/1760206882426?e=1762992000&v=beta&t=3cNsUubz_mhAS7_iREGu3ey65-GqXVxrnKxuoZym-C8",
+          "inputUrl": "https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords=ux&origin=FACETED_SEARCH"
+        }
+      },
+      {
+        "json": {
+          "urn": "urn:li:activity:7382656203350323200",
+          "text": "At teamLab I saw what UX could become — and it wasn’t a screen.\n\n🇯🇵 Continuing my journey in Japan…\n\nVisiting teamLab Borderless completely shifted how I think about design.\nIt wasn’t just art — it was a living ecosystem of light, sound, and motion, where technology felt as natural as breathing.\n\nI could sit quietly in one corner — and the entire space around me would transform.\nFlowers bloomed and faded on the walls and floor as I moved.\nA procession of glowing rabbits hopped through the room — one paused, turned its head, and looked straight at us.\nA waterfall cascaded down a virtual cliff, and just like in nature, it split and swirled around people’s bodies — as if they were part of the landscape itself.\nEven the soundscape was endless — music without a clear beginning, middle, or end — flowing seamlessly from one room to another, blurring the boundaries between spaces and moments.\n\nThere were no signs, no explanations, no boundaries between rooms —\nthe installations flowed naturally, like the passing of seasons.\n\nNothing about it screamed “interface.”\nIt simply responded — fluidly, intuitively, organically.\nEven the presence of other visitors became part of the experience —\nthe system reacted not only to individuals, but to the collective movement of people.\n\nAnd I couldn’t help thinking about the rise of GenAI.\nWe’re now designing systems where entire experiences happen through a single line of text.\nNo buttons, no menus, no flows — just intention and response.\n\nBoth teamLab and GenAI challenge the same assumption:\nthat interaction requires an interface.\n\nMaybe the future of UX isn’t about simplifying screens —\nbut about dissolving them entirely. \n\n#UXDesign #GenAI #teamLabBorderless #DesignThinking #FutureOfUX",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382656203350323200?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382656203350323200%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "postedAtTimestamp": 1760162401998,
+          "postedAtISO": "2025-10-11T06:00:01.998Z",
+          "timeSincePosted": "1d",
+          "isRepost": false,
+          "authorType": "Person",
+          "authorProfileUrl": "https://www.linkedin.com/in/ACoAAAeP3pQB0QN4WIwjS3zWO7fafuP4pFniHj4?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAAAeP3pQB0QN4WIwjS3zWO7fafuP4pFniHj4",
+          "authorProfileId": "ACoAAAeP3pQB0QN4WIwjS3zWO7fafuP4pFniHj4",
+          "authorHeadline": "Product Design Executive | AI Enthusiast | Leading Product Vision from Strategy to Execution",
+          "authorName": "Hadar Maximov",
+          "image": "https://media.licdn.com/dms/image/v2/D4D05AQGMGpsZhfQhVQ/videocover-high/B4DZnQJl6sIcB8-/0/1760133850359?e=1760857200&v=beta&t=Sd7NBIqVbcmkQ8e5VJL1Y7odDzOjgpfEmPzDrQ111j4",
+          "inputUrl": "https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords=ux&origin=FACETED_SEARCH"
+        }
+      },
+      {
+        "json": {
+          "urn": "urn:li:activity:7382851006080057344",
+          "text": "First university presentation complete ✅ Exploring how UX design shapes player experiences and helps them enter flow.\nIt’s amazing how much thought goes into making something feel effortless. 👀\n",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382851006080057344?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382851006080057344%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "postedAtTimestamp": 1760208846588,
+          "postedAtISO": "2025-10-11T18:54:06.588Z",
+          "timeSincePosted": "11h",
+          "isRepost": false,
+          "authorType": "Person",
+          "authorProfileUrl": "https://www.linkedin.com/in/ACoAABJ1FjQBmBK-QHe5dl_APoBdNyjm6R725Ec?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAABJ1FjQBmBK-QHe5dl_APoBdNyjm6R725Ec",
+          "authorProfileId": "ACoAABJ1FjQBmBK-QHe5dl_APoBdNyjm6R725Ec",
+          "authorHeadline": "Future UX Designer | Current Admin Ninja | Past Event Juggler 🧠✨💻",
+          "authorName": "Estelle Köhler",
+          "image": "https://media.licdn.com/dms/image/v2/D4E22AQGIdHhMGf_U2A/feedshare-shrink_20/B4EZnUn3ASHMA4-/0/1760208844474?e=1762992000&v=beta&t=D_Ktc19boyGI0bvsizMJkUVPB_GMT8wibxX0JXNCblU",
+          "inputUrl": "https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords=ux&origin=FACETED_SEARCH"
+        }
+      },
+      {
+        "json": {
+          "urn": "urn:li:activity:7382849225757196288",
+          "text": "هل موقعك بيخدمك فعلًا؟ ولا بس شكله حلو؟ 🤔\n\nالجمال مهم، بس الأهم الأداء!\nالـ UI هو الشكل اللي يجذب،\nوالـ UX هو التجربة اللي تخلي الزائر يكمل ويحوّل لعميل 🚀\n\nفي Tonexus، بنصمم موقع يخدم أهدافك مش بس يبهرك شكله.\nلأن الجمال الحقيقي هو اللي بيحوّل الزوار لعملاء. 💡\n\n🌐 خلّي أول انطباع عن موقعك يفرق — تواصل معانا دلوقتي https://tonexus.co\n\n#startupbusiness#businessowners#uidesign#uxdesign #businessgrowthstrategy#programming#development",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382849225757196288?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382849225757196288%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "postedAtTimestamp": 1760208422126,
+          "postedAtISO": "2025-10-11T18:47:02.126Z",
+          "timeSincePosted": "11h",
+          "isRepost": false,
+          "authorType": "Company",
+          "authorProfileUrl": "https://www.linkedin.com/company/tonexus/",
+          "authorProfileId": "tonexus",
+          "authorFollowersCount": "3",
+          "authorName": "Tonexus",
+          "image": "https://media.licdn.com/dms/image/v2/D4D22AQEOqe_Nc-FuGQ/feedshare-shrink_20/B4DZnUmPQdJAA0-/0/1760208420626?e=1762992000&v=beta&t=7dW-BYwCTKgXiXqEvXCJRmKFur29AwhiFB0ZnIemNAI",
+          "inputUrl": "https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords=ux&origin=FACETED_SEARCH"
+        }
+      },
+      {
+        "json": {
+          "urn": "urn:li:activity:7382779938279616512",
+          "text": "✨ السيشن التالتة كانت رائعة فعلًا! ✨\nاتكلمنا فيها عن مرحلتي Define & Ideate من منهج التفكير التصميمي (Design Thinking)، وكانت من أكتر السيشنز العملية والتفاعلية في الكورس.\nالطلبة كلهم كانوا نشطين، بيشاركوا، وبيفكروا بصوت عالي 💡\nوده بالضبط هدف الكورس — إننا نتعلّم بالـتطبيق والممارسة، مش بس بالشرح.\nلو حابب تبني طريقة تفكير UX حقيقية،\nوتعرف إزاي تحوّل البحث إلى أفكار وحلول مبتكرة،\nيبقى مكانك معانا في الكورس الجاي 🎓\n📩 احجز مكانك دلوقتي وابدأ رحلة احترافك في الـ UX!\n\nبعض آراءهم عنsession \n#advancedUX #uxcourse #productdesign #uidesign #uxdesign #UserExperience #UserResearch #uxui #UsabilityTesting #ux",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382779938279616512?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382779938279616512%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "postedAtTimestamp": 1760191902704,
+          "postedAtISO": "2025-10-11T14:11:42.704Z",
+          "timeSincePosted": "16h",
+          "isRepost": false,
+          "authorType": "Person",
+          "authorProfileUrl": "https://www.linkedin.com/in/ACoAADBEZgQBbUnuR_LS8ZCpZrUn2MXCXITUvIw?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAADBEZgQBbUnuR_LS8ZCpZrUn2MXCXITUvIw",
+          "authorProfileId": "ACoAADBEZgQBbUnuR_LS8ZCpZrUn2MXCXITUvIw",
+          "authorHeadline": "Lead UI/UX Designer | Expert in User-Centered Design & Interaction | Enhancing Digital Experiences with Innovative Solutions",
+          "authorName": "Nourhan Mahmoud",
+          "image": "https://media.licdn.com/dms/image/v2/D4D22AQHyketGaQM8hA/feedshare-shrink_800/B4DZnTnOHUKoAg-/0/1760191900470?e=1762992000&v=beta&t=HbKbtmJYfNm_VQ3THzEOmYHPy07KRpnAVAAatuvw610",
+          "inputUrl": "https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords=ux&origin=FACETED_SEARCH"
+        }
+      },
+      {
+        "json": {
+          "urn": "urn:li:activity:7382851006080057344",
+          "text": "First university presentation complete ✅ Exploring how UX design shapes player experiences and helps them enter flow.\nIt’s amazing how much thought goes into making something feel effortless. 👀\n",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:7382851006080057344?updateEntityUrn=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7382851006080057344%2CFEED_DETAIL%2CEMPTY%2CDEFAULT%2Cfalse%29",
+          "postedAtTimestamp": 1760208846588,
+          "postedAtISO": "2025-10-11T18:54:06.588Z",
+          "timeSincePosted": "11h",
+          "isRepost": false,
+          "authorType": "Person",
+          "authorProfileUrl": "https://www.linkedin.com/in/ACoAABJ1FjQBmBK-QHe5dl_APoBdNyjm6R725Ec?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAABJ1FjQBmBK-QHe5dl_APoBdNyjm6R725Ec",
+          "authorProfileId": "ACoAABJ1FjQBmBK-QHe5dl_APoBdNyjm6R725Ec",
+          "authorHeadline": "Future UX Designer | Current Admin Ninja | Past Event Juggler 🧠✨💻",
+          "authorName": "Estelle Köhler",
+          "image": "https://media.licdn.com/dms/image/v2/D4E22AQGIdHhMGf_U2A/feedshare-shrink_20/B4EZnUn3ASHMA4-/0/1760208844474?e=1762992000&v=beta&t=D_Ktc19boyGI0bvsizMJkUVPB_GMT8wibxX0JXNCblU",
+          "inputUrl": "https://www.linkedin.com/search/results/content/?datePosted=%22past-24h%22&keywords=ux&origin=FACETED_SEARCH"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Reddit",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "X",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "X": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1b333ed8-d3a0-409b-af57-76b4479cdc38",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7ae231d5a92eb748d26d32057909897e96a0e49a938f8c7913f7497f81fe3781"
+  },
+  "id": "XZGS5IYSRLjqlpsh",
+  "tags": []
+}

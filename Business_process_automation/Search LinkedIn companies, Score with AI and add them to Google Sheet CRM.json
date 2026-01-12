@@ -1,0 +1,689 @@
+{
+  "name": "Search LinkedIn companies, Score with AI and add them to Google Sheet CRM",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "89e36b0a-2be2-49cd-ba02-ae13dbde1d74",
+      "name": "Process Each Company",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        528,
+        784
+      ],
+      "typeVersion": 3,
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://api.ghostgenius.fr/v2/company",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.url }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 2000
+            }
+          }
+        }
+      },
+      "id": "96186369-61e6-4242-a7d1-7d3fa19072d7",
+      "name": "Get Company Info",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        768,
+        784
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "JWCG5BgCQamajVEA",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "5ea943a6-8f6c-4cb0-b194-8c92d4b2aacc",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.website }}",
+              "rightValue": "[null]"
+            },
+            {
+              "id": "8235b9bb-3cd4-4ed4-a5dc-921127ff47c7",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "leftValue": "={{ $json.followers_count }}",
+              "rightValue": 200
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4433905a-53a4-4ce4-a93f-5c3c89e9fcc9",
+      "name": "Filter Valid Companies",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        992,
+        784
+      ],
+      "typeVersion": 2.2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "050c33be-c648-44d7-901c-51f6ff024e97",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $('Check If Company Exists').all().first().json }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "01e59243-8a17-4d08-8988-973949bb0232",
+      "name": "Is New Company?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1392,
+        784
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e81e4891-4786-4dd9-a338-d1095e27f382",
+              "name": "Your target",
+              "type": "string",
+              "value": "Growth Marketing Agency"
+            },
+            {
+              "id": "ed2b6b08-66aa-4d4b-b68c-698b5e841930",
+              "name": "B: 1-10 employees, C: 11-50 employees, D: 51-200 employees, E: 201-500 employees, F: 501-1000 employees, G: 1001-5000 employees, H: 5001-10,000 employees, I: 10,001+ employees",
+              "type": "string",
+              "value": "C"
+            },
+            {
+              "id": "f1d02f1a-8115-4e0c-a5ec-59bf5b54263b",
+              "name": "Location (find it on : https://www.ghostgenius.fr/tools/search-sales-navigator-locations-id)",
+              "type": "string",
+              "value": "103644278"
+            },
+            {
+              "id": "21bdb871-9327-4553-bb4a-a138be9f735c",
+              "name": "Your product or service",
+              "type": "string",
+              "value": "our CRM implementation services"
+            },
+            {
+              "id": "31f5adfc-8a8f-498c-9e57-24584c42f7de",
+              "name": "Positive indicators (3-5 specific factors that indicate a company might need your product)",
+              "type": "string",
+              "value": "- Mentions challenges with customer relationships or sales processes \n- Company is in growth phase with expanding client base \n- Mentions need for better data organization or customer insights \n- References marketing automation, sales pipelines, or customer retention "
+            },
+            {
+              "id": "630807cb-9d06-41ee-8534-a652ed76cb4c",
+              "name": "Negative indicators (3-5 specific factors that indicate a company might NOT need your product)",
+              "type": "string",
+              "value": "- Very small companies (1-5 employees) or extremely large enterprises \n- Already mentions using advanced CRM solutions \n- No indication of sales process or customer relationship management in description \n- Pure manufacturing or product-based business with minimal customer interaction \n- Non-profit or government entity with unique relationship management needs"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6f93b601-2bbf-4a62-be3f-74d8519dca03",
+      "name": "Set Variables",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -224,
+        784
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "url": "https://api.ghostgenius.fr/v2/search/companies",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "keywords",
+              "value": "={{ $json['Your target'] }}"
+            },
+            {
+              "name": "locations",
+              "value": "={{ $json['Location (find it on : https://www'].ghostgenius['fr/tools/search-sales-navigator-locations-id)'] }}"
+            },
+            {
+              "name": "company_size",
+              "value": "={{ $json['B: 1-10 employees, C: 11-50 employees, D: 51-200 employees, E: 201-500 employees, F: 501-1000 employees, G: 1001-5000 employees, H: 5001-10,000 employees, I: 10,001+ employees'] }}"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "page",
+                    "value": "={{ $pageCount + 1 }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ $response.body.data.isEmpty() }}",
+              "limitPagesFetched": true,
+              "maxRequests": 3,
+              "requestInterval": 2000
+            }
+          }
+        }
+      },
+      "id": "1ea76859-eec6-43a8-975a-604c1bcd7b13",
+      "name": "Search Companies",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -16,
+        784
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "JWCG5BgCQamajVEA",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "id": "cd2a4a59-5504-4bb4-aa0e-d468cc7aafcd",
+      "name": "Extract Company Data",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        176,
+        784
+      ],
+      "typeVersion": 1,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1OIeGmHm7mYCKv0h86V-fE3nhwJ8ZOtUne1ukz_76SFg/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OIeGmHm7mYCKv0h86V-fE3nhwJ8ZOtUne1ukz_76SFg/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "ID",
+              "lookupValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cb79ba86-4681-4d97-bfd6-5608d83a5015",
+      "name": "Check If Company Exists",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1200,
+        784
+      ],
+      "typeVersion": 4.5,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pZnkWXEbr5wYx1H1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1",
+          "cachedResultName": "GPT-4.1"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an AI assistant that evaluates companies to determine if they might be interested in {{ $('Set Variables').item.json['Your product or service'] }}.\n\nEvaluate the company information provided on a scale of 0 to 10, where:\n- 0 = Not at all likely to be interested\n- 10 = Extremely likely to be interested\n\nBase your evaluation on these criteria:\n1. Industry fit: How well does the company's industry align with {{ $('Set Variables').item.json['Your product or service'] }}?\n2. Company profile: Is the company size, growth stage, and location appropriate for {{ $('Set Variables').item.json['Your product or service'] }}?\n3. Pain points: Based on their description, do they likely have challenges that {{ $('Set Variables').item.json['Your product or service'] }} solves?\n\nFactors that indicate a good fit:\n{{ $('Set Variables').item.json['Positive indicators (3-5 specific factors that indicate a company might need your product)'] }}\n\nFactors that indicate a poor fit:\n{{ $('Set Variables').item.json['Negative indicators (3-5 specific factors that indicate a company might NOT need your product)'] }}\n\nRespond ONLY with this JSON format:\n```json\n{\n  \"score\": [number between 0 and 10],\n}",
+              "role": "system"
+            },
+            {
+              "content": "=Here is the company to analyze:\nName: {{ $('Filter Valid Companies').item.json.name }}\n{{ $('Filter Valid Companies').item.json.tagline }}\n{{ $('Filter Valid Companies').item.json.description }}\nNumber of employees: {{ $('Filter Valid Companies').item.json.staff_count }}\nIndustry: {{ $('Filter Valid Companies').item.json.industries }}\nSpecialties: {{ $('Filter Valid Companies').item.json.specialities }}\nLocation: {{ $('Filter Valid Companies').item.json.locations?.toJsonString() }}\nFounded in: {{ $('Filter Valid Companies').item.json.founded_on }}\nFunding: {{ $('Filter Valid Companies').item.json.funding?.toJsonString() }}\n"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "336a75be-6184-47c6-87be-40cd82b68ebc",
+      "name": "AI Company Scoring",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        1712,
+        800
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "nvAX9Qn2wPhiAqoL",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## LinkedIn Company Search\n",
+        "height": 304,
+        "width": 860,
+        "color": 6
+      },
+      "id": "dab619df-988c-4010-b08d-c5a667e495a7",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        688
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Company Data Processing \n",
+        "height": 304,
+        "width": 1120,
+        "color": 4
+      },
+      "id": "bbe7074f-9d04-4260-9c19-ea17d4dc2cd9",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        448,
+        688
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## AI Scoring and Storage\n",
+        "height": 304,
+        "width": 780,
+        "color": 5
+      },
+      "id": "2c4fd134-ae1e-4389-b723-691bf92aa65b",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1648,
+        688
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "id": "b38c6903-74ab-4bae-86c1-e7d2fe13fb20",
+      "name": "Wait 2s",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        2064,
+        800
+      ],
+      "webhookId": "d22fd305-d8f6-4fc3-8a96-62386fa30f94",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1OIeGmHm7mYCKv0h86V-fE3nhwJ8ZOtUne1ukz_76SFg/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1OIeGmHm7mYCKv0h86V-fE3nhwJ8ZOtUne1ukz_76SFg/edit#gid=0"
+        },
+        "columns": {
+          "value": {
+            "ID": "={{ $('Get Company Info').item.json.id }}",
+            "Name": "={{ $('Get Company Info').item.json.name }}",
+            "Score": "={{ $json.message.content.score }}",
+            "State": "Qualified",
+            "Summary": "={{ $('Get Company Info').item.json.description }}",
+            "Website": "={{ $('Get Company Info').item.json.website }}",
+            "LinkedIn": "={{ $('Get Company Info').item.json.url }}"
+          },
+          "schema": [
+            {
+              "id": "Name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Website",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LinkedIn",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "LinkedIn",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ID",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "ID",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Summary",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Score",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Score",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "State",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "State",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "106b3068-d73a-413b-a9a2-d16f349d28b6",
+      "name": "Add Company to CRM",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2272,
+        800
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pZnkWXEbr5wYx1H1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "80b55245-2e73-4316-b295-c1142c09e6b7",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -416,
+        784
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Process Each Company": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get Company Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Company Info": {
+      "main": [
+        [
+          {
+            "node": "Filter Valid Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Valid Companies": {
+      "main": [
+        [
+          {
+            "node": "Check If Company Exists",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Process Each Company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New Company?": {
+      "main": [
+        [
+          {
+            "node": "AI Company Scoring",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Process Each Company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Variables": {
+      "main": [
+        [
+          {
+            "node": "Search Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Companies": {
+      "main": [
+        [
+          {
+            "node": "Extract Company Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Company Data": {
+      "main": [
+        [
+          {
+            "node": "Process Each Company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Company Exists": {
+      "main": [
+        [
+          {
+            "node": "Is New Company?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Company Scoring": {
+      "main": [
+        [
+          {
+            "node": "Wait 2s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2s": {
+      "main": [
+        [
+          {
+            "node": "Add Company to CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Company to CRM": {
+      "main": [
+        [
+          {
+            "node": "Process Each Company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Set Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "df9a63c9-64ee-410d-8ed3-4cdc3769ff5b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "93ed6a94a482e1415c1391a4d98bec025d67c846672cce4bbbb4a9390479302a"
+  },
+  "id": "pfbpVowvEmZu7q1s",
+  "tags": []
+}

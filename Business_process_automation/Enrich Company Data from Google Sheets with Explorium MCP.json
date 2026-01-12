@@ -1,0 +1,741 @@
+{
+  "name": "Enrich Company Data from Google Sheets with Explorium MCP",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1y_oppT6aXNdApf4pyYcskKfN94zV41w78G0TPa9fwtg",
+          "mode": "list",
+          "cachedResultName": "Company Info",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y_oppT6aXNdApf4pyYcskKfN94zV41w78G0TPa9fwtg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y_oppT6aXNdApf4pyYcskKfN94zV41w78G0TPa9fwtg/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "fa142e95-995b-4e34-b9cc-5ca6622e7547",
+      "name": "Google Sheets Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "position": [
+        -496,
+        32
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "2zvn2mzVFMOBJtWF",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 1,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "8c7d5b8a-4569-4c8f-b5e8-6c5f5e5c5e5c",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              },
+              "leftValue": "={{ $json.name }}",
+              "rightValue": ""
+            },
+            {
+              "id": "9d8e6c9b-5670-5d9f-c6f9-7d6g6f6d6f6d",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              },
+              "leftValue": "={{ $json.website }}",
+              "rightValue": ""
+            },
+            {
+              "id": "32a7763a-ed98-4b72-b2cc-3bd627a423aa",
+              "leftValue": "={{ $json.business_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "1884a828-04d2-4e42-8c50-97f798c05661",
+              "leftValue": "={{ $json[\"Outreach Strategy\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "26f81a96-84b6-4347-95cc-b195d5322864",
+      "name": "Filter Valid Rows",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -272,
+        32
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "d5de7cac-7001-40ba-b607-1aefd8638d06",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -48,
+        32
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You will be provided with company information including:\n\nName: {{ $json.name }}\nDomain: {{ $json.website }}\n\nYour task is to research and extract the following key business metrics for this company:\nRequired Data Points:\n- Name (keep the same as provided)\n- Website (keep the same as provided)\n- Annual revenue (as business_id first, then get the range)\n- Number of employees (range)\n- NAICS code\n- Industry Category\n- Linkedin Profile\n- Business Description\n\nUse the Explorium tools to:\n1. First use match-business to find the business ID\n2. Then use enrich-businesses-firmographics to get the company details\n\nReturn the data exactly in this format.\nMake sure request body is not too large for Open AI ",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "515b6e23-f236-476b-a8cd-bfadf2184c79",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        208,
+        -112
+      ],
+      "typeVersion": 1.6
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simply pass through the AI output with proper formatting\nreturn {\n  name: $json.output.name || $json.name,\n  website: $json.output.website || $json.website,\n  business_id: $json.output.business_id || '',\n  naics: $json.output.naics || '',\n  number_of_employees_range: $json.output.number_of_employees_range || '',\n  yearly_revenue_range: $json.output.yearly_revenue_range || '',\n  industry_category: $json.output.industry_category \n|| '',\nlinkedin_profile: $json.output.linkedin_profile\n|| '',\nbusiness_description: $json.output.business_description\n};"
+      },
+      "id": "1e824c6e-0f90-4341-a75e-032bfd2bbfed",
+      "name": "Code - Format Output",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        608,
+        -112
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1y_oppT6aXNdApf4pyYcskKfN94zV41w78G0TPa9fwtg",
+          "mode": "list",
+          "cachedResultName": "Company Info",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y_oppT6aXNdApf4pyYcskKfN94zV41w78G0TPa9fwtg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y_oppT6aXNdApf4pyYcskKfN94zV41w78G0TPa9fwtg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.name }}",
+            "naics": "={{ $json.naics }}",
+            "website": "={{ $json.website }}",
+            "business_id": "={{ $json.business_id }}",
+            "yearly_revenue_range": "={{ $json.yearly_revenue_range }}",
+            "number_of_employees_range": "={{ $json.number_of_employees_range }}",
+            "industry_category": "={{ $json.industry_category }}",
+            "linkedin_profile": "={{ $json.linkedin_profile }}",
+            "business_description": "={{ $json.business_description }}"
+          },
+          "matchingColumns": [
+            "name"
+          ],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "naics",
+              "displayName": "naics",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_id",
+              "displayName": "business_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "yearly_revenue_range",
+              "displayName": "yearly_revenue_range",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "number_of_employees_range",
+              "displayName": "number_of_employees_range",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "industry_category",
+              "displayName": "industry_category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "linkedin_profile",
+              "displayName": "linkedin_profile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "business_description",
+              "displayName": "business_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Outreach Strategy",
+              "displayName": "Outreach Strategy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "111369d5-1d73-48f8-91db-4dc499f8aea3",
+      "name": "Update Company Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        832,
+        32
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HBUcSC8TyEZnv7nr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Enrich Company Data from Google Sheets with Explorium MCP\n\nThis workflow automatically enriches company data when new rows are added or when the name/website fields are updated in your Google Sheet.",
+        "height": 280,
+        "width": 460,
+        "color": 5
+      },
+      "id": "b6ac53e9-d2eb-4f91-a906-e54878a7a41a",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://mcp.explorium.ai/sse",
+        "authentication": "headerAuth",
+        "include": "selected",
+        "includeTools": [
+          "web-search",
+          "match-business",
+          "enrich-business"
+        ],
+        "options": {}
+      },
+      "id": "0abf31d5-b23b-44ca-bdd2-683f780e61cd",
+      "name": "Explorium MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "position": [
+        320,
+        80
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nmrulJmJTmpUEhsx",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n    \"name\": \"Microsoft Corporation\",\n    \"website\": \"https://www.microsoft.com\",\n    \"business_id\": \"a34bacf839b923770b2c360eefa26748\",\n    \"naics\": \"511210\",\n    \"number_of_employees_range\": \"10001+\",\n    \"yearly_revenue_range\": \"100B-1T\",\n    \"industry_category\" : \"IT services\",\n    \"linkedin_profile\" : \"https://linked.com/microsoft\",\n    \"business_description\" : \"This company started in.....\"\n}"
+      },
+      "id": "24c54182-f9d6-4933-b447-e92cd0df2239",
+      "name": "Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        448,
+        80
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "content": "### Workflow Structure:\n\n**Google Sheets Trigger** → **Filter Valid Rows** → **Loop Over Items**\n                                                          ↓\n                                                      **AI Agent**\n                                                           ↓\n                                                   **Code - Format Output**\n                                                           ↓\n                                                   **Update Company Row**\n                                                           ↓\n                                                   (back to Loop Over Items)",
+        "height": 280,
+        "width": 460
+      },
+      "id": "a1cd3f7f-994c-49da-ac2c-89b4d0406375",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        16,
+        288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### How the Loop Works:\n1. Loop Over Items splits the batch (size 1)\n2. Sends one item to AI Agent\n3. AI Agent enriches the data\n4. Code formats the output\n5. Google Sheets updates the row\n6. Flow returns to Loop Over Items for next item\n7. When all items are processed, loop ends\n\n### Key Points:\n- Each row is processed individually\n- The loop continues until all rows are done\n- Failed enrichments won't stop other rows\n\n### Testing:\n1. Add multiple rows with company names and websites\n2. Trigger the workflow\n3. Watch each row get processed sequentially\n4. All rows should be updated with enriched data",
+        "height": 460,
+        "width": 460,
+        "color": 4
+      },
+      "id": "fac33d69-e0d7-4633-b5d5-1d1cc14b9c71",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        512,
+        288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        176,
+        80
+      ],
+      "id": "425bf22f-2885-47a5-8d51-7038b9feaca3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.name }} Employee : {{ $json.number_of_employees_range }} Industry: {{ $json.industry_category }} Yearly Revenue: {{ $json.yearly_revenue_range }} {{ $json.business_description }}",
+        "options": {
+          "systemMessage": "You are an outreach agent for a company called ATM Labs. Your job is to prepare an outreach strategy for the given company information and how we can provide them solutions.\n\nOur company, ATM Labs is an AI Automation agency specializing in Business Process Automations. Provide a structured strategy for the company we are approaching."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1040,
+        112
+      ],
+      "id": "fbfe49a8-851f-4b3e-82cb-8679a1bb0495",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        288
+      ],
+      "id": "3f0bb252-2d63-497f-b6c7-093827b24d13",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1y_oppT6aXNdApf4pyYcskKfN94zV41w78G0TPa9fwtg",
+          "mode": "list",
+          "cachedResultName": "Company Info",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y_oppT6aXNdApf4pyYcskKfN94zV41w78G0TPa9fwtg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1y_oppT6aXNdApf4pyYcskKfN94zV41w78G0TPa9fwtg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Outreach Strategy": "={{ $json.output }}",
+            "name": "={{ $('Update Company Row').item.json.name }}"
+          },
+          "matchingColumns": [
+            "name"
+          ],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "naics",
+              "displayName": "naics",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "business_id",
+              "displayName": "business_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "yearly_revenue_range",
+              "displayName": "yearly_revenue_range",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "number_of_employees_range",
+              "displayName": "number_of_employees_range",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "industry_category",
+              "displayName": "industry_category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "linkedin_profile",
+              "displayName": "linkedin_profile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "business_description",
+              "displayName": "business_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Outreach Strategy",
+              "displayName": "Outreach Strategy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "b44330a1-cd8d-402c-aaca-dad922b1d6be",
+      "name": "Update Company Row1",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1408,
+        112
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HBUcSC8TyEZnv7nr",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code - Format Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Valid Rows": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Company Row": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Format Output": {
+      "main": [
+        [
+          {
+            "node": "Update Company Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter Valid Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Update Company Row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Company Row1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "75c4772b-352b-4493-9627-e4ac5653736f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "edb67d3a7f9d12c7abb88f04023272f13c5753dec2ada987b4428826f48ef7ab"
+  },
+  "id": "PnvtdTpK5ubuAYFZ",
+  "tags": []
+}

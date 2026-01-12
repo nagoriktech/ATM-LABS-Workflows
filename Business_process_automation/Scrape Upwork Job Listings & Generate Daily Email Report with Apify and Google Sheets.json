@@ -1,0 +1,1216 @@
+{
+  "name": "Scrape Upwork Job Listings & Generate Daily Email Report with Apify and Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI",
+          "mode": "list",
+          "cachedResultName": "UpworkJobScraper",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1233458794,
+          "mode": "list",
+          "cachedResultName": "Daily Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit#gid=1233458794"
+        },
+        "numberToDelete": "={{ $('Load Today’s Daily Jobs\t').all().length}}"
+      },
+      "id": "69be1def-a18d-442a-b0b4-dd3e025185b5",
+      "name": "Delete rows or columns from sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -784,
+        368
+      ],
+      "executeOnce": true,
+      "typeVersion": 4.6,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oDlfKzLprUWw3P92",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "c86fbc28-10c3-480f-8e44-84ae2afe8b34",
+      "name": "Loop Through Keywords\t",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -1664,
+        576
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {},
+      "id": "1f56faa6-11af-44f9-aee1-53b6652847e5",
+      "name": "Trigger Manual Run\t",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -2096,
+        576
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI",
+          "mode": "list",
+          "cachedResultName": "UpworkJobScraper",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "AI keywords",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "0816bae4-b0c6-411e-a9f3-a40f839588f5",
+      "name": "Fetch Keywords from Google Sheet\t",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -1888,
+        576
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oDlfKzLprUWw3P92",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/neatrat~upwork-job-scraper/run-sync-get-dataset-items?token=apify_api_7I4F8GvWHNL9EarG5UBJMfF6KS4tgk4hUrwf",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"clientHistory\": [\n        \"noHires\",\n        \"1to9Hires\",\n        \"10+Hires\"\n    ],\n    \"experienceLevel\": [\n        \"entry\",\n        \"intermediate\",\n        \"expert\"\n    ],\n     \"maxJobAge\": {\n        \"value\": 23,\n        \"unit\": \"hours\"\n    },\n    \"paymentVerified\": false,\n    \"query\": \"{{ $json.Keywords }}\",\n    \"page\": 1,\n    \"perPage\": 100,\n    \"sort\": \"newest\"\n} ",
+        "options": {}
+      },
+      "id": "8cb876a7-dfbc-48b9-8654-ff2d4a85794f",
+      "name": "Trigger Apify Scraper\t",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -1360,
+        592
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apify.com/v2/actor-runs/{{ $json.data.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "waitForFinish",
+              "value": "150"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "80498586-8ca5-4274-b571-e1788d0dd126",
+      "name": "Wait for Apify Completion\t",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -736,
+        -96
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "IQ8B2lPoS5lknHlg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "id": "533ee229-4b45-4427-8843-6b80549f79d8",
+      "name": "Delay Before Dataset Read\t",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        -528,
+        -96
+      ],
+      "webhookId": "3b380880-9271-4abe-922c-0fe9a0f588d4",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apify.com/v2/datasets/{{ $json.data.defaultDatasetId }}/items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "443b6e75-60cd-4b2b-9c11-70dbd7240f02",
+      "name": "Fetch Scraped Job Dataset\t",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -304,
+        -96
+      ],
+      "typeVersion": 4.2,
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "IQ8B2lPoS5lknHlg",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst hoursThreshold = 23;\nconst thresholdTime = new Date(now.getTime() - hoursThreshold * 60 * 60 * 1000);\n\nconst filteredJobs = $input.all().filter(item => {\n  const jobDate = new Date(item.json.absoluteDate);\n  return jobDate > thresholdTime;\n});\n\nreturn filteredJobs;\n"
+      },
+      "id": "a0c296a9-f049-4fb6-b448-5e52cb449fb9",
+      "name": "Process Raw Job Data\t",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1136,
+        592
+      ],
+      "typeVersion": 2,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI",
+          "mode": "list",
+          "cachedResultName": "UpworkJobScraper",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1233458794,
+          "mode": "list",
+          "cachedResultName": "Daily Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit#gid=1233458794"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Job Title": "={{ $json.title }}",
+            "Description": "={{ $json.description }}",
+            "Budget": "={{ $json.budget }}",
+            "Client Rating": "={{ $json.clientRating }}",
+            "Posted Date": "={{ $json.absoluteDate }}",
+            "Job URL": "={{ $json.url }}",
+            "Keyword": "={{ $('Loop Through Keywords\t').item.json.Keyword }}",
+            "Job Type": "={{ $json.jobType }}",
+            "Experience level": "={{ $json.experienceLevel }}",
+            "Tags": "={{ $json.tags }}",
+            "Payment Verified": "={{ $json.paymentVerified }}",
+            "Client Location": "={{ $json.clientLocation }}",
+            "Allowed applicant countries": "={{ $json.allowedApplicantCountries }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Rating",
+              "displayName": "Client Rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Posted Date",
+              "displayName": "Posted Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job URL",
+              "displayName": "Job URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Keyword",
+              "displayName": "Keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Scraped at",
+              "displayName": "Scraped at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Job Type",
+              "displayName": "Job Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Experience level",
+              "displayName": "Experience level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tags",
+              "displayName": "Tags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Payment Verified",
+              "displayName": "Payment Verified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Location",
+              "displayName": "Client Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Allowed applicant countries",
+              "displayName": "Allowed applicant countries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Keyword",
+              "displayName": "Keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c353c253-098e-4c0d-8cd6-6ed539da21de",
+      "name": "Save Jobs to Daily Sheet\t",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -928,
+        592
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oDlfKzLprUWw3P92",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI",
+          "mode": "list",
+          "cachedResultName": "UpworkJobScraper",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "AI keywords",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Keyword": "={{ $('Loop Through Keywords\t').item.json.Keyword }}",
+            "Job Count": "={{ $('Process Raw Job Data\t').first().json.title == undefined ? \"0\" : $('Process Raw Job Data\t').all().length}}"
+          },
+          "matchingColumns": [
+            "Keyword"
+          ],
+          "schema": [
+            {
+              "id": "Keyword",
+              "displayName": "Keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Job Count",
+              "displayName": "Job Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Last Updated",
+              "displayName": "Last Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "cd171ebc-1d7b-451f-a920-b1b1182f3853",
+      "name": "Update Keyword Job Count\t",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -688,
+        592
+      ],
+      "typeVersion": 4.6,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oDlfKzLprUWw3P92",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI",
+          "mode": "list",
+          "cachedResultName": "UpworkJobScraper",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1233458794,
+          "mode": "list",
+          "cachedResultName": "Daily Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit#gid=1233458794"
+        },
+        "options": {}
+      },
+      "id": "b3c193f7-77ab-4376-bcc0-31f5c007a1ad",
+      "name": "Load Today’s Daily Jobs\t",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -1440,
+        368
+      ],
+      "executeOnce": true,
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oDlfKzLprUWw3P92",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// Initialize a Set to track seen combinations\nconst seen = new Set();\nconst uniqueItems = [];\n\nfor (const item of  $input.all()) {\n  const title = item.json.title?.trim().toLowerCase() || '';\n  const description = item.json.description?.trim().toLowerCase() || '';\n  const key = `${title}|||${description}`;\nif(title != \"No records found in last 24 hours\".trim().toLowerCase()){\n  if (!seen.has(key)) {\n    seen.add(key);\n    uniqueItems.push(item);\n  }\n}\n}\n\nreturn uniqueItems;\n\n\n\nreturn $input.all();"
+      },
+      "id": "c772d7c2-4336-4989-b429-c07aad9c7641",
+      "name": "Remove Duplicates by Title/Desc\t",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1216,
+        368
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI",
+          "mode": "list",
+          "cachedResultName": "UpworkJobScraper",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1233458794,
+          "mode": "list",
+          "cachedResultName": "Daily Jobs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit#gid=1233458794"
+        },
+        "columns": {
+          "value": {
+            "url": "={{ $json.url }}",
+            "tags": "={{ $json.tags }}",
+            "title": "={{ $json.title }}",
+            "budget": "={{ $json.budget }}",
+            "jobType": "={{ $json.jobType }}",
+            "description": "={{ $json.description }}",
+            "absoluteDate": "={{ $json.absoluteDate }}",
+            "relativeDate": "={{ $json.relativeDate }}",
+            "Keyword Title": "={{ $json['Keyword Title'] }}",
+            "clientLocation": "={{ $json.clientLocation }}",
+            "experienceLevel": "={{ $json.experienceLevel }}",
+            "paymentVerified": "={{ $json.paymentVerified }}",
+            "allowedApplicantCountries": "={{ $json.allowedApplicantCountries }}"
+          },
+          "schema": [
+            {
+              "id": "title",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "title",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "description",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "url",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "budget",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "budget",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "relativeDate",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "relativeDate",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "absoluteDate",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "absoluteDate",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "jobType",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "jobType",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "experienceLevel",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "experienceLevel",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "paymentVerified",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "paymentVerified",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tags",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "tags",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "clientLocation",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "clientLocation",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "allowedApplicantCountries",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "allowedApplicantCountries",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Keyword Title",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Keyword Title",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Done by",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Done by",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client details found",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Client details found",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Client name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Company name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email ID",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Email ID",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone Number",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Phone Number",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LinkedIn",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "LinkedIn",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website URL",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Website URL",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Follow up status",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Follow up status",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "1st Email sent date",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "1st Email sent date",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c443be13-b37e-45db-b096-80cb4a67ab53",
+      "name": "Save Clean Job Data\t",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -1008,
+        368
+      ],
+      "executeOnce": false,
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oDlfKzLprUWw3P92",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI",
+          "mode": "list",
+          "cachedResultName": "UpworkJobScraper",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "AI keywords",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ryVXPhD3GlBn31hFb-XpE-CkWdrn2-aokq2XjhRENdI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "71ce680e-0adf-41d4-ad47-d06cc89cc678",
+      "name": "Reload Clean Job Data\t",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -560,
+        368
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oDlfKzLprUWw3P92",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "=nsultana2021@icloud.com",
+        "subject": "={{ $json.output.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.output.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "8e22a926-6afd-4097-9b0d-c65f98237c06",
+      "name": "Send Daily Report Email\t",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        960,
+        368
+      ],
+      "webhookId": "2d9e39cd-11b2-491d-9234-7dbbeb84321f",
+      "executeOnce": true,
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YNg4hDlVnTtx6NIm",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Job Scraping & Initial Processing\nScrapes job data using Apify and stores it in the daily sheet.\n\n🔁 Trigger Manual Run: Manually starts the workflow.\n\n📄 Fetch Keywords from Google Sheet: Reads the list of job-related keywords from the All Keywords sheet.\n\n🔂 Loop Through Keywords: Iterates over each keyword to trigger Apify.\n\n🌐 Trigger Apify Scraper: Sends HTTP request to start Apify actor for scraping jobs.\n\n⏳ Wait for Apify Completion: Waits for the Apify actor to finish execution.\n\n⏱️ Delay Before Dataset Read: Waits a few seconds to ensure dataset is ready.\n\n📦 Fetch Scraped Job Dataset: Fetches the latest dataset from Apify.\n\n🧹 Process Raw Job Data: Filters jobs posted in the last 24 hours and formats the data.\n\n📥 Save Jobs to Daily Sheet: Appends new job data to the daily Google Sheet.\n\n🔢 Update Keyword Job Count: Updates job count in the All Keywords summary sheet.",
+        "height": 520,
+        "width": 700
+      },
+      "id": "f01504e8-080d-421b-8620-ec1b01d34c2c",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2224,
+        32
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Data Cleaning & Deduplication\nCleans and deduplicates today's job data.\n\n📥 Load Today’s Daily Jobs: Loads all jobs added in today’s sheet.\n\n🧽 Remove Duplicates by Title/Desc: Removes duplicates based on title & description.\n\n✅ Save Clean Job Data: Saves the cleaned, unique entries.\n\n🗑️ Clear Old Daily Sheet Data: Deletes old or duplicate entries from the sheet.\n\n🔄 Reload Clean Job Data: Loads clean data again after deletion.\n\n",
+        "height": 300,
+        "width": 600,
+        "color": 4
+      },
+      "id": "c4ff3a97-f379-4a32-8a86-f86e02ffa119",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1264,
+        16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Daily Summary & Email Report\nGenerates a job summary and sends it via email.\n\n📊 Generate Keyword Summary Stats: Counts job totals per keyword.\n\n📈 Update Summary Sheet: Updates the summary sheet with keyword stats.\n\n📑 Fetch Final Summary Data: Reads the summary sheet for reporting.\n\n📨 Build Email Body: Formats email with stats and sheet link.\n\n📬 Send Daily Report Email: Sends the structured daily summary email to recipients.\n\n",
+        "height": 340,
+        "width": 500,
+        "color": 3
+      },
+      "id": "004027b7-3816-4ef8-b507-e35a978cbf76",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        80,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an assistant that writes clear, concise daily summaries of job keyword performance for automation workflows. You must return the result as valid JSON with two keys: \"subject\" and \"body\". The subject should be short and professional, while the body should summarize all keyword results in a friendly, readable format.\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Here’s today’s keyword job data:\n\n{{ $json.summary }} \n\nFormat the output as:\n{\n  \"subject\": \"string\",\n  \"body\": \"string\"\n}\n\nGuidelines:\n- The subject should be a short summary of overall results (e.g. “Job Keyword Summary – 9 Results Found”).\n- The body should include each keyword and its job count in a neat, readable paragraph or bulleted list.\n- Use natural language (not raw data tables).\n- If any job count is 0, mention that no new jobs were found for that keyword.\n- Keep the tone friendly and informative.\n- use the date {{ $today }} in the email subject\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        112,
+        368
+      ],
+      "id": "dddc4679-31c5-42ca-b7bc-cc5c761acdf9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -288,
+        576
+      ],
+      "id": "9f0b1855-bded-4734-8375-27de8ee39ce9",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "PwLY9xCnHkI9iRwq",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all incoming items\nconst items = $input.all();\n\n// Prepare summaries\nconst summaries = [];\n\nfor (const item of items) {\n\tconst keyword = item.json[\"Keyword\"]?.trim();\n\tconst jobCount = item.json[\"Job Count\"] || 0;\n\n\tconst summary =\n\t\tjobCount > 0\n\t\t\t? `${jobCount} job${jobCount > 1 ? \"s\" : \"\"} found for ${keyword}`\n\t\t\t: `No jobs found for ${keyword}`;\n\n\tsummaries.push(summary);\n}\n\n// Return a single item containing all summaries\nreturn [\n\t{\n\t\tjson: {\n\t\t\tkeywords: items.map(i => i.json[\"Keyword\"]?.trim()),\n\t\t\tsummary: summaries.join(\"; \")\n\t\t}\n\t}\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        368
+      ],
+      "id": "e387539b-53d7-4046-9b47-dfb359aa32ec",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"subject\": \"string\",\n  \"body\": \"string\"\n  \n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        576
+      ],
+      "id": "ffb4a3d8-8d6d-4463-a4a5-c8d6ec124277",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Trigger Manual Run\t": {
+      "main": [
+        [
+          {
+            "node": "Fetch Keywords from Google Sheet\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Clean Job Data\t": {
+      "main": [
+        [
+          {
+            "node": "Delete rows or columns from sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Raw Job Data\t": {
+      "main": [
+        [
+          {
+            "node": "Save Jobs to Daily Sheet\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Through Keywords\t": {
+      "main": [
+        [
+          {
+            "node": "Load Today’s Daily Jobs\t",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Trigger Apify Scraper\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reload Clean Job Data\t": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Apify Scraper\t": {
+      "main": [
+        [
+          {
+            "node": "Process Raw Job Data\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Jobs to Daily Sheet\t": {
+      "main": [
+        [
+          {
+            "node": "Update Keyword Job Count\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Keyword Job Count\t": {
+      "main": [
+        [
+          {
+            "node": "Loop Through Keywords\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delay Before Dataset Read\t": {
+      "main": [
+        [
+          {
+            "node": "Fetch Scraped Job Dataset\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Scraped Job Dataset\t": {
+      "main": [
+        []
+      ]
+    },
+    "Load Today’s Daily Jobs\t": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates by Title/Desc\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Apify Completion\t": {
+      "main": [
+        [
+          {
+            "node": "Delay Before Dataset Read\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates by Title/Desc\t": {
+      "main": [
+        [
+          {
+            "node": "Save Clean Job Data\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete rows or columns from sheet": {
+      "main": [
+        [
+          {
+            "node": "Reload Clean Job Data\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Keywords from Google Sheet\t": {
+      "main": [
+        [
+          {
+            "node": "Loop Through Keywords\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Daily Report Email\t",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0065a85f-50a8-4280-99f9-88736bcc3e63",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3dce95668c598f6d0f9da090194a9974b22afc001733834edfd3cbd3f84e9927"
+  },
+  "id": "K9uapytSc3VKYiaZ",
+  "tags": []
+}

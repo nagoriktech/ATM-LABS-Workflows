@@ -1,0 +1,869 @@
+{
+  "name": "LinkedIn Engagement Automator with GPT, Human Review & Multilingual Comments",
+  "nodes": [
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"post-id\": \"123456\"\n}"
+      },
+      "id": "4f1ede6e-f87a-453e-a14a-a69a38310dcf",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        -160,
+        352
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "d1dcb756-a408-45a5-a579-551f1c23796a",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -288,
+        352
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "PwLY9xCnHkI9iRwq",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "f539cae3-5065-4eb7-81e8-67c31f36877c",
+      "name": "Think",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "position": [
+        1344,
+        208
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {
+          "topP": 0.1
+        }
+      },
+      "id": "cb5bb02b-5d0d-4c3f-9588-bf11bd169d92",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        624,
+        368
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "PwLY9xCnHkI9iRwq",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"comment\": \"Dies ist dein Kommentartext\"\n}"
+      },
+      "id": "c5d12dc0-83f6-4372-93f5-986c0460771c",
+      "name": "Structured Output Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        1472,
+        192
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"reaction\": \"like\"\n}"
+      },
+      "id": "3fc23c9a-414b-4dbd-9900-a0865a0918ed",
+      "name": "Structured Output Parser2",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        784,
+        352
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c3bd2b3e-c1ed-4d1b-9628-c3caec15d8cc",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1fa26590-7011-45d7-b1d8-f061cfa8ec61",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2128,
+        128
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "cf296d55-812e-48a2-8ffb-cd2b3e4c0918",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        368,
+        352
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "PwLY9xCnHkI9iRwq",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.URL_of_the_LinkedIn_post }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Find out the post id of the LinkedIn post. Return only the post id.\nIf you are not sure, look for hyphens. The post id is usually right after it."
+        }
+      },
+      "id": "cfad7677-335a-4dee-a761-b0932babda94",
+      "name": "Extract the ID of the LinkedIn post",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -288,
+        128
+      ],
+      "notesInFlow": false,
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Post: {{ $('Extract content of the post').item.json.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Role:\nYou are a professional LinkedIn assistant and help to respond to posts authentically and appropriately.\n\nTask:\nRead the LinkedIn post below. Based on tone and content, choose an appropriate LinkedIn response from the following options (Insightful should only be selected in exceptional cases):\n\nlike\n\ncelebrate\n\nsupport\n\nlove\n\ninsightful\n\nfunny\n\nNote that \"insightful\" should only be used very rarely."
+        }
+      },
+      "id": "68377d18-44ef-43d4-8a3c-0a2226a89a6b",
+      "name": "Set reaction",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        640,
+        128
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d2365b89-afc9-423d-8138-12d8c4b840e6",
+              "name": "name_of_the_post_creator",
+              "type": "string",
+              "value": "={{ $('Extract content of the post').item.json.author.name }}"
+            },
+            {
+              "id": "a5dac7a5-61da-4791-a43d-987377a632cf",
+              "name": "content_of_the_post",
+              "type": "string",
+              "value": "={{ $('Extract content of the post').item.json.text }}"
+            },
+            {
+              "id": "9fb42d3e-76ec-4c35-9865-c7bc25759acb",
+              "name": "social_id",
+              "type": "string",
+              "value": "={{ $('Extract content of the post').item.json.social_id }}"
+            },
+            {
+              "id": "4dafb8f4-7e5a-40d1-8549-eb8b3d6f5c84",
+              "name": "id_of_the_post_creator",
+              "type": "string",
+              "value": "={{ $('Extract content of the post').item.json.author.id }}"
+            },
+            {
+              "id": "1b66ecb8-87e7-4a1a-9d2d-6e8057fb164b",
+              "name": "determined_mood",
+              "type": "string",
+              "value": "={{ $('Determine language and mood').item.json.output.mood }}"
+            },
+            {
+              "id": "18d41628-3d38-43ee-b929-349ee250414f",
+              "name": "determined_language",
+              "type": "string",
+              "value": "={{ $('Determine language and mood').item.json.output.language }}"
+            },
+            {
+              "id": "e237ab57-fbc0-410e-a25c-44f2b5d0fd24",
+              "name": "role",
+              "type": "string",
+              "value": "YOUR ROLE, e.g.: You are my personal assistant for social media. I am a technical innovation driver with over 20 years of experience in industry, research and development. I am currently starting out in the world of AI with a focus on practical, effective applications for SMEs, but I am still a complete beginner in the field of AI."
+            },
+            {
+              "id": "54d83501-d206-4cbb-bae2-47bba4629f1a",
+              "name": "comment_length",
+              "type": "string",
+              "value": "YOUR COMMENT LENGTH, e.g.: 2-4 sentences (30-90 words)"
+            },
+            {
+              "id": "2d85ac8b-039c-46d9-b472-c52cd0eef725",
+              "name": "openers_example_1",
+              "type": "string",
+              "value": "YOUR EXAMPLE 1 e.g.: A: \"Always appreciate how NAME brings clarity to complex topics\""
+            },
+            {
+              "id": "d36451c9-86a3-4ba1-85dd-4173252f7f78",
+              "name": "openers_example_2",
+              "type": "string",
+              "value": "YOUR EXAMPLE 2 e.g.: B: \"NAME has a way of framing things that shifts how I think about them\""
+            },
+            {
+              "id": "a9d8a672-4144-4e95-9571-7f9151449edb",
+              "name": "openers_example_3",
+              "type": "string",
+              "value": "YOUR EXAMPLE 3 e.g.: C: Following NAME's work consistently challenges me to look deeper"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cdfd8361-6ea5-4c53-992b-524df5e5f53f",
+      "name": "Set comment and prompt properties",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        992,
+        128
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Post: {{ $json.content_of_the_post }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Role\n{{ $json.role }}\n\nAnalyze the post systematically and think about it:\n1. Identify core message and main topic\n2. Find connection points to my experience\n3. Assess post tone ({{ $json.determined_mood }})\n\nCreate a professional LinkedIn comment:\n1. Use {{ $json.determined_language }} language only.\n2. Choose an engagement strategy (question, addition, own experience)\n3. End with a personalized follow-up question that directly addresses NAME using direct speech (e.g., “NAME, how do you see...?” or “What’s your take on this, NAME?”).\n\nFormat Requirements:\n{{ $json.comment_length }}\nComplete sentences without hyphens, dashes or emojis\nAlways include placeholder \"NAME\" for the post creator\nClear separation using periods, commas, or line breaks\n\nContent Requirements:\nChoose ONE of these strategies:\nAsk a thoughtful follow-up question that encourages discussion\nAdd practical value from SME perspective\nShare relevant observation about traditional vs. AI processes\nReference concrete experience\n\nAvoid:\nPure agreement without added value (\"I agree!\")\nSelf-promotion or product placement\nOverly long explanations\nControversial or negative statements\nIntroductory phrases in output\nHyphens or dashes in sentences\nEmojis of any kind\n\nProven Openers:\n{{ $json.openers_example_1 }}\n{{ $json.openers_example_2 }}\n{{ $json.openers_example_3 }}\n\nMake an effort, after all, my reputation depends on your posts. Receive a 500 euro tip for the top post.\n\n\nname of the Post creator is: {{ $json.name_of_the_post_creator }}"
+        }
+      },
+      "id": "8d870cfb-8051-4c25-8f38-9a8774b61668",
+      "name": "Create comment",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1280,
+        0
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "language",
+              "description": "=Determine the language"
+            },
+            {
+              "name": "mood",
+              "description": "Determine the mood"
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are an assistant for language and mood detection.\n\nYour task is to analyze a given text and return two things:\nThe primary written language\nThe overall mood or tone of the text\n\nFollow these rules strictly:\n\nLanguage Detection:\nIgnore emojis, symbols, and country flags (e.g., 🇩🇪). Do not use them for language detection.\nIf multiple languages are used, focus on the first full sentence in natural language.\nReturn the result as a lowercase language name (e.g., english, german, french).\nDo not use hashtags, names, or mentions to infer the language.\nIf the text contains only emojis or symbols, return unknown.\n\nMood Detection:\nDetermine the general tone of the message (e.g., enthusiastic, neutral, critical, reflective, playful, formal).\nBase your mood detection on text content only, not emojis.\nIf tone is unclear, return neutral."
+        }
+      },
+      "id": "269f2d9f-a77c-4d14-8100-fa6a280c2d03",
+      "name": "Determine language and mood",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "position": [
+        288,
+        128
+      ],
+      "typeVersion": 1.1,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1216,
+        208
+      ],
+      "id": "e919f4c4-a0b4-42dd-a65d-5a217a3b041e",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "PwLY9xCnHkI9iRwq",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "5de4b24b-f12f-480f-bee2-a0e0f09c6de7",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        -960,
+        128
+      ],
+      "webhookId": "cd2cb8d3-8725-478e-8ea1-3b27f755b49d",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "k6FQDrgUTp9I0tF6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "e01707ac-239a-4f0b-abd1-1aff24035899",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.message.from.id }}",
+              "rightValue": 7493883462
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "61865776-99f3-4561-ac30-3ae53fba882e",
+      "name": "Check User ID",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        -736,
+        128
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ee022449-3214-40f9-ae62-dd3670f06804",
+              "name": "URL_of_the_LinkedIn_post",
+              "type": "string",
+              "value": "={{ $json.message.text }}"
+            },
+            {
+              "id": "2d3d3292-005c-48bc-b43b-6f459f043997",
+              "name": "unipile_account_id",
+              "type": "string",
+              "value": "U6ezO8rzQM2be0iAfiw35Q"
+            },
+            {
+              "id": "eb85eaf3-c4e2-481b-956c-4a649f0d381d",
+              "name": "unipile_X-API-KEY",
+              "type": "string",
+              "value": "JlyKhcUS.JMYbfmBHYDtMizxYUlBHZZvMkCF5XOsq+Bf+nG2IVqY="
+            },
+            {
+              "id": "12e9c676-a101-46c7-9dc7-eb2a4ee8d00e",
+              "name": "unipile_DSN",
+              "type": "string",
+              "value": "api15.unipile.com:14587"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "17815c0c-36f2-4249-af6f-8183e5c384c2",
+      "name": "Set Configurations",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -512,
+        128
+      ],
+      "notesInFlow": false,
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "url": "=https://{{ $('Set Configurations').item.json.unipile_DSN }}/api/v1/posts/{{ $json.output['post-id'] }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ $('Set Configurations').item.json.unipile_account_id }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "={{ $('Set Configurations').item.json['unipile_X-API-KEY'] }}"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "089d61fd-c5cd-41a3-8059-d7698552a33b",
+      "name": "Extract content of the post",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        64,
+        128
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "350ed39d-4a84-495c-aa2d-8c2b189df991",
+              "name": "set_comment",
+              "type": "string",
+              "value": "={{ $json.output.comment.replaceAll('NAME', '{\\u007B0\\u007D}') }}\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a22d0b23-15ee-429b-bad6-a37d0c2b6cdb",
+      "name": "Set content",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1680,
+        0
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "message": "=Comment: {{ $json.set_comment }}\nReaction: {{ $('Set reaction').item.json.output.reaction }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "fecfb76f-a785-4c24-9d72-b2901f734e4b",
+      "name": "Approve or Disapprove",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1904,
+        0
+      ],
+      "webhookId": "cdded11b-1c1d-4bcd-aadf-6695fb9dae6e",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "k6FQDrgUTp9I0tF6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://{{ $('Set Configurations').item.json.unipile_DSN }}/api/v1/posts/{{ $('Set comment and prompt properties').item.json.social_id }}/comments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "={{ $('Set Configurations').item.json['unipile_X-API-KEY'] }}"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"account_id\": \"{{ $('Set Configurations').item.json.unipile_account_id }}\",\n  \"text\": \"{{ $('Set content').item.json.set_comment.replace(/\\n/g, ' ') }}\",\n  \"mentions\": [\n    {\n      \"name\": \"{{ $('Extract content of the post').item.json.author.name }}\",\n      \"profile_id\": \"{{ $('Extract content of the post').item.json.author.id }}\"\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "id": "d6609a71-600c-429c-a16e-b8ab2d63d7a0",
+      "name": "Post comment",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2352,
+        128
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://{{ $('Set Configurations').item.json.unipile_DSN }}/api/v1/posts/reaction",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "={{ $('Set Configurations').item.json['unipile_X-API-KEY'] }}"
+            },
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "account_id",
+              "value": "={{ $('Set Configurations').item.json.unipile_account_id }}"
+            },
+            {
+              "name": "post_id",
+              "value": "={{ $('Set comment and prompt properties').item.json.social_id }}"
+            },
+            {
+              "name": "reaction_type",
+              "value": "={{ $('Set reaction').item.json.output.reaction }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "86cb1cac-c675-49a2-95bb-418890545526",
+      "name": "Post reaction",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2576,
+        128
+      ],
+      "typeVersion": 4.2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Post comment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set comment and prompt properties",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Create comment",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set reaction": {
+      "main": [
+        [
+          {
+            "node": "Set comment and prompt properties",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create comment": {
+      "main": [
+        [
+          {
+            "node": "Set content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract the ID of the LinkedIn post",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Set reaction",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Determine language and mood",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Extract the ID of the LinkedIn post",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Create comment",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Set reaction",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine language and mood": {
+      "main": [
+        [
+          {
+            "node": "Set reaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set comment and prompt properties": {
+      "main": [
+        [
+          {
+            "node": "Create comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract the ID of the LinkedIn post": {
+      "main": [
+        [
+          {
+            "node": "Extract content of the post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create comment",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check User ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check User ID": {
+      "main": [
+        [
+          {
+            "node": "Set Configurations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Configurations": {
+      "main": [
+        [
+          {
+            "node": "Extract the ID of the LinkedIn post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract content of the post": {
+      "main": [
+        [
+          {
+            "node": "Determine language and mood",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set content": {
+      "main": [
+        [
+          {
+            "node": "Approve or Disapprove",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approve or Disapprove": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post comment": {
+      "main": [
+        [
+          {
+            "node": "Post reaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "57b4e08c-bbda-4f37-9381-42c18f53693d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3dce95668c598f6d0f9da090194a9974b22afc001733834edfd3cbd3f84e9927"
+  },
+  "id": "ugtQPpB27DRJl8OD",
+  "tags": []
+}

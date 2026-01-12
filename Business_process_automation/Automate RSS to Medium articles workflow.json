@@ -1,0 +1,1289 @@
+{
+  "name": "Automate RSS to Medium articles workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "folderId": "1wULhkoxfSxH08xevjPpApVFjyimGW0pN",
+        "title": "={{ $json.title }}"
+      },
+      "id": "a2345029-c6db-45c3-9ddc-4ba3ac2b5baf",
+      "name": "Create Google Doc",
+      "type": "n8n-nodes-base.googleDocs",
+      "position": [
+        3408,
+        1088
+      ],
+      "typeVersion": 2,
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "S4Qh9ywMDUi1y2UD",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 1,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "condition-approval",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c7e827c8-e067-4193-8b09-eb2d11c13584",
+      "name": "Check Approval Status",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        5360,
+        1008
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09CW3PM3B8",
+          "mode": "list",
+          "cachedResultName": "all-ghutu"
+        },
+        "text": "❌ **Article Rejected**\n\n",
+        "otherOptions": {}
+      },
+      "id": "0942497f-48f6-4978-b097-5e0d3798294b",
+      "name": "Rejection Notification",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        5584,
+        1200
+      ],
+      "webhookId": "33cc03d5-a827-4aba-821a-187b208a96d3",
+      "typeVersion": 2.1,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "OuTD7X3xMDpyarmh",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6,
+              "triggerAtMinute": 10
+            }
+          ]
+        }
+      },
+      "id": "a42b1d71-6758-4490-8c9c-43b3541302b1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        144,
+        880
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/feed",
+        "options": {}
+      },
+      "id": "f42b1f5b-78d2-41a9-a4dc-5792d5e09915",
+      "name": "TechCrunch",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [
+        752,
+        704
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://www.theverge.com/rss/index.xml",
+        "options": {}
+      },
+      "id": "fc6c0cb5-b7a3-4296-8b78-56394e0b7e16",
+      "name": "The Verge – Tech",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [
+        352,
+        784
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.arstechnica.com/arstechnica/technology-lab",
+        "options": {}
+      },
+      "id": "42686cf3-1ffc-4db3-ad0d-907c5446928c",
+      "name": "Ars Technica – Technology Lab",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [
+        544,
+        720
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a well formatted Medium Post with the content.\n {{ $json.title }}{{ $json.content }}{{ $json.contentSnippet }}{{ $json.link }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=[{\"role\": \"system\", \"content\": \"You are a professional tech blogger. Transform the RSS feed content into an engaging Medium article with proper formatting, introduction, and conclusion. Keep it informative yet accessible.\"}, {\"role\": \"user\", \"content\": \"Title: {{ $json.title }}\\n\\nSummary: {{ $json.contentSnippet }}\\n\\nWrite a comprehensive blog post about this topic.\"}]"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "e59bb3fd-cfb3-4748-9e19-e7a45f33ec34",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        1632,
+        864
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "id": "9334db35-115f-425e-bcef-eeab919d1695",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [
+        2288,
+        1040
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "RkTrozQnZ8k4AhMs",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Based on the following article, generate a descriptive image prompt for the cover of a medium post: it should be for marketing and professional style image\n{{ $json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a professional image prompt engineer. Your task is to generate concise, highly descriptive prompts suitable for AI image generation based on article content.  Always create a vivid visual concept that aligns with the tone, subject, and theme of the input text. Use stylistic and visual descriptors relevant to photography, illustration, painting, or graphic design.  Follow these rules strictly:  Start with the main subject of the article.  Describe setting, mood, and style.  Use artistic keywords (e.g., “vector art”, “digital painting”, “cinematic lighting”).  Output only the image prompt — no introduction, explanation, or formatting.  The final prompt should be clear, specific, and optimized for tools like Midjourney or DALL·E. Keep length between 25–75 words."
+            }
+          ]
+        }
+      },
+      "id": "db8ac73e-524e-45a9-a15b-d4e1ec0b1adb",
+      "name": "Generate Image Prompt (Gemini)",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        2320,
+        864
+      ],
+      "typeVersion": 1.6
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "text",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "9f7db5a0-2f78-4ae7-80ab-7773e49817da",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        2064,
+        864
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1F5lF3uvnPoc5YPTui77_XHJbNQIyBeINL0ZQFVJIgoQ",
+          "mode": "list",
+          "cachedResultName": "trackingArticles",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1F5lF3uvnPoc5YPTui77_XHJbNQIyBeINL0ZQFVJIgoQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1F5lF3uvnPoc5YPTui77_XHJbNQIyBeINL0ZQFVJIgoQ/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "709e4812-769f-48c7-9835-c540046656a2",
+      "name": "Get row(s) in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        544,
+        880
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "agnITpQnUDcFMt5T",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "link",
+        "joinMode": "keepEverything",
+        "options": {}
+      },
+      "id": "e1412c70-f5d0-4012-882e-e57eec3cfda4",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        832,
+        864
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "jsCode": "if (items.length === 0) {\n  throw new Error(\"No fresh posts available to pick from.\");\n}\n\nconst randomIndex = Math.floor(Math.random() * items.length);\nreturn [items[randomIndex]];\n"
+      },
+      "id": "41e573b3-cafa-4246-aafa-8f27162575e3",
+      "name": "Pick Random Post",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1312,
+        864
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Separate merged items into RSS posts and Sheet URLs\nconst rssItems = [];\nconst usedUrls = new Set();\n\nfor (const item of items) {\n  const link = item.json.link;\n  const url = item.json.url;\n\n  if (link && !rssItems.find(i => i.json.link === link)) {\n    // This is from RSS\n    rssItems.push(item);\n  } else if (url) {\n    // This is from Sheet\n    usedUrls.add(url);\n  }\n}\n\n// Filter out RSS posts whose link already exists in the sheet\nconst freshPosts = rssItems.filter(item => !usedUrls.has(item.json.link));\n\nreturn freshPosts;\n"
+      },
+      "id": "10d1ff71-dce2-46e6-a454-ca17abe189d3",
+      "name": "Check if Already Posted",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1072,
+        864
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9bfad590-ce07-469b-a875-06c0452b977b",
+              "name": "text",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "id": "e75780c5-42ff-464e-8d91-60e7dad705bb",
+              "name": "drive_url",
+              "type": "string",
+              "value": "={{ $json.webViewLink }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "671aef08-79fe-4f31-b56a-2fca663aadcc",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3904,
+        832
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "jsCode": "const articleText = $json.text;\nconst driveImageURL = $json.drive_url || 'Image URL not found';\nconst date = new Date().toLocaleString('en-US');\n\n\n// Extract title from the first **bolded** line\nconst titleMatch = articleText.match(/\\*\\*(.*?)\\*\\*/);\nconst title = titleMatch ? titleMatch[1] : 'Untitled Article';\n\n// Prepare final formatted text\nconst formattedArticle = \n`${title}\\n\\n` +\n`\\n${driveImageURL}\\n\\n` +\n`[DATE]\\n${date}\\n\\n` +\n`[ARTICLE]\\n${articleText}\\n\\n`;\n\n\nreturn [\n  {\n    json: {\n      title,\n      formattedArticle,\n      driveImageURL\n    }\n  }\n];"
+      },
+      "id": "a434aafb-68c6-4111-8243-291bfbfdc730",
+      "name": "Code1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4080,
+        880
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "title",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "3e808380-60b2-44f7-84f2-04baa1ebbedc",
+      "name": "Split Out1",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        3152,
+        1120
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "0969feb7-0a22-4779-bfc5-f069e7cbdf57",
+      "name": "Merge1",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        3632,
+        1120
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {},
+      "id": "47368266-2748-4a56-8ad8-1cc17a132329",
+      "name": "Wait1",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        3408,
+        1280
+      ],
+      "webhookId": "00b01ae1-5f35-4071-a98c-849616ea3b48",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter out the item with the doc ID and the one with the article\nlet idItem = items.find(item => item.json.id);\nlet articleItem = items.find(item => item.json.formattedArticle);\n\n// Output a single object with id, formatted article, and drive image URL\nreturn [\n  {\n    json: {\n      id: idItem.json.id,\n      formattedArticle: articleItem.json.formattedArticle,\n      driveImageURL: articleItem.json.driveImageURL\n    }\n  }\n];\n"
+      },
+      "id": "33a3bb7d-16c7-443f-80a7-d61f34a1a27a",
+      "name": "Code2",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        3872,
+        1120
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Safely find input parts\nconst docId = items.find(item => item.json.id)?.json.id;\nconst article = items.find(item => item.json.formattedArticle)?.json.formattedArticle || '';\n\n// Try to get title from a dedicated field, fallback to bolded headline\nlet title = items.find(item => item.json.title)?.json.title;\nif (!title) {\n  const match = article.match(/\\*\\*(.+?)\\*\\*/);\n  title = match ? match[1] : 'Untitled Article';\n}\n\n// Remove bolded title if it appears again inside the content\nconst cleanedArticle = article.replace(new RegExp(`\\\\*\\\\*${title}\\\\*\\\\*`, 'i'), '');\n\n// Remove all structural [TAGS] except [Link: ...]\nconst mainContent = cleanedArticle\n  .replace(/\\[(?!Link:).*?\\]/g, '')\n  .trim();\n\n// Compose final content\nconst content = `${title}\n\n[Image will be inserted here]\n\nPublished: ${new Date().toLocaleString('en-US')}\n\n\n${mainContent}\n`;\n\nreturn [\n  {\n    json: {\n      id: docId,\n      formattedArticle: content\n    }\n  }\n];\n"
+      },
+      "id": "47d4669d-3b5b-4ab0-9d8a-cdc8106a8f02",
+      "name": "REFORMAT ARTICLE",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4064,
+        1120
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "name": "={{$json[\"fileName\"] || \"image.jpg\"}}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1wULhkoxfSxH08xevjPpApVFjyimGW0pN",
+          "mode": "list",
+          "cachedResultName": "test_n8n_image",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1wULhkoxfSxH08xevjPpApVFjyimGW0pN"
+        },
+        "options": {}
+      },
+      "id": "128f2599-e646-44c7-b8f8-72078a9fd0ae",
+      "name": "Upload file",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        3120,
+        704
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "dd8c7f58-e112-4834-bfda-892a9a4a5b9c",
+      "name": "Merge2",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        3280,
+        848
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "formattedArticle",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "d678460a-aadd-4828-af0d-80f08233e330",
+      "name": "Split Out2",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        4288,
+        992
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "1e74b45d-691f-45b5-ae71-6f999f409109",
+      "name": "Merge3",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        4672,
+        1008
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {},
+      "id": "831e96ae-ac0c-40a7-b475-a690037c0208",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        4480,
+        1104
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ $json.formattedArticle }}"
+            }
+          ]
+        }
+      },
+      "id": "6e26ecbc-e95e-4ebb-b653-cd5f18ce6e0a",
+      "name": "Update Doc",
+      "type": "n8n-nodes-base.googleDocs",
+      "position": [
+        4512,
+        864
+      ],
+      "typeVersion": 2,
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "S4Qh9ywMDUi1y2UD",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09CW3PM3B8",
+          "mode": "list",
+          "cachedResultName": "all-ghutu"
+        },
+        "message": "=🚀 *New Article Ready for Review*\n\nTo approve, reply in this channel with: *APPROVE ARTICLE*\n",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "buttonApprovalStyle": "secondary"
+          }
+        },
+        "options": {}
+      },
+      "id": "d24df759-eba3-450b-aeb5-aace65bd08d8",
+      "name": "Send message and wait for response",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        5152,
+        1008
+      ],
+      "webhookId": "5c064123-2ce2-4962-ac14-6fa6c1d33b20",
+      "typeVersion": 2.3,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "OuTD7X3xMDpyarmh",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "nsultana2021@icloud.com",
+        "subject": "Medium Content",
+        "emailType": "text",
+        "message": "=THE ARTICLE\n\n{{ $('Split Out2').item.json.formattedArticle }}",
+        "options": {}
+      },
+      "id": "eaece9cb-51dc-4745-9336-d94229d4b5c3",
+      "name": "Send a message1",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        5584,
+        800
+      ],
+      "webhookId": "5e7ce835-a678-490b-875f-5af707cd36ef",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BAVHNoH0U8sqXr9X",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5fad9b34-9bae-4d70-a3a1-dc9fe7177292",
+              "name": "formattedArticle",
+              "type": "string",
+              "value": "={{ $json.formattedArticle }}"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": true,
+          "dotNotation": true
+        }
+      },
+      "id": "7abb9f87-7c34-4a6c-8cec-6515b872c241",
+      "name": "Edit Fields1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        4912,
+        1008
+      ],
+      "executeOnce": false,
+      "typeVersion": 3.4,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09CW3PM3B8",
+          "mode": "list",
+          "cachedResultName": "all-ghutu"
+        },
+        "text": "=REVIEW THE ARTICLE FOR MEDIUM POST\n\n{{ $json.text }}\n\n{{ $json.webViewLink }}",
+        "otherOptions": {}
+      },
+      "id": "b15ae584-2544-4fd3-9896-2226a7b4380c",
+      "name": "Send a message2",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        3520,
+        912
+      ],
+      "webhookId": "4ffab5ad-840d-4e62-9ca4-bcd6aa19b9e3",
+      "typeVersion": 2.3,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "OuTD7X3xMDpyarmh",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "7d1672aa-feb1-468a-aeb1-4aa1e91e035c",
+      "name": "Merge4",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        3712,
+        864
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "content": "## 📰 RSS for Content Fetching\n\nNodes involved:\n\nSchedule Trigger\nThe Verge - Tech RSS\nTechCrunch RSS\n\nThis section uses a scheduled trigger to pull in fresh content from two tech-focused RSS feeds: The Verge and TechCrunch. These feeds act as the primary sources for news articles. It ensures that every run starts with up-to-date, relevant tech content from reputable platforms.\n\n\n\n## 🧮 Sort, Merge, and Pick a Post\nNodes involved:\n\nGet row(s) in sheet : TITLE, IMAGE_URL, CREATOR, & DESCRIPTION\n\nMerge\n\nPick Random Post[Customize to your preferred Niche]\n\nNote:\nFetched articles are merged into a single list. The workflow then checks a Google Sheet to verify which articles were already posted before. One new, unique article is picked randomly from the valid entries to be used for further processing. This ensures no duplicate publishing and supports content diversity.\n\n\n🚫 Check If Already Posted\nNodes involved:\n\nCheck If Already Posted\n\nNote:\nThis node verifies if the selected article has already been used in a past run by comparing its title or link with existing records in the Google Sheet. If already posted, it either halts or skips the duplicate to maintain uniqueness in published content.",
+        "height": 1420,
+        "width": 1520
+      },
+      "id": "d89dd5e7-d3b1-49f7-8aa7-fa0b27da0def",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "🧠 Agent Article & Image Generation\nNodes involved:\n\nGoogle Gemini Model (text generation)\n\nBasic LLM Chain (structured content)\n\nGroq Chat Model (content expansion)\n\nGenerate Image Prompt\n\nCreate Image with Pollinations and get the URL\n\nHTTP Request (fetch/download image)\n\nDownload Image file \n\nNote:\nThis is the AI generation stage:\n\nText: Google Gemini and Groq LLM models are used to generate a well-written article based on the RSS content.\n\nImage: Pollinations AI generates a relevant visual image from a text prompt. An HTTP node is used to fetch the image, which is then uploaded to the cloud (possibly Drive or another host).\n\nOutput is split to handle both article and image streams for better control downstream.\n\n",
+        "height": 1420,
+        "width": 1520
+      },
+      "id": "4a291ead-cab7-4f41-82f0-f11a25850370",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1552,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "const width = 1024;\nconst height = 800;\nconst randomSeed = Math.floor(Math.random() * 100000);\n\nconst finalPrompt = $json.text;\nconst imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}.jpg?width=${width}&height=${height}&seed=${randomSeed}&model=flux&nologo=true`;\n\nreturn [\n  {\n    json: {\n      text: finalPrompt,\n      imageUrl\n    }\n  }\n];\n"
+      },
+      "id": "17da0f41-0dda-4e1a-9316-ae0fdfa8cc9b",
+      "name": "Create Pollinations + URL",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2704,
+        784
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.imageUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "1efba00f-f278-4fe9-95ce-0c7ddebb00e4",
+      "name": "DOWNLOAD IMAGE",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2928,
+        704
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "content": "☁️ Upload to Google Drive\nNodes involved:\n\nCreate Google Doc\n\nMerge4\n\nUpdate Doc\n\nEdit Fields\n\nNote:\nThe generated article and image are uploaded and stored in Google Drive. A Google Doc is created, updated with the AI-generated content, and linked back to the system. This provides a centralized place for human reviewers and stores the article for archiving or reuse.\n\nHere We Send the post to Slack DM or Channel for the user to Review the Article.",
+        "height": 1420,
+        "width": 1980
+      },
+      "id": "fb71843b-9678-4679-9620-b1384d9b6615",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3088,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "📤 Slack Notification for Approval\nNodes involved:\n\nSend a message2\n\nSend a message and wait for response\n\nCheck Approval Status\n\nNote:\nSlack is used as the manual review checkpoint. The system sends a message with the content preview and waits for a response (approval or rejection) from a designated reviewer or group. This introduces human judgment before public publishing.\n\n✅ Approved = Publish to Medium + Gmail\nNodes involved:\n\nPublish to Medium\n\nSend a message1 (Gmail)\n\nNote:\nOnce content is approved via Slack, it's automatically published to Medium through an API call. At the same time, an email is sent via Gmail, which could be used to notify stakeholders, send to a mailing list, or archive the content. This step ensures distribution across multiple channels.\n\n❌ Rejected = Notify on Slack\nNodes involved:\n\nRejection Notification\n\nNote:\nIf the reviewer rejects the article in Slack, a rejection notification is triggered and sent to the same Slack user or group. This keeps the content creation team informed and ready to revise or skip the rejected content. It closes the loop with proper rejection feedback.\n\n",
+        "height": 1420,
+        "width": 820
+      },
+      "id": "1605ca11-ab65-49ca-99d1-69cafcbf01df",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5088,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1568,
+        1072
+      ],
+      "id": "c06182e0-95de-41ce-a240-03045f3d480d",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Hb8scaDn3DEbAoqO",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1F5lF3uvnPoc5YPTui77_XHJbNQIyBeINL0ZQFVJIgoQ",
+          "mode": "list",
+          "cachedResultName": "trackingArticles",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1F5lF3uvnPoc5YPTui77_XHJbNQIyBeINL0ZQFVJIgoQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1F5lF3uvnPoc5YPTui77_XHJbNQIyBeINL0ZQFVJIgoQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ $('Pick Random Post').first().json.title }}",
+            "Creator": "={{ $('Pick Random Post').first().json.creator }}",
+            "Description": "={{ $('Pick Random Post').first().json.contentSnippet }}",
+            "Image_URL": "={{ $('Upload file').first().json.webViewLink }}"
+          },
+          "matchingColumns": [
+            "Title"
+          ],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Image_URL",
+              "displayName": "Image_URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Creator",
+              "displayName": "Creator",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        5792,
+        832
+      ],
+      "id": "1b5b4108-6111-43c6-9173-7911489b861e",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "agnITpQnUDcFMt5T",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "REFORMAT ARTICLE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Check if Already Posted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge4": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Generate Image Prompt (Gemini)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Create Google Doc",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out2": {
+      "main": [
+        [
+          {
+            "node": "Update Doc",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechCrunch": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Doc": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DOWNLOAD IMAGE": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message2": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Pick Random Post": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "REFORMAT ARTICLE": {
+      "main": [
+        [
+          {
+            "node": "Split Out2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "The Verge – Tech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Google Doc": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "The Verge – Tech": {
+      "main": [
+        [
+          {
+            "node": "Ars Technica – Technology Lab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Check Approval Status": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rejection Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if Already Posted": {
+      "main": [
+        [
+          {
+            "node": "Pick Random Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Image Prompt (Gemini)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create Pollinations + URL": {
+      "main": [
+        [
+          {
+            "node": "DOWNLOAD IMAGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image Prompt (Gemini)": {
+      "main": [
+        [
+          {
+            "node": "Create Pollinations + URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ars Technica – Technology Lab": {
+      "main": [
+        [
+          {
+            "node": "TechCrunch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Check Approval Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ad2ad5f6-2d91-49ca-a765-ecb7cbff7ea5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "98b510ca4dbbabb609e24c83189c67f6ae0083179272377aca703df4038b384f"
+  },
+  "id": "fwXhfPTniUDSrmGx",
+  "tags": []
+}

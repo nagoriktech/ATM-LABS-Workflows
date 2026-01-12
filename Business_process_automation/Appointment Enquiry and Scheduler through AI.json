@@ -1,0 +1,289 @@
+{
+  "name": "Appointment Enquiry and Scheduler through AI 2",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "=najmussakib.nagorik@gmail.com",
+        "subject": "New Appointment Request!",
+        "message": "=<h2>A new appointment request was submitted!</h2>\n<p>\nRequesting appointment date is <strong>{{ $('When Executed by Another Workflow').item.json.dateTime }}</strong>.\n</p>\n<p>\nName: {{ $('When Executed by Another Workflow').item.json.name }}<br/>\nEmail: {{ $('When Executed by Another Workflow').item.json.email }}<br/>\nEnquiry Summary: {{ $json.text }}<br/>\nSubmitted at: {{ $('When Executed by Another Workflow').item.json.submittedAt }}\n</p>",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Confirm"
+          }
+        },
+        "options": {}
+      },
+      "id": "61c45403-ea14-47b2-b428-feda353388b6",
+      "name": "Wait for Approval",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        112,
+        256
+      ],
+      "webhookId": "ab9c6c5e-334d-44bb-a8fd-a58140bc680d",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "B36xoXlOCdnRY8Wy",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "e5e37acb-9e9d-4a9e-bf59-a35dfc035886",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "80d5d38b-f2ca-4e45-9a7a-232811997b7a",
+      "name": "Has Approval?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        288,
+        256
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f3f32c37-cfa4-4bb4-8b5f-336b4f976910",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -240,
+        384
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openAiApi": {
+          "id": "frEneSu11hpc8feL",
+          "name": "OpenAi account AUDIO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "najmussakib.nagorik@gmail.com",
+          "mode": "list",
+          "cachedResultName": "najmussakib.nagorik@gmail.com"
+        },
+        "start": "={{ $('When Executed by Another Workflow').item.json.dateTime }}",
+        "end": "={{\nDateTime.fromFormat(\n  $('When Executed by Another Workflow').item.json.dateTime,\n  \"cccc, dd LLL yyyy, h:mm a\"\n).plus({ hours: 1 }).toFormat(\"cccc, dd LLL yyyy, h:mm a\")\n}}\n",
+        "additionalFields": {
+          "attendees": [
+            "={{ $('When Executed by Another Workflow').item.json.email }}"
+          ],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "description": "={{ $('Summarise Enquiry').first().json.text }}\n\nOriginal message:\n> {{ $('When Executed by Another Workflow').item.json.enquiry }}",
+          "summary": "=Appointment Scheduled - {{ $('When Executed by Another Workflow').item.json.name }} & Jim"
+        }
+      },
+      "id": "8b81b208-26ec-456d-8ba7-f6999f34c281",
+      "name": "Create Appointment",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        480,
+        176
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "2p2KrdzNPkKknH7o",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Execute Workflow Trigger').first().json.email }}",
+        "subject": "=Appointment Request Rejected for {{ DateTime.fromISO($('Execute Workflow Trigger').first().json.dateTime).format('EEE, dd MMM @ t') }}",
+        "message": "=<p>Dear {{ $('Execute Workflow Trigger').first().json.name }},</p>\n<p>Unfortunately, we cannot schedule the requested appointment at the requested time.</p>\n<p>Kind regards</p>\n",
+        "options": {}
+      },
+      "id": "ca0fe8f8-15c0-4386-8ab9-bd7be51b1299",
+      "name": "Send Rejection",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        480,
+        336
+      ],
+      "webhookId": "5f590407-4ab9-4ae6-bb85-38dbe41d6dce",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "B36xoXlOCdnRY8Wy",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 4. Approve or Decline Appointment\n[Learn more about the Waiting for Approval](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.gmail/message-operations/#send-a-message-and-wait-for-approval)\n\nThe Wait for Approval feature for Gmail is a special operation which allows for human-in-the-loop interaction in n8n workflows. In this example, the human interaction is the approval of the appointment request. The feature will put the workflow in a waiting state where a message is sent to the admin with 2 buttons: confirm and decline.\n\nWhen the admin clicks on the confirm button, the workflow resumes from the Gmail node and a meeting event is created for the requesting user in Google Calendar.\n\nWhen declined, a rejection email is sent to the requester instead.",
+        "height": 287.178089758343,
+        "width": 609.4228768699652,
+        "color": 7
+      },
+      "id": "6ba9a8ae-0c87-4dd4-b765-bb29c556a8d3",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        -112
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=The enquiry is as follows:\n{{ $json.enquiry }}\n{{ $json.dateTime }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Summarise the given enquiry"
+            }
+          ]
+        }
+      },
+      "id": "ab109b1a-9509-4dda-86a9-3392d866f735",
+      "name": "Summarise Enquiry",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        -240,
+        256
+      ],
+      "typeVersion": 1.5
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### 🚨 Set your admin email here!",
+        "height": 257.56869965477557,
+        "width": 177.66444188722656
+      },
+      "id": "454112f7-c9e7-420e-9ba2-3702b9771302",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        64,
+        224
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -448,
+        256
+      ],
+      "id": "55373e0f-26cc-41bc-93b5-737622ea6e3f",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Wait for Approval": {
+      "main": [
+        [
+          {
+            "node": "Has Approval?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Approval?": {
+      "main": [
+        [
+          {
+            "node": "Create Appointment",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Rejection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarise Enquiry",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarise Enquiry": {
+      "main": [
+        [
+          {
+            "node": "Wait for Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Summarise Enquiry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bf5195d5-932c-4442-bbea-95eca82ccab6",
+  "meta": {
+    "instanceId": "f2f9a39beefde290018433988fb188a8717f5a87fc352d6cf5aaa1908f787990"
+  },
+  "id": "Ukawgc2qlxNGaH0U",
+  "tags": []
+}

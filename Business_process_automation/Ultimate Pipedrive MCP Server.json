@@ -1,0 +1,1817 @@
+{
+  "name": "Ultimate Pipedrive MCP Server",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🛠️ Pipedrive Tool MCP Server\n\n### 📋 Available Operations (45 total)\n\n**Activity**: create, delete, get, get all, update\n**Deal**: create, delete, duplicate, get, get all, search, update\n**Dealactivity**: get all\n**Dealproduct**: add, get all, remove, update\n**File**: create, delete, download, get, update\n**Lead**: create, delete, get, get all, update\n**Note**: create, delete, get, get all, update\n**Organization**: create, delete, get, get all, search, update\n**Person**: create, delete, get, get all, search, update\n**Product**: get all\n\n### ⚙️ Setup Instructions\n\n1. **Import Workflow**: Load this workflow into your n8n instance\n\n1. **🔑 Add Credentials**: Configure Pipedrive Tool authentication in one tool node then open and close all others.\n2. **🚀 Activate**: Enable this workflow to start your MCP server\n3. **🔗 Get URL**: Copy webhook URL from MCP trigger (right side)\n4. **🤖 Connect**: Use MCP URL in your AI agent configurations\n\n### ✨ Ready-to-Use Features\n\n• Zero configuration - all 45 operations pre-built\n• AI agents automatically populate parameters via `$fromAI()` expressions\n• Every resource and operation combination available\n• Native n8n error handling and response formatting\n• Modify parameter defaults in any tool node as needed\n\n### 💬 Need Help?\nCheck the [n8n documentation](https://docs.n8n.io/integrations/builtin/cluster-nodes/sub-nodes/n8n-nodes-langchain.toolmcp/) or ping me on [discord](https://discord.me/cfomodz) for MCP integration guidance or customizations.",
+        "height": 980,
+        "width": 420
+      },
+      "id": "e0e88552-ef3b-4819-b138-2d7932a3ff00",
+      "name": "Workflow Overview 0",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1408,
+        -1616
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "subject": "={{ $fromAI('Subject', ``, 'string') }}",
+        "done": "={{ $fromAI('Done', ``, 'string') }}",
+        "type": "={{ $fromAI('Type', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "id": "5c0b3471-20ff-411f-9821-d84ac0b76c28",
+      "name": "Create an activity",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -736,
+        -1616
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "operation": "delete",
+        "activityId": "={{ $fromAI('Activity_Id', ``, 'number') }}"
+      },
+      "id": "4f95abe4-206c-4eef-937b-3147c369d3a6",
+      "name": "Delete an activity",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -528,
+        -1616
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "operation": "get",
+        "activityId": "={{ $fromAI('Activity_Id', ``, 'number') }}",
+        "resolveProperties": "={{ $fromAI('Resolve_Properties', ``, 'boolean') }}"
+      },
+      "id": "ffcf6224-f798-43f9-8aa4-9a8d9937bc9a",
+      "name": "Get an activity",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -304,
+        -1616
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "operation": "getAll",
+        "resolveProperties": "={{ $fromAI('Resolve_Properties', ``, 'boolean') }}",
+        "additionalFields": {}
+      },
+      "id": "2f5e1a9a-fb7c-43ae-88d2-01c097bb05dd",
+      "name": "Get many activities",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -80,
+        -1616
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "operation": "update",
+        "activityId": "={{ $fromAI('Activity_Id', ``, 'number') }}",
+        "updateFields": {},
+        "encodeProperties": "={{ $fromAI('Encode_Properties', ``, 'boolean') }}"
+      },
+      "id": "830a33ca-5199-471e-949a-ee2eb6dadb6d",
+      "name": "Update an activity",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        144,
+        -1616
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Activity",
+        "width": 1280,
+        "color": 4
+      },
+      "id": "0083a73a-c3c4-4ade-85d5-4d3b99d6940c",
+      "name": "Sticky Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -944,
+        -1632
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "title": "={{ $fromAI('Title', ``, 'string') }}",
+        "associateWith": "={{ $fromAI('Associate_With', ``, 'string') }}",
+        "org_id": "={{ $fromAI('Org_Id', ``, 'number') }}",
+        "person_id": "={{ $fromAI('Person_Id', ``, 'number') }}",
+        "additionalFields": {}
+      },
+      "id": "00aa8053-41c3-4ea1-9ed3-1eea42d519b6",
+      "name": "Create a deal",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -736,
+        -1376
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "dealId": "={{ $fromAI('Deal_Id', ``, 'number') }}"
+      },
+      "id": "38411c2c-a440-4796-82af-641bdb99ef74",
+      "name": "Delete a deal",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -528,
+        -1376
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "duplicate",
+        "dealId": "={{ $fromAI('Deal_Id', ``, 'number') }}"
+      },
+      "id": "f12893d6-40e3-47ee-8765-e1434f5e9dac",
+      "name": "Duplicate a deal",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -304,
+        -1376
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dealId": "={{ $fromAI('Deal_Id', ``, 'number') }}",
+        "resolveProperties": "={{ $fromAI('Resolve_Properties', ``, 'boolean') }}"
+      },
+      "id": "82bf2a37-3ddb-4f9a-9170-dc13b85d0389",
+      "name": "Get a deal",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -80,
+        -1376
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "resolveProperties": "={{ $fromAI('Resolve_Properties', ``, 'boolean') }}",
+        "filters": {}
+      },
+      "id": "c2414a38-2027-4566-b54d-9499265867ee",
+      "name": "Get many deals",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        144,
+        -1376
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "term": "={{ $fromAI('Term', ``, 'string') }}",
+        "exactMatch": "={{ $fromAI('Exact_Match', ``, 'boolean') }}",
+        "additionalFields": {}
+      },
+      "id": "98a738eb-00a6-4517-9776-63ad3c2d2647",
+      "name": "Search a deal",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        352,
+        -1376
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dealId": "={{ $fromAI('Deal_Id', ``, 'number') }}",
+        "updateFields": {},
+        "encodeProperties": "={{ $fromAI('Encode_Properties', ``, 'boolean') }}"
+      },
+      "id": "d664d8a0-ae01-4f1d-b067-0bca74f13525",
+      "name": "Update a deal",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        576,
+        -1376
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Deal",
+        "width": 1720,
+        "color": 5
+      },
+      "id": "77da4e49-a944-44bb-bb10-9c63103fd58f",
+      "name": "Sticky Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -944,
+        -1392
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "dealActivity",
+        "dealId": "={{ $fromAI('Deal_Id', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "id": "eb360df3-e41f-415b-ad0b-c1b7435bbd2f",
+      "name": "Get many deal activities",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -736,
+        -1136
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Dealactivity",
+        "width": 400,
+        "color": 6
+      },
+      "id": "d3c4292e-5fb2-429a-bf04-657a687b7190",
+      "name": "Sticky Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -944,
+        -1152
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "dealProduct",
+        "dealId": "={{ $fromAI('Deal_Id', ``, 'string') }}",
+        "productId": "={{ $fromAI('Product_Id', ``, 'string') }}",
+        "item_price": "={{ $fromAI('Item_Price', ``, 'number') }}",
+        "quantity": "={{ $fromAI('Quantity', ``, 'number') }}",
+        "additionalFields": {}
+      },
+      "id": "c1a63b84-b567-4814-961f-42ac11c1d845",
+      "name": "Add a deal product",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -736,
+        -896
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "dealProduct",
+        "operation": "getAll",
+        "dealId": "={{ $fromAI('Deal_Id', ``, 'string') }}"
+      },
+      "id": "5bd372b5-302a-4d8b-9523-daf64938c0ef",
+      "name": "Get many deal products",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -528,
+        -896
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "dealProduct",
+        "operation": "remove",
+        "dealId": "={{ $fromAI('Deal_Id', ``, 'string') }}",
+        "productAttachmentId": "={{ $fromAI('Product_Attachment_Id', ``, 'string') }}"
+      },
+      "id": "a6690037-1795-4ea4-b30d-47b83eb01596",
+      "name": "Remove a deal product",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -304,
+        -896
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "dealProduct",
+        "operation": "update",
+        "dealId": "={{ $fromAI('Deal_Id', ``, 'string') }}",
+        "productAttachmentId": "={{ $fromAI('Product_Attachment_Id', ``, 'string') }}",
+        "updateFields": {}
+      },
+      "id": "69958735-3160-4f5d-bcbe-af1837e16b4b",
+      "name": "Update a deal product",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -80,
+        -896
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Dealproduct",
+        "width": 1060,
+        "color": 7
+      },
+      "id": "23ecc140-c5d4-4b12-90ff-a948bc6140cb",
+      "name": "Sticky Note 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -944,
+        -912
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "binaryPropertyName": "={{ $fromAI('Binary_Property_Name', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "id": "a47ba897-13ac-4bae-9b09-3ebe1ecd0b55",
+      "name": "Create a file",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -736,
+        -656
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "delete",
+        "fileId": "={{ $fromAI('File_Id', ``, 'number') }}"
+      },
+      "id": "e50b5624-8305-4055-99dd-019e8adce919",
+      "name": "Delete a file",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -528,
+        -656
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "download",
+        "fileId": "={{ $fromAI('File_Id', ``, 'number') }}",
+        "binaryPropertyName": "={{ $fromAI('Binary_Property_Name', ``, 'string') }}"
+      },
+      "id": "81f9a84b-6f30-45d9-a718-41a08b5a7662",
+      "name": "Download a file",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -304,
+        -656
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "fileId": "={{ $fromAI('File_Id', ``, 'number') }}"
+      },
+      "id": "02d18405-cb59-40cf-9e3f-fe1fe8eeb533",
+      "name": "Get a file",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -80,
+        -656
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "update",
+        "fileId": "={{ $fromAI('File_Id', ``, 'number') }}",
+        "updateFields": {}
+      },
+      "id": "6ea2049e-0173-4a6a-8779-fb5b07d48747",
+      "name": "update details of a file",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        144,
+        -656
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## File",
+        "width": 1280,
+        "color": 2
+      },
+      "id": "1eb3f031-be14-4a1c-9b7f-12c7a8f682ea",
+      "name": "Sticky Note 5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -944,
+        -672
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "lead",
+        "title": "={{ $fromAI('Title', ``, 'string') }}",
+        "associateWith": "={{ $fromAI('Associate_With', ``, 'string') }}",
+        "organization_id": "={{ $fromAI('Organization_Id', ``, 'number') }}",
+        "person_id": "={{ $fromAI('Person_Id', ``, 'number') }}",
+        "additionalFields": {
+          "expected_close_date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Expected_Close_Date', ``, 'string') }}",
+          "value": {
+            "valueProperties": {
+              "amount": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Amount', ``, 'number') }}"
+            }
+          }
+        }
+      },
+      "id": "ee475d1d-1c61-44cf-8c8f-a5c067f042d2",
+      "name": "Create a lead",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -736,
+        -416
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "lead",
+        "operation": "delete",
+        "leadId": "={{ $fromAI('Lead_Id', ``, 'string') }}"
+      },
+      "id": "479769b7-bf9d-4d43-813a-5a31c87731b5",
+      "name": "Delete a lead",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -528,
+        -416
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "lead",
+        "operation": "get",
+        "leadId": "={{ $fromAI('Lead_Id', ``, 'string') }}"
+      },
+      "id": "06019211-57ba-4bff-ba57-e337c231373b",
+      "name": "Get a lead",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -304,
+        -416
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "lead",
+        "operation": "getAll",
+        "filters": {}
+      },
+      "id": "9b476af5-adc2-4c50-885c-29a3eaedd762",
+      "name": "Get many leads",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -80,
+        -416
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "lead",
+        "operation": "update",
+        "leadId": "={{ $fromAI('Lead_Id', ``, 'string') }}",
+        "updateFields": {
+          "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}",
+          "value": {
+            "valueProperties": {
+              "amount": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Amount', ``, 'number') }}"
+            }
+          },
+          "expected_close_date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Expected_Close_Date', ``, 'string') }}"
+        }
+      },
+      "id": "b23c85b4-b7c8-4fca-a465-b10e99b47548",
+      "name": "Update a lead",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        144,
+        -416
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Lead",
+        "width": 1280,
+        "color": 3
+      },
+      "id": "a74e009a-9e3e-4de0-9619-9a23f78f6514",
+      "name": "Sticky Note 6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -944,
+        -432
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "note",
+        "content": "={{ $fromAI('Content', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "id": "1f95019a-1226-43c7-a7e0-b43a952484ca",
+      "name": "Create a note",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -736,
+        -176
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "note",
+        "operation": "delete",
+        "noteId": "={{ $fromAI('Note_Id', ``, 'number') }}"
+      },
+      "id": "8c16eaf6-e57f-4d1a-a7df-8cd342390d86",
+      "name": "Delete a note",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -528,
+        -176
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "note",
+        "operation": "get",
+        "noteId": "={{ $fromAI('Note_Id', ``, 'number') }}"
+      },
+      "id": "d023ae5d-1670-4996-a5b2-a2205ba5c0e2",
+      "name": "Get a note",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -304,
+        -176
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "note",
+        "operation": "getAll",
+        "additionalFields": {}
+      },
+      "id": "37fef873-39f1-4d73-9300-24ecce0b94f9",
+      "name": "Get many notes",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -80,
+        -176
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "note",
+        "operation": "update",
+        "noteId": "={{ $fromAI('Note_Id', ``, 'number') }}",
+        "updateFields": {}
+      },
+      "id": "d35d0739-e6ae-493f-a562-6579ba45faa0",
+      "name": "Update a note",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        144,
+        -176
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Note",
+        "width": 1280,
+        "color": 4
+      },
+      "id": "a47a3faf-6ca7-4d3a-81f0-75ac93b286f7",
+      "name": "Sticky Note 7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -944,
+        -192
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "organization",
+        "name": "={{ $fromAI('Name', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "id": "9a7f00d2-6e4a-413f-bc44-2e44f1e4379d",
+      "name": "Create an organization",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -736,
+        64
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "organization",
+        "operation": "delete",
+        "organizationId": "={{ $fromAI('Organization_Id', ``, 'number') }}"
+      },
+      "id": "e602e6e3-6d85-41f0-9ce9-c1d27c8365d5",
+      "name": "Delete an organization",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -528,
+        64
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "organization",
+        "operation": "get",
+        "organizationId": "={{ $fromAI('Organization_Id', ``, 'number') }}",
+        "resolveProperties": "={{ $fromAI('Resolve_Properties', ``, 'boolean') }}"
+      },
+      "id": "9ec1f9bc-5d22-45bb-aba7-b154e69609eb",
+      "name": "Get an organization",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -304,
+        64
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "organization",
+        "operation": "getAll",
+        "resolveProperties": "={{ $fromAI('Resolve_Properties', ``, 'boolean') }}",
+        "filters": {}
+      },
+      "id": "2008763a-f90e-4941-b7cb-48b9cbfa5f97",
+      "name": "Get many organizations",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -80,
+        64
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "organization",
+        "operation": "search",
+        "term": "={{ $fromAI('Term', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "id": "51a0c614-5a11-4e9f-a0c7-3fb1f12ee77e",
+      "name": "Search an organization",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        144,
+        64
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "organization",
+        "operation": "update",
+        "organizationId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Organization_ID', ``, 'number') }}",
+        "updateFields": {
+          "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Name', ``, 'string') }}"
+        },
+        "encodeProperties": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Encode_Properties', ``, 'boolean') }}"
+      },
+      "id": "6aa8c5bc-8d3b-4585-a569-f67c7bb42352",
+      "name": "Update an organization",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        352,
+        64
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Organization",
+        "width": 1500,
+        "color": 5
+      },
+      "id": "db14c714-e3fa-47b4-8d70-d3953df8fa2f",
+      "name": "Sticky Note 8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -944,
+        48
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "person",
+        "name": "={{ $fromAI('Name', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "id": "c6173455-2a75-4ad7-a083-6ef99f4c193d",
+      "name": "Create a person",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -736,
+        304
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "person",
+        "operation": "delete",
+        "personId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Person_ID', ``, 'number') }}"
+      },
+      "id": "22e2e71b-4bee-48f2-a564-275bbd98df23",
+      "name": "Delete a person",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -528,
+        304
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "person",
+        "operation": "get",
+        "personId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Person_ID', ``, 'number') }}",
+        "resolveProperties": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Resolve_Properties', ``, 'boolean') }}"
+      },
+      "id": "a3853a8e-58cc-49b8-ac49-da470c37e47d",
+      "name": "Get a person",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -304,
+        304
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "person",
+        "operation": "getAll",
+        "resolveProperties": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Resolve_Properties', ``, 'boolean') }}",
+        "additionalFields": {}
+      },
+      "id": "aca617f3-2e5b-4b9e-8d3f-deed59a94e27",
+      "name": "Get many people",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -80,
+        304
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "person",
+        "operation": "search",
+        "term": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Term', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "id": "5d845888-510c-4e04-a8be-57f013841253",
+      "name": "Search a person",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        144,
+        304
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "person",
+        "operation": "update",
+        "personId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Person_ID', ``, 'number') }}",
+        "updateFields": {
+          "email": [
+            "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('email0_Email', ``, 'string') }}"
+          ],
+          "name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Name', ``, 'string') }}",
+          "phone": [
+            "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('phone0_Phone', ``, 'string') }}"
+          ]
+        },
+        "encodeProperties": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Encode_Properties', ``, 'boolean') }}"
+      },
+      "id": "85290f15-2377-4317-9812-67664e22f5dc",
+      "name": "Update a person",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        352,
+        304
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Person",
+        "width": 1500,
+        "color": 6
+      },
+      "id": "0a121fa1-26ad-4dbe-8eb9-de5e97cb8f34",
+      "name": "Sticky Note 9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -944,
+        288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "product",
+        "resolveProperties": "={{ $fromAI('Resolve_Properties', ``, 'boolean') }}"
+      },
+      "id": "21de89e5-85e3-4b1d-9ed2-76e900588581",
+      "name": "Get many products",
+      "type": "n8n-nodes-base.pipedriveTool",
+      "position": [
+        -80,
+        -1136
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pipedriveApi": {
+          "id": "PLGtVCEdJsoHmyWS",
+          "name": "Pipedrive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Product",
+        "width": 400,
+        "color": 7
+      },
+      "id": "dcb850be-9daa-49b9-bd42-b7e26b4e948a",
+      "name": "Sticky Note 10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -288,
+        -1152
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful Pipedrive assistant. Find best ways to utilize Pipedrive tools to perform chat actions.\nAlways keep necessary parameters that are needed to use tools."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -992,
+        -1984
+      ],
+      "id": "03d5ce36-570c-4072-9225-952f178e1d72",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1216,
+        -1984
+      ],
+      "id": "5be573fb-659a-4eec-af4b-0bb99f5fe017",
+      "name": "When chat message received",
+      "webhookId": "057b0b7f-851e-48f2-b92e-f13e36e5f818"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://kzsakib5.app.n8n.cloud/mcp/2b5d4492-66f4-41a7-89d1-2543ce8bd3d0",
+        "options": {}
+      },
+      "id": "93738eb7-b41e-4300-b8be-215eaebdfdeb",
+      "name": "MCP Client1",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "position": [
+        -752,
+        -1808
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "path": "2b5d4492-66f4-41a7-89d1-2543ce8bd3d0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        144,
+        -1792
+      ],
+      "id": "b1e428eb-3c93-4a81-ae8a-2aca44bcc1f4",
+      "name": "MCP Server Trigger",
+      "webhookId": "2b5d4492-66f4-41a7-89d1-2543ce8bd3d0"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -976,
+        -1776
+      ],
+      "id": "ba76f69f-8cc8-41ca-8fd9-16ad960634d6",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1120,
+        -1776
+      ],
+      "id": "ab737c8b-d03e-4186-84ba-d24e8f282659",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get a deal": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a lead": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a note": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a person": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a deal": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a file": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a lead": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a note": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a deal": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a file": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a lead": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a note": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search a deal": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a deal": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a lead": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a note": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many deals": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many leads": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many notes": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a person": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a person": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download a file": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get an activity": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many people": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search a person": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a person": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Duplicate a deal": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many products": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add a deal product": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an activity": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete an activity": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update an activity": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get an organization": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many activities": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove a deal product": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a deal product": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an organization": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete an organization": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many deal products": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many organizations": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search an organization": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update an organization": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many deal activities": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update details of a file": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "02488e9a-efbd-4bca-a2e0-66c1dda3c532",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "edb67d3a7f9d12c7abb88f04023272f13c5753dec2ada987b4428826f48ef7ab"
+  },
+  "id": "8SFlogTivgcHe8hd",
+  "tags": []
+}
