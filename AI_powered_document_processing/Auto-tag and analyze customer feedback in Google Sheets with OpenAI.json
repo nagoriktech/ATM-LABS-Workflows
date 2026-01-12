@@ -1,0 +1,628 @@
+{
+  "name": "Auto-tag and analyze customer feedback in Google Sheets with OpenAI",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "e102eee6-10e9-4b9e-b7f6-5695c03d598e",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -144,
+        -560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14vyKLET10xNLXN1y1aIxCuVqQFLoz0ksNo7hIHHSvRA",
+          "mode": "list",
+          "cachedResultName": "Copy of N8N Template - Auto-Tag UX and Product Feedback in Google Sheets with OpenAI",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14vyKLET10xNLXN1y1aIxCuVqQFLoz0ksNo7hIHHSvRA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 816375349,
+          "mode": "list",
+          "cachedResultName": "Tags",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14vyKLET10xNLXN1y1aIxCuVqQFLoz0ksNo7hIHHSvRA/edit#gid=816375349"
+        },
+        "options": {}
+      },
+      "id": "61ae0227-3028-4032-8af3-f3dd43061b29",
+      "name": "Fetch Allowed Tags",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        352,
+        -496
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hishLMrcsGcnQbN9",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14vyKLET10xNLXN1y1aIxCuVqQFLoz0ksNo7hIHHSvRA",
+          "mode": "list",
+          "cachedResultName": "Copy of N8N Template - Auto-Tag UX and Product Feedback in Google Sheets with OpenAI",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14vyKLET10xNLXN1y1aIxCuVqQFLoz0ksNo7hIHHSvRA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feedbacks",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14vyKLET10xNLXN1y1aIxCuVqQFLoz0ksNo7hIHHSvRA/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "68a72344-5f98-4af9-bbd3-1f1028502cc5",
+      "name": "Fetch New Feedbacks",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        352,
+        -304
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hishLMrcsGcnQbN9",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "tags",
+              "value": "={{ $items('Fetch Allowed Tags').map(i => i.json['Tags']) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "986aba40-1d08-4988-93a8-40c662e34b84",
+      "name": "Attach Tags Array",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        800,
+        -400
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a tagging, sentiment, and emotion analysis assistant.  \n\nInput format:\n- You will receive multiple feedbacks in an array under `feedbacks`.\n- Each feedback item has: `row_number` and `text`.\n- Feedback text may be multilingual (e.g., Persian/Farsi). Analyze natively.\n- You will also receive an `allowed_tags` array (may be empty).\n\nGeneral rules:\n- Analyze each feedback independently.\n- Detect and describe emotional tone naturally.\n- Identify one **primary emotion** that captures the dominant feeling.\n- Optionally include up to two **secondary emotions** that reflect additional nuances.\n- Output must be a **valid JSON array** only, with **no extra text** before or after.\n- Maintain the original input order.\n\n⚠️ CRITICAL TAGGING RULES (2-tier system with STRONG preference for allowed_tags):\n\n**TIER 1: ALWAYS TRY ALLOWED TAGS FIRST (Your Primary Responsibility)**\n- If `allowed_tags` is provided, you MUST thoroughly examine it for matches.\n- **Be creative and flexible in matching:**\n  - Look for direct matches (e.g., \"Bug\" for bug reports)\n  - Look for semantic matches (e.g., \"Payment\" tag for \"billing issue\" feedback)\n  - Look for category matches (e.g., \"Performance\" for \"slow\", \"lag\", \"loading\")\n  - Look for broader themes (e.g., \"User Experience\" for usability complaints)\n- **Think broadly:** A tag doesn't need to be a perfect word-for-word match.\n- Consider the **intent and topic** of the feedback, not just exact keywords.\n- Return up to **3** most relevant tags from `allowed_tags` (sorted by relevance).\n- **Only proceed to Tier 2 if you genuinely cannot find ANY relevant match** after careful analysis.\n\n**TIER 2: AI-Generated Tags (ONLY as a last resort)**\n- Use this ONLY when:\n  - `allowed_tags` is completely empty, OR\n  - After thorough analysis, absolutely NO tag in `allowed_tags` relates to the feedback topic\n- Generate up to **2 custom, descriptive tags** (short labels like \"UI Bug\", \"Pricing Question\").\n- Put these in `ai_tag_1` and `ai_tag_2`.\n- Use \"\" for empty AI tag fields.\n\n**Decision Flow:**\n1. Read the feedback carefully\n2. Review ALL allowed_tags thoroughly\n3. Can you match any tag semantically or thematically? → YES = Use allowed tags, set ai_tag_1=\"\", ai_tag_2=\"\"\n4. Still no match after careful review? → Use AI tags as fallback\n\nSentiment scale (choose one):\n[\"Very Negative\", \"Negative\", \"Neutral\", \"Positive\", \"Very Positive\"].\n\nEmotions:\n- primary_emotion: one clear emotional label (e.g., \"anger\", \"hope\", \"disappointment\", \"relief\", \"satisfaction\", \"gratitude\").\n- secondary_emotion: optional supporting emotional state (e.g., \"frustration\", \"trust\", \"curiosity\", \"anxiety\"). Use \"\" if none applies.\n\nResponse JSON schema (use exactly these keys):\n[\n  {\n    \"row_number\": <row_number from input>,\n    \"tags\": [\"tag_from_allowed_list_1\", \"tag_from_allowed_list_2\"],\n    \"ai_tag_1\": \"\",\n    \"ai_tag_2\": \"\",\n    \"sentiment\": \"Positive\",\n    \"primary_emotion\": \"Gratitude\",\n    \"secondary_emotion\": \"Relief\"\n  }\n]\n\nExamples of GOOD matching behavior:\n✅ Feedback: \"The app crashes constantly\" + allowed_tags: [\"Bug\", \"Stability\", \"Feature\"] → tags: [\"Bug\", \"Stability\"]\n✅ Feedback: \"Can't complete checkout\" + allowed_tags: [\"Payment\", \"Technical Issue\", \"UI\"] → tags: [\"Payment\", \"Technical Issue\"]\n✅ Feedback: \"Love the new design!\" + allowed_tags: [\"Design\", \"Positive Feedback\", \"UI\"] → tags: [\"Design\", \"Positive Feedback\"]\n✅ Feedback: \"Too expensive for what it offers\" + allowed_tags: [\"Pricing\", \"Value\", \"Feature Request\"] → tags: [\"Pricing\", \"Value\"]\n\nExamples of when to use AI tags:\n❌ Feedback: \"Bug in login\" + allowed_tags: [] → tags: [], ai_tag_1: \"Authentication Bug\", ai_tag_2: \"Login\"\n❌ Feedback: \"Need dark mode\" + allowed_tags: [\"Pricing\", \"Support\", \"Payment\"] → tags: [], ai_tag_1: \"Feature Request\", ai_tag_2: \"UI Customization\"\n\nConstraints:\n- **STRONGLY PREFER allowed_tags** - exhaust all matching possibilities first\n- Do **not** invent tags in the `tags` array — only use exact names from `allowed_tags`\n- Generate creative tags for `ai_tag_1` and `ai_tag_2` ONLY when truly necessary\n- Use ASCII keys exactly as shown. Values must be strings or arrays of strings\n- Do not include reasoning, markdown, or comments — **JSON array only**",
+              "role": "system"
+            },
+            {
+              "content": "={{ JSON.stringify({\n  allowed_tags: $json.tags,\n  feedbacks: $json.feedbackBatch\n}) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f0f6bdd9-c9ca-456b-9300-9ac3c6fb7fe2",
+      "name": "Tag Feedbacks with AI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        1472,
+        -472
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "URRbsC3VkaNt4l8s",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "14vyKLET10xNLXN1y1aIxCuVqQFLoz0ksNo7hIHHSvRA",
+          "mode": "list",
+          "cachedResultName": "Copy of N8N Template - Auto-Tag UX and Product Feedback in Google Sheets with OpenAI",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14vyKLET10xNLXN1y1aIxCuVqQFLoz0ksNo7hIHHSvRA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feedbacks",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14vyKLET10xNLXN1y1aIxCuVqQFLoz0ksNo7hIHHSvRA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "Status": "={{ $json.tags && $json.tags.length > 0 ? 'Updated' : 'Needs Review' }}",
+            "Sentiment": "={{ $json.sentiment }}",
+            "Tag 1": "={{ $json.tags[0] || ''}}",
+            "Tag 2": "={{ $json.tags[1] || ''}}",
+            "Tag 3": "={{ $json.tags[2] || ''}}",
+            "AI Tag 1": "={{ $json.ai_tag_1 }}",
+            "AI Tag 2": "={{ $json.ai_tag_2 }}",
+            "Primary Emotion": "={{ $json.primary_emotion }}",
+            "Secondary Emotion": "={{ $json.secondary_emotion }}",
+            "Updated Date (N8N)": "={{ new Date().toISOString().split('T')[0] }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Sentiment",
+              "displayName": "Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Feedbacks",
+              "displayName": "Feedbacks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tag 1",
+              "displayName": "Tag 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tag 2",
+              "displayName": "Tag 2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tag 3",
+              "displayName": "Tag 3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Tag 1",
+              "displayName": "AI Tag 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Tag 2",
+              "displayName": "AI Tag 2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Primary Emotion",
+              "displayName": "Primary Emotion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Secondary Emotion",
+              "displayName": "Secondary Emotion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Updated Date (N8N)",
+              "displayName": "Updated Date (N8N)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8157486e-238a-4da1-819c-19f55717e15b",
+      "name": "Update Google Sheet (Tagged)",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2048,
+        -400
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hishLMrcsGcnQbN9",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": "=10",
+        "options": {}
+      },
+      "id": "6d6612cc-a2d4-45bc-9522-6f6048baa4a4",
+      "name": "Process Feedbacks in Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        1024,
+        -400
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate all items in the current batch into a single item\nconst feedbackBatch = $input.all().map((item, index) => ({\n  id: index,\n  row_number: item.json.row_number,\n  text: item.json.Feedbacks\n}));\n\nconst tags = $input.first().json.tags;\n\nreturn {\n  json: {\n    feedbackBatch,\n    tags\n  }\n};"
+      },
+      "id": "b8bc61fa-9fa4-46b3-a7c4-f1635b57466e",
+      "name": "Aggregate Batch Items",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1248,
+        -472
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the OpenAI response and split it back into individual items\nconst response = JSON.parse($input.first().json.message.content);\n\n// Handle both array format and object with results property\nconst results = Array.isArray(response) ? response : response.results || [];\n\nreturn results.map(result => ({\n  json: {\n    row_number: result.row_number,\n    tags: result.tags || [],\n    sentiment: result.sentiment || \"\",\n    ai_tag_1: result.ai_tag_1 || \"\",\n    ai_tag_2: result.ai_tag_2 || \"\",\n    primary_emotion: result.primary_emotion || \"\",\n    secondary_emotion: result.secondary_emotion || \"\"\n  }\n}));"
+      },
+      "id": "392c2958-152b-40a0-8344-e246a4fe8b90",
+      "name": "Split Batch Results",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1824,
+        -472
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 60
+            }
+          ]
+        }
+      },
+      "id": "eddc2208-95de-4e6e-8f94-feff780eef90",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -144,
+        -272
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "content": "## 🏷️ **Fetch Allowed Tags**\n\n",
+        "height": 112,
+        "width": 224,
+        "color": 4
+      },
+      "id": "f185d3a1-09b8-4851-8486-5694d822992f",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        304,
+        -656
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 💬 **Fetch New Feedbacks**\n\n",
+        "height": 112,
+        "color": 4
+      },
+      "id": "458df5b2-4b57-4872-b6c7-adeb3fca36fc",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        288,
+        -144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 **Tag Feedbacks with OpenAI**\n\n",
+        "height": 400,
+        "width": 720,
+        "color": 6
+      },
+      "id": "7fb20794-3a73-43f0-ba2d-709507b65889",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1200,
+        -576
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 📊 **Update Google Sheet (Tagged)**\n",
+        "height": 400,
+        "width": 336,
+        "color": 4
+      },
+      "id": "92c3aa12-9736-456c-9166-f537aa2c01b7",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1952,
+        -576
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🖱️ **Manual Trigger**\n\n",
+        "height": 240,
+        "width": 352,
+        "color": 7
+      },
+      "id": "00c792f4-85a0-4fd9-8f5c-74ad8887b482",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -224,
+        -624
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## ⏰ **Schedule Trigger**\n\n",
+        "height": 240,
+        "width": 352,
+        "color": 7
+      },
+      "id": "fbf194ff-d9e6-4daa-bb0c-72220596a9f1",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -224,
+        -352
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "id": "adfe980b-36b0-4fc8-b437-1ed1e16fc714",
+      "name": "Merge Tags & Feedbacks",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        576,
+        -400
+      ],
+      "typeVersion": 2.1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Allowed Tags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch New Feedbacks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Tags Array": {
+      "main": [
+        [
+          {
+            "node": "Process Feedbacks in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Allowed Tags": {
+      "main": [
+        [
+          {
+            "node": "Merge Tags & Feedbacks",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Fetch New Feedbacks": {
+      "main": [
+        [
+          {
+            "node": "Merge Tags & Feedbacks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Batch Results": {
+      "main": [
+        [
+          {
+            "node": "Update Google Sheet (Tagged)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Batch Items": {
+      "main": [
+        [
+          {
+            "node": "Tag Feedbacks with AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag Feedbacks with AI": {
+      "main": [
+        [
+          {
+            "node": "Split Batch Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Feedbacks in Batches": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Aggregate Batch Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Google Sheet (Tagged)": {
+      "main": [
+        [
+          {
+            "node": "Process Feedbacks in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Fetch Allowed Tags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch New Feedbacks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Tags & Feedbacks": {
+      "main": [
+        [
+          {
+            "node": "Attach Tags Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "48d606c3-dc65-4f0a-9561-87befbfd2e9e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "83a0bd2cd089bcc720c463ad29ce167c02c8874e936d90c332f0cf86f0da3076"
+  },
+  "id": "K5BJchom9u5NKEUo",
+  "tags": []
+}

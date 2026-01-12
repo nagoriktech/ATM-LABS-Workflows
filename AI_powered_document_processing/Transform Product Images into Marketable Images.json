@@ -1,0 +1,812 @@
+{
+  "name": "Transform Product Images into Marketable Images",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        528
+      ],
+      "id": "fa2c58a5-4174-4e62-b292-e97a6ceee80f",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  const base64Url = item?.json?.data;\n  const url = `data:image/png;base64,${base64Url}`;\n  return { url };\n});\nreturn updatedItems;"
+      },
+      "id": "d179c685-6d25-4d8a-b113-f46ecaf2b808",
+      "name": "Format Image URL for AI",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        112,
+        528
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openRouterApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/gemini-2.5-flash-image-preview\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": [\n        {\n          \"type\": \"text\",\n          \"text\": \"You are an expert A.I. creative director for a high-end fashion campaign. Your task is to analyze the provided image of a clothing item and then generate a single, photo-realistic campaign photograph featuring the perfect model who embodies the essence of that garment.\\n\\n**Step 1: Analyze the Garment (Internal Thought Process).**\\nFirst, silently analyze the clothing in the input image. Determine its core identity by asking:\\n- **Style:** Is it streetwear, formal, bohemian, athletic, minimalist, avant-garde?\\n- **Audience:** Who is the target customer? Consider their likely age, lifestyle, values, and aspirations.\\n- **Vibe & Archetype:** What is the overall feeling? Is it rebellious and edgy, sophisticated and elegant, approachable and wholesome, or powerful and dynamic?\\n\\n**Step 2: Synthesize the Ideal Model Persona (Internal Thought Process).**\\nBased on your analysis in Step 1, create a detailed persona for the ideal model. Do not describe a generic model. Instead, synthesize specific traits that perfectly match the clothing:\\n- **Define Demeanor:** What is their attitude? Confident, serene, intense, joyful, thoughtful? This is the most important element.\\n- **Define Features:** What specific age, ethnicity, build, and facial features would best represent the brand vibe and connect with the target audience?\\n- **Define Styling:** What hairstyle and expression will complete the story of the garment?\\n\\n**Step 3: Execute the Photograph (Final Output).**\\nNow, generate the final image. The output should ONLY be the photograph described below, featuring the unique model persona you just created in Step 2.\\n\\n**The Photograph:**\\nA RAW, ultra-realistic, full-body fashion photograph. The model you conceptualized is standing in a relaxed, neutral A-pose, centered in the frame, and facing directly towards the camera. They are wearing the clothing from the input image. The setting is a professional photography studio with a solid, seamless, neutral gray background. The lighting is bright, even, and flattering, achieved with large softbox lights to eliminate all harsh shadows. The image must be shot on a Sony A7R V with an 85mm f/1.4 lens, featuring extremely high detail, hyper-realism, and sharp focus. The final output is 8K UHD. Do not include any text, watermarks, or logos.\"\n        },\n        {\n          \"type\": \"image_url\",\n          \"image_url\": {\n            \"url\": \"{{ $json.url }}\"\n          }\n        }\n      ]\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "id": "543b99a5-857c-4e00-a005-79f2c076263a",
+      "name": "AI Marketing Image Generator",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        336,
+        528
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "openRouterApi": {
+          "id": "SMOtjjcF4tGyYOqU",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d83a18ad-f0dd-4088-b4d4-4109882c17c6",
+              "name": "data",
+              "type": "string",
+              "value": "={{ $json.choices[0].message.images[0].image_url.url }}"
+            },
+            {
+              "id": "1c01e6fb-4bc5-429d-bca1-71fa08a3dd08",
+              "name": "mime",
+              "type": "string",
+              "value": "={{ $json.choices[0].message.images[0].image_url.url.split(\",\")[0].split(':')[1]}}"
+            },
+            {
+              "id": "0c206e48-63ca-4018-8515-230dda633beb",
+              "name": "fileNme",
+              "type": "string",
+              "value": ".png"
+            },
+            {
+              "id": "af48b4ea-282e-47c5-b276-fb08b15d849c",
+              "name": "base",
+              "value": "={{ $json.choices[0].message.images[0].image_url.url.split(\",\")[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "4b9c450c-c0f8-4f73-b102-3a4d85ffeae0",
+              "name": "content",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a815080f-1b50-474c-855c-35de4343b9c9",
+      "name": "Extract Image Data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        560,
+        528
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "base",
+        "options": {}
+      },
+      "id": "112279da-c0ad-49f3-bc30-9d5038cd1182",
+      "name": "Convert to Downloadable File",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        784,
+        528
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "name": "={{ $('AI Marketing Image Generator').item.json.id }}x",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1008,
+        528
+      ],
+      "id": "db35fee2-41a1-4074-b856-2386455c00d3",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "JiDyPLe64nyWKDtC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "writer",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1232,
+        528
+      ],
+      "id": "1ca6a8f4-3b80-4806-9085-dc1291a26997",
+      "name": "Share file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "JiDyPLe64nyWKDtC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f65e31fd-e239-448d-a687-821e321ea803",
+              "name": "webContentLink",
+              "value": "={{ $('Upload file').item.json.webContentLink }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1456,
+        528
+      ],
+      "id": "473419b7-d0bd-4244-8498-dfc17645772f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appu08Y7ALvZwHHxZ",
+          "mode": "list",
+          "cachedResultName": "Product",
+          "cachedResultUrl": "https://airtable.com/appu08Y7ALvZwHHxZ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblSKIPgebQWDb76F",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appu08Y7ALvZwHHxZ/tblSKIPgebQWDb76F"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Attachments": "={{ $json.Attachment2 }}",
+            "Name": "={{ $('Telegram Trigger').item.json.message.caption }}",
+            "Status": "Done"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Todo",
+                  "value": "Todo"
+                },
+                {
+                  "name": "In progress",
+                  "value": "In progress"
+                },
+                {
+                  "name": "Done",
+                  "value": "Done"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Attachments",
+              "displayName": "Attachments",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Modified",
+              "displayName": "Last Modified",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Generated Product",
+              "displayName": "Generated Product",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1232,
+        336
+      ],
+      "id": "1eeb4393-6538-4672-8a3e-4fcdba70d61a",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "xuju8XP1MCqqCNPm",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -336,
+        432
+      ],
+      "id": "c50aab4c-aac1-4f24-8ee3-76902de9ee13",
+      "name": "Telegram Trigger",
+      "webhookId": "34979bb7-808f-4ec9-a9bb-591400d9f8af",
+      "credentials": {
+        "telegramApi": {
+          "id": "w95Vkcyop8EytPo0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "=\n{\n\"Attachment\":[\n{\n\"url\": \" {{ $json.webContentLink }}\", \"filename\": \"{{ $('Upload file').item.json.id }}\"\n}\n]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1680,
+        528
+      ],
+      "id": "9c09639d-c3fd-486b-92ac-73c134c0497f",
+      "name": "A"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "=\n{\n\"Attachment2\":[\n{\n\"url\": \" {{ $json.webContentLink }}\", \"filename\": \"{{ $('Upload file1').item.json.id }}\"\n}\n]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1008,
+        336
+      ],
+      "id": "5cdb74ff-f2f5-4fdf-9569-c821ff0ae9d7",
+      "name": "B"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f65e31fd-e239-448d-a687-821e321ea803",
+              "name": "webContentLink",
+              "value": "={{ $('Upload file1').item.json.webContentLink }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        784,
+        336
+      ],
+      "id": "800ea77d-0823-40ab-8e19-12c606b9034e",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "writer",
+            "type": "anyone"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        560,
+        336
+      ],
+      "id": "1fbf3233-bb8e-47d2-b339-606e07be205c",
+      "name": "Share file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "JiDyPLe64nyWKDtC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data",
+        "options": {}
+      },
+      "id": "2ba341b1-e383-4b10-ac4d-2ff8176979b1",
+      "name": "Convert to Downloadable File1",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        112,
+        336
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "name": "=xy",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        336,
+        336
+      ],
+      "id": "df3b755c-d7b5-4976-adb9-fea82eab9167",
+      "name": "Upload file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "JiDyPLe64nyWKDtC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        336
+      ],
+      "id": "c0bf4939-c72d-4ec8-aa4c-9d3c776547cd",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appu08Y7ALvZwHHxZ",
+          "mode": "list",
+          "cachedResultName": "Product",
+          "cachedResultUrl": "https://airtable.com/appu08Y7ALvZwHHxZ"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblSKIPgebQWDb76F",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appu08Y7ALvZwHHxZ/tblSKIPgebQWDb76F"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Telegram Trigger').item.json.message.caption }}",
+            "Generated Product": "={{ $json.Attachment }}"
+          },
+          "matchingColumns": [
+            "Name"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Todo",
+                  "value": "Todo"
+                },
+                {
+                  "name": "In progress",
+                  "value": "In progress"
+                },
+                {
+                  "name": "Done",
+                  "value": "Done"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Attachments",
+              "displayName": "Attachments",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Last Modified",
+              "displayName": "Last Modified",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Generated Product",
+              "displayName": "Generated Product",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1888,
+        528
+      ],
+      "id": "14b3fc91-3095-4361-b87a-0c19506025fa",
+      "name": "Update record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "xuju8XP1MCqqCNPm",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Format Image URL for AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Image URL for AI": {
+      "main": [
+        [
+          {
+            "node": "AI Marketing Image Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Marketing Image Generator": {
+      "main": [
+        [
+          {
+            "node": "Extract Image Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Image Data": {
+      "main": [
+        [
+          {
+            "node": "Convert to Downloadable File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to Downloadable File": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share file": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share file1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to Downloadable File1": {
+      "main": [
+        [
+          {
+            "node": "Upload file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file1": {
+      "main": [
+        [
+          {
+            "node": "Share file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Convert to Downloadable File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "B": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dd807806-962c-4d6f-bd8d-eb98b40ddb43",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7ae231d5a92eb748d26d32057909897e96a0e49a938f8c7913f7497f81fe3781"
+  },
+  "id": "RFwozcOnYIkcB3sN",
+  "tags": []
+}

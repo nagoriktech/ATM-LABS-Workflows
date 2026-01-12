@@ -1,0 +1,703 @@
+{
+  "name": "Research Report Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.output.searchQueries }}"
+      },
+      "id": "15bbea21-9b2d-458f-bc06-ef303a506245",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        1984,
+        1104
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "toolDescription": "Fetches recent news articles",
+        "url": "=https://newsapi.org/v2/everything?q={{ encodeURIComponent($input.cleanedQuery) }}&apiKey=aabbf34e746a4e0aa3a86ee11fd830c3",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "q"
+            },
+            {
+              "name": "pageSize",
+              "valueProvider": "fieldValue",
+              "value": "3"
+            },
+            {
+              "name": "sortBy",
+              "valueProvider": "fieldValue",
+              "value": "publishedAt"
+            },
+            {
+              "name": "language",
+              "valueProvider": "fieldValue",
+              "value": "en"
+            }
+          ]
+        },
+        "optimizeResponse": true
+      },
+      "id": "fe5424b4-9f5a-45ea-b9fa-bc9d091988c4",
+      "name": "Search News",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "position": [
+        2480,
+        1296
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "toolDescription": "Fetches structured data from Wikipedia",
+        "url": "=https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro&explaintext&titles={{ $input.query ? encodeURIComponent($input.query) : encodeURIComponent($json.refined_query) }}\n\n",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "action",
+              "valueProvider": "modelOptional"
+            },
+            {
+              "name": "prop",
+              "valueProvider": "fieldValue",
+              "value": "extracts"
+            }
+          ]
+        },
+        "optimizeResponse": true
+      },
+      "id": "4107e9f2-0877-4b91-b0ee-ca9a5bf6a2f8",
+      "name": "Wikipedia",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "position": [
+        2080,
+        1264
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "109053b0-2597-4d98-a461-8e9bb96467c2",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1472,
+        1120
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "J33vj3ycUOpKrTGa",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a query generation expert. Based on the refined query provided, generate exactly 5 related search queries that can help broaden the research scope. Each query should focus on a different aspect of the topic (e.g., applications, challenges, recent developments, specific domains, case studies). The output must match the following JSON schema:\n{\n  \"topic\": \"The refined query\",\n  \"searchQueries\": [\"query1\", \"query2\", \"query3\", \"query4\", \"query5\"]\n}\n\nRefined Query: {{ $json.cleanedQuery}}\nExamples:\n- Refined Query: \"current trends in artificial intelligence 2025\"\n  Output: {\n    \"topic\": \"current trends in artificial intelligence 2025\",\n    \"searchQueries\": [\n      \"AI applications in healthcare 2025\",\n      \"ethical challenges of artificial intelligence 2025\",\n      \"recent developments in generative AI 2025\",\n      \"AI trends in education 2025\",\n      \"AI startup funding trends 2025\"\n    ]\n  }\n- Refined Query: \"artificial intelligence applications in healthcare diagnostics and treatment\"\n  Output: {\n    \"topic\": \"artificial intelligence applications in healthcare diagnostics and treatment\",\n    \"searchQueries\": [\n      \"AI in medical diagnostics 2025\",\n      \"artificial intelligence for personalized treatment plans\",\n      \"challenges of AI in healthcare diagnostics\",\n      \"recent studies on AI in healthcare\",\n      \"AI healthcare diagnostics case studies\"\n    ]\n  }",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "916236ef-625f-4432-aaaa-a2c546d5ec18",
+      "name": "Query Refiner",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1488,
+        880
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Perform research on the topic \n\"{{ $json.output.topic }}\"\"\n\n\nusing the following search queries: {{ $json.output.searchQueries.join(\",\") }}\n\n",
+        "options": {
+          "systemMessage": "=You are a research assistant named \"ResearchBot\". Your role is to perform thorough and comprehensive research based on the topic and search queries provided. Follow these steps to gather data:\n- Search the web for general information using the provided topic and queries, focusing on recent trends, developments, and applications (2024-2025).\n- Search Wikipedia for foundational knowledge about the topic to provide context.\n- Search for recent news articles (from 2024-2025) to identify current developments, announcements, and trends.\n- Search Google Scholar for academic papers (from 2020-2025) to gather scholarly insights and research findings.\n- Summarize and aggregate all findings into a structured JSON format.\n- Ensure all data is directly relevant to the topic:  {{ $json.output.topic }}.\nReturn the research findings as a raw JSON object with the following structure:\n{\n  \"introduction\": \"A detailed 4-6 sentence introduction to the topic, providing context, significance, and a brief overview of current trends.\",\n  \"summary\": \"A comprehensive 6-8 sentence summary of the key findings, covering trends, challenges, opportunities, and notable applications.\",\n  \"key_findings\": [\"A list of 8-12 specific key points or trends, each as a concise sentence. This must always be an array with at least 8 items.\"],\n  \"news_highlights\": [\"A list of 4-6 recent news headlines with sources (from 2024-2025), each in the format 'Headline - Source, Year'. This must always be an array with at least 4 items.\"],\n  \"scholarly_insights\": [\"A list of 4-6 insights from academic papers with sources (from 2020-2025), each in the format 'Insight (Author et al., Year, Journal)'. This must always be an array with at least 4 items.\"],\n  \"wikipedia_summary\": \"A detailed 4-6 sentence summary of foundational knowledge from Wikipedia, providing background and historical context on the topic.\",\n  \"sources\": [\"A list of all source URLs (at least 8-12 unique, relevant sources, including web articles, news, and academic papers). This must always be an array with at least 8 items.\"]\n}\nIf insufficient data is found for any field, perform additional searches using variations of the topic and queries to meet the minimum requirements. For example:\n- For news, search for terms like \"[topic] 2025 news\", \"[topic] recent developments\", or \"[topic] industry trends\".\n- For scholarly insights, search for \"[topic] machine learning 2020-2025\", \"[topic] applications research\", or \"[topic] ethical concerns\".\n- For sources, ensure a mix of web articles, news, and academic papers.\nDo NOT include irrelevant information or sources. Do NOT wrap the JSON in a string, an \"output\" field, or any Markdown formatting (e.g., ```json). Return only the raw JSON object.\n\n\nTopic: {{ $json.output.topic }}\nSearch Queries: {{ $json.output.searchQueries }}"
+        }
+      },
+      "id": "4247a23f-c606-42e4-af1c-b2a6ac9d1892",
+      "name": "Research AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1984,
+        880
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "toolDescription": "Searches the web for a given query using Google Custom Search API",
+        "url": "=https://www.googleapis.com/customsearch/v1?key=AIzaSyBvbiV8xK2yBl8jlcaKe9bl7O4CZCmGcto={{ encodeURIComponent($input.query) }}",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "num",
+              "valueProvider": "fieldValue",
+              "value": "5"
+            }
+          ]
+        },
+        "optimizeResponse": true
+      },
+      "id": "e6e4ec4e-7c31-4bb1-83e6-f0965e0fbfc2",
+      "name": "Google Search Web",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "position": [
+        2304,
+        1280
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "toolDescription": "Searches Google Scholar for academic papers",
+        "url": "=https://serpapi.com/search?engine=google_scholar&q={{ encodeURIComponent( $json.refined_query ) }}&api_key=\"YOURAPIKEY\"",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "serpApi",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "num",
+              "valueProvider": "fieldValue",
+              "value": "3"
+            }
+          ]
+        },
+        "optimizeResponse": true
+      },
+      "id": "ebdf1f25-43c0-4ee6-be68-21b11d25d6ea",
+      "name": "SerpApi",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "position": [
+        2464,
+        1104
+      ],
+      "typeVersion": 1.1,
+      "credentials": {
+        "serpApi": {
+          "id": "pbWQPakmTBrxDf2O",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"output\": {\n    \"topic\": \"the best ai models 2025\",\n    \"searchQueries\": [\n      \"best AI models 2025 natural language processing\",\n      \"top AI models 2025 computer vision\",\n      \"best AI models 2025 generative AI\",\n      \"recent advancements in AI models 2025 news\",\n      \"scholarly research on AI models 2020-2025\",\n      \"ethical concerns in AI models 2025\",\n      \"AI models 2025 applications in healthcare\",\n      \"AI models 2025 trends in automation\"\n    ]\n  }\n}"
+      },
+      "id": "1ef8fb86-d833-4251-967a-5bf1155067d5",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        1664,
+        1120
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": " introduction, summary, key_findings, news_highlights, scholarly_insights, wikipedia_summary, sources",
+        "options": {}
+      },
+      "id": "ebd3dc77-08bb-4c4d-a434-7edc52ae0709",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        2592,
+        880
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate input and prepare for processing\nconst query = $input.all()[0].json.query;\n\nif (!query || query.trim().length < 3) {\n  throw new Error('Research query must be at least 3 characters long');\n}\n\nreturn {\n  json: {\n    originalQuery: query,\n    cleanedQuery: query.trim().toLowerCase(),\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "a1dd25b8-8054-4bfe-b68a-7099803d76e5",
+      "name": "Input Validation",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1264,
+        880
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the output string from the Research AI Agent\nlet outputString = $input.first().json.output;\n\n// Remove Markdown code fences if present\noutputString = outputString.replace(/```[a-zA-Z]*\\n?/, '').replace(/```$/, '').trim();\n\nconsole.log(outputString);\nconst parsedOutput = JSON.parse(outputString);\n\n// Return the parsed JSON as a single item\nreturn [{\n  json: parsedOutput\n}];"
+      },
+      "id": "311563a3-dedd-4fd0-ad31-3cb0ae22c9d7",
+      "name": "Parse Research Output",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2384,
+        880
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "const mergedItem = {\n  key_findings: [],\n  news_highlights: [],\n  scholarly_insights: [],\n  sources: []\n};\n\n$input.all().forEach(item => {\n  const data = item.json;\n\n  if (data.introduction) mergedItem.introduction = data.introduction;\n  if (data.summary) mergedItem.summary = data.summary;\n  if (data.wikipedia_summary) mergedItem.wikipedia_summary = data.wikipedia_summary;\n\n  if (data.key_findings) {\n    const findingsToAdd = Array.isArray(data.key_findings) ? data.key_findings : [data.key_findings];\n    mergedItem.key_findings = mergedItem.key_findings.concat(findingsToAdd);\n  }\n  if (data.news_highlights) {\n    const highlightsToAdd = Array.isArray(data.news_highlights) ? data.news_highlights : [data.news_highlights];\n    mergedItem.news_highlights = mergedItem.news_highlights.concat(highlightsToAdd);\n  }\n  if (data.scholarly_insights) {\n    const insightsToAdd = Array.isArray(data.scholarly_insights) ? data.scholarly_insights : [data.scholarly_insights];\n    mergedItem.scholarly_insights = mergedItem.scholarly_insights.concat(insightsToAdd);\n  }\n  if (data.sources) {\n    const sourcesToAdd = Array.isArray(data.sources) ? data.sources : [data.sources];\n    mergedItem.sources = mergedItem.sources.concat(sourcesToAdd);\n  }\n});\n\nreturn [{ json: mergedItem }];"
+      },
+      "id": "3f92b044-e205-46c2-8919-aa2018af9453",
+      "name": "Merge Split Items",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2784,
+        880
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function to escape HTML special characters\nfunction escapeHtml(unsafe) {\n  if (typeof unsafe !== 'string') return unsafe;\n  return unsafe\n    .replace(/&/g, \"&amp;\")\n    .replace(/</g, \"&lt;\")\n    .replace(/>/g, \"&gt;\")\n    .replace(/\"/g, \"&quot;\")\n    .replace(/'/g, \"&#039;\");\n}\n\n// Get topic from Query Refiner\nconst queryRefinerData = $('Query Refiner').first().json;\nconsole.log('Debugging queryRefinerData:', JSON.stringify(queryRefinerData, null, 2));\nconst topicRaw = queryRefinerData.output?.topic || 'Untitled';\nconst topic = topicRaw.split(' ').map(word => {\n  if (word.toLowerCase() === 'ai') return 'AI';\n  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();\n}).join(' ');\n\n// Get timestamp from Aggregate Research Data\nconst aggregateData = $input.first().json;\nconsole.log('Debugging aggregateData:', JSON.stringify(aggregateData, null, 2));\n\n// Validate and parse the timestamp\nlet rawTimestamp = aggregateData.timestamp;\nif (!rawTimestamp || isNaN(new Date(rawTimestamp))) {\n  rawTimestamp = new Date().toISOString(); // Fallback to current date if invalid\n}\nconst formattedDate = new Date(rawTimestamp).toLocaleDateString('en-US', {\n  year: 'numeric',\n  month: 'long',\n  day: 'numeric'\n});\nconsole.log('Raw timestamp:', rawTimestamp);\nconsole.log('Formatted date:', formattedDate);\n\n// Get the aggregated research data from Merge Split Items\nconst mergeSplitItems = $('Merge Split Items').first().json;\nconsole.log('Data from Merge Split Items:', JSON.stringify(mergeSplitItems, null, 2));\n\n// Use data from Merge Split Items\nconst data = {\n  topic: topic,\n  rawTimestamp: rawTimestamp, // Store the raw timestamp\n  formattedDate: formattedDate, // Store the formatted date\n  introduction: mergeSplitItems.introduction,\n  summary: mergeSplitItems.summary,\n  key_findings: mergeSplitItems.key_findings,\n  news_highlights: mergeSplitItems.news_highlights,\n  scholarly_insights: mergeSplitItems.scholarly_insights,\n  wikipedia_summary: mergeSplitItems.wikipedia_summary,\n  sources: mergeSplitItems.sources\n};\n\n// Ensure array fields are arrays, default to empty array if not\nconst keyFindings = Array.isArray(data.key_findings) ? data.key_findings : [];\nconst newsHighlights = Array.isArray(data.news_highlights) ? data.news_highlights : [];\nconst scholarlyInsights = Array.isArray(data.scholarly_insights) ? data.scholarly_insights : [];\nconst sources = Array.isArray(data.sources) ? data.sources : [];\n\n// Define the file name based on the topic\nconst fileName = `research-report-${(data.topic || 'untitled').replace(/\\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`;\n\n// Create an HTML template for the PDF with enhanced styling\nconst htmlContent = `\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Research Report: ${escapeHtml(data.topic)}</title>\n  <style>\n    @page {\n      size: A4;\n      margin: 0;\n      @top-center {\n        content: \"Research Report: ${escapeHtml(data.topic)}\";\n        font-family: 'Helvetica', sans-serif;\n        font-size: 10pt;\n        color: #666;\n      }\n      @bottom-right {\n        content: counter(page);\n        font-family: 'Helvetica', sans-serif;\n        font-size: 10pt;\n        color: #666;\n      }\n    }\n    body {\n      font-family: 'Helvetica', 'Arial', sans-serif;\n      margin: 0;\n      padding: 0;\n      color: #333;\n      line-height: 1.6;\n      font-size: 12pt;\n    }\n    .page-break {\n      page-break-before: always;\n    }\n    .container {\n      width: 90%;\n      max-width: 800px;\n      margin: 0 auto;\n      padding: 40px 30px;\n      background-color: #fff;\n    }\n    /* Cover Page */\n    .cover-page {\n      text-align: center;\n      padding: 100px 30px;\n      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);\n      height: 100vh;\n      display: flex;\n      flex-direction: column;\n      justify-content: center;\n      box-sizing: border-box;\n    }\n    .cover-page h1 {\n      font-family: 'Georgia', serif;\n      font-size: 40pt;\n      font-weight: bold;\n      color: #1a3c5e;\n      margin: 0;\n      text-transform: uppercase;\n      letter-spacing: 2px;\n    }\n    .cover-page p {\n      font-size: 14pt;\n      color: #555;\n      margin: 20px 0;\n      font-style: italic;\n    }\n    /* Header */\n    .header {\n      border-bottom: 2px solid #1a3c5e;\n      padding: 15px 0;\n      text-align: center;\n      margin-bottom: 30px;\n    }\n    .header h1 {\n      font-family: 'Georgia', serif;\n      font-size: 24pt;\n      font-weight: bold;\n      color: #1a3c5e;\n      margin: 0;\n      text-transform: uppercase;\n    }\n    .header p {\n      font-size: 10pt;\n      color: #666;\n      margin: 5px 0 0;\n      font-style: italic;\n    }\n    /* Sections */\n    .section {\n      margin: 40px 0;\n      padding-bottom: 20px;\n      border-bottom: 1px solid #e0e0e0;\n    }\n    .section:last-child {\n      border-bottom: none;\n    }\n    .section h2 {\n      font-family: 'Georgia', serif;\n      font-size: 18pt;\n      font-weight: bold;\n      color: #1a3c5e;\n      margin-bottom: 15px;\n      position: relative;\n    }\n    .section h2::after {\n      content: '';\n      position: absolute;\n      left: 0;\n      bottom: -5px;\n      width: 50px;\n      height: 2px;\n      background-color: #1a3c5e;\n    }\n    .section p {\n      font-size: 12pt;\n      margin: 0 0 15px;\n      color: #444;\n    }\n    .section ul {\n      margin: 0;\n      padding-left: 20px;\n    }\n    .section li {\n      font-size: 12pt;\n      margin: 10px 0;\n      color: #444;\n    }\n    /* Highlighted Key Findings */\n    .key-finding-highlight {\n      background-color: #f0f5fa;\n      padding: 15px;\n      border-left: 4px solid #1a3c5e;\n      margin: 10px 0;\n      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);\n      border-radius: 4px;\n    }\n    .key-finding-highlight span {\n      font-weight: bold;\n      color: #1a3c5e;\n    }\n    /* Sources */\n    .sources ol {\n      margin: 0;\n      padding-left: 20px;\n    }\n    .sources li {\n      font-size: 11pt;\n      margin: 8px 0;\n      word-break: break-all;\n    }\n    .sources a {\n      color: #1a73e8;\n      text-decoration: none;\n    }\n    .sources a:hover {\n      text-decoration: underline;\n    }\n    /* Footer */\n    .footer {\n      text-align: center;\n      font-size: 10pt;\n      color: #666;\n      padding: 20px 0;\n      border-top: 1px solid #e0e0e0;\n      margin-top: 40px;\n      font-style: italic;\n    }\n  </style>\n</head>\n<body>\n  <!-- Cover Page -->\n  <div class=\"cover-page\">\n    <h1>Research Report: ${escapeHtml(data.topic)}</h1>\n    <p>Generated on: ${escapeHtml(data.formattedDate)}</p>\n  </div>\n\n  <!-- Main Content -->\n  <div class=\"page-break\"></div>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>Research Report: ${escapeHtml(data.topic)}</h1>\n      <p>Generated on: ${escapeHtml(data.formattedDate)}</p>\n    </div>\n\n    <div class=\"section\" id=\"introduction\">\n      <h2>Introduction</h2>\n      <p>${escapeHtml(data.introduction) || 'No introduction available.'}</p>\n    </div>\n\n    <div class=\"section\" id=\"summary\">\n      <h2>Summary</h2>\n      <p>${escapeHtml(data.summary) || 'No summary available.'}</p>\n    </div>\n\n    <div class=\"section\" id=\"key-findings\">\n      <h2>Key Findings</h2>\n      <ul>\n        ${keyFindings.length > 0 ? keyFindings.map((finding, index) => {\n          if (index < 3) {\n            return `<li class=\"key-finding-highlight\"><span>${escapeHtml(finding)}</span></li>`;\n          }\n          return `<li>${escapeHtml(finding)}</li>`;\n        }).join('') : '<li>No key findings available.</li>'}\n      </ul>\n    </div>\n\n    <div class=\"section\" id=\"news-highlights\">\n      <h2>News Highlights</h2>\n      <ul>\n        ${newsHighlights.length > 0 ? newsHighlights.map(highlight => `<li>${escapeHtml(highlight)}</li>`).join('') : '<li>No news highlights available.</li>'}\n      </ul>\n    </div>\n\n    <div class=\"section\" id=\"scholarly-insights\">\n      <h2>Scholarly Insights</h2>\n      <ul>\n        ${scholarlyInsights.length > 0 ? scholarlyInsights.map(insight => `<li>${escapeHtml(insight)}</li>`).join('') : '<li>No scholarly insights available.</li>'}\n      </ul>\n    </div>\n\n    <div class=\"section\" id=\"wikipedia-summary\">\n      <h2>Wikipedia Summary</h2>\n      <p>${escapeHtml(data.wikipedia_summary) || 'No Wikipedia summary available.'}</p>\n    </div>\n\n    <div class=\"section sources\" id=\"sources\">\n      <h2>Sources</h2>\n      <ol>\n        ${sources.length > 0 ? sources.map(source => `<li><a href=\"${escapeHtml(source)}\" target=\"_blank\">${escapeHtml(source)}</a></li>`).join('') : '<li>No sources available.</li>'}\n      </ol>\n    </div>\n\n    <div class=\"footer\">\n      <p>Generated by ResearchBot | © 2025</p>\n    </div>\n  </div>\n</body>\n</html>\n`;\n\n// Return the HTML content and file name\nreturn [{\n  json: {\n    htmlContent: htmlContent,\n    fileName: fileName,\n    topic: data.topic,\n    rawTimestamp: data.rawTimestamp,\n    formattedDate: data.formattedDate\n  }\n}];"
+      },
+      "id": "0921fb17-e0dd-4d35-a773-3240bcb648a5",
+      "name": "Generate PDF HTML",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        3200,
+        880
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pdfshift.io/v3/convert/pdf",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "authorization",
+              "value": "Basic sk_c57e6c5081f1af687fc8af5ad50fcfcfa8e1f24d"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=source",
+              "value": "={{ $json.htmlContent }}"
+            },
+            {
+              "name": "landscape",
+              "value": "false"
+            },
+            {
+              "name": "use_print",
+              "value": "false"
+            },
+            {
+              "name": "filename",
+              "value": "={{ $json.fileName }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "455dc3c5-aec8-41de-b847-d0da8ab8d2e0",
+      "name": "Convert HTML to PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3392,
+        880
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "507aec83-3e12-4507-9f85-f54b6a9646c1",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        2992,
+        880
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "370b0e06-621c-4d61-9f93-a44c45324b05",
+      "name": "Download PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3584,
+        880
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "sendTo": "nadvee646@gmail.com",
+        "subject": "=Research Report: {{ $('Query Refiner').first().json.output.topic.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ') }}",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Research Report: {{ $('Generate PDF HTML').item.json.topic }}</title>\n  <style>\n    body {\n      font-family: 'Arial', sans-serif;\n      color: #333;\n      line-height: 1.6;\n      background-color: #f4f4f4;\n      margin: 0;\n      padding: 0;\n    }\n    .container {\n      max-width: 600px;\n      margin: 20px auto;\n      background-color: #ffffff;\n      padding: 30px;\n      border-radius: 8px;\n      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);\n    }\n    .header {\n      text-align: center;\n      border-bottom: 2px solid #1a3c5e;\n      padding-bottom: 15px;\n      margin-bottom: 20px;\n    }\n    .header h1 {\n      font-size: 24px;\n      color: #1a3c5e;\n      margin: 0;\n    }\n    .content p {\n      font-size: 16px;\n      margin: 0 0 15px;\n    }\n    .content p strong {\n      color: #1a3c5e;\n    }\n    .content a {\n      color: #1a73e8;\n      text-decoration: none;\n    }\n    .content a:hover {\n      text-decoration: underline;\n    }\n    .signature {\n      margin-top: 20px;\n      font-size: 14px;\n      color: #666;\n      border-top: 1px solid #e0e0e0;\n      padding-top: 15px;\n    }\n    .signature p {\n      margin: 5px 0;\n    }\n    .footer {\n      text-align: center;\n      font-size: 12px;\n      color: #999;\n      margin-top: 20px;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>Research Report: {{ $('Generate PDF HTML').item.json.topic }}</h1>\n    </div>\n    <div class=\"content\">\n      <p>Dear Nadvee,</p>\n      <p>I hope this email finds you well. I am pleased to share with you a comprehensive research report on \"<strong>\n{{ $('Generate PDF HTML').item.json.topic }}</strong>\", generated on <strong>{{ $('Generate PDF HTML').item.json.formattedDate }}</strong>.</p>\n      <p>This report provides an in-depth analysis, including a detailed introduction, summary, key findings, news highlights, scholarly insights, and a Wikipedia summary, all supported by credible sources. It is designed to offer valuable insights and actionable information to support your research, decision-making, or project needs.</p>\n      <p>Please find the report attached as a PDF for your review. Should you have any questions, require further details, or wish to discuss the findings, feel free to reach out—I’d be happy to assist.</p>\n      <p>Thank you for your interest, and I look forward to your feedback.</p>\n    </div>\n    <div class=\"signature\">\n      <p>Best regards,</p>\n      <p>Immanuel</p>\n    \n    </div>\n    <div class=\"footer\">\n      <p>Generated by Em | © 2025</p>\n    </div>\n  </div>\n</body>\n</html>\n\n\n\n\n\n\n\n\n\n",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "id": "afe69843-8376-4f9a-9ea3-0ec45e21123d",
+      "name": "Send Research to Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        3904,
+        1200
+      ],
+      "webhookId": "ef2f7336-e7d4-4476-a65e-951d92138f0b",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6cl3xY8mTrnaVjH4",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "1bdeca8a-43cc-46de-ae23-471563e2480a",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        1040,
+        992
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "1774923818",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "id": "3e52caa8-2496-4edc-bc8e-be2801cae6b1",
+      "name": "Send PDF",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        3888,
+        864
+      ],
+      "webhookId": "1b2f4bf7-8838-48db-ae75-e50c2a18b815",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "49QJPLdNE4XZdZUA",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        1088
+      ],
+      "id": "72c4b6d5-6bee-49da-b7e9-16e771b539f8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TNRjyeMpcpE2xwcw",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When clicking ‘Test workflow’": [
+      {
+        "json": {
+          "query": "Facts about Thailand"
+        }
+      }
+    ],
+    "Research AI Agent": [
+      {
+        "json": {
+          "output": "```json\n{\n  \"introduction\": \"Thailand, a Southeast Asian nation, is renowned for its tropical beaches, opulent royal palaces, ancient ruins, and ornate temples displaying figures of Buddha. Bangkok, the capital, is an ultramodern cityscape contrasting with quiet canalside communities and iconic temples. The country's economy is a developing one, highly dependent on exports, which account for more than two-thirds of its Gross Domestic Product (GDP). Tourism is a significant economic driver, attracting millions of visitors annually, and it continues to be a crucial sector for national development. Recent trends indicate a push towards digital transformation and sustainable practices across various sectors.\",\n  \"summary\": \"Thailand's economy is undergoing a transformation, with a strong emphasis on boosting digital infrastructure and green initiatives, particularly within its critical tourism and agricultural sectors. Challenges persist in tourism, including over-tourism in popular areas, infrastructure strain, and the need for more diversified offerings. Economically, the country aims to move towards high-tech industries and value-added agriculture, alongside maintaining its robust export market. Opportunities lie in leveraging its rich cultural heritage for niche tourism and expanding its sustainable development projects to protect natural resources and local communities, ensuring long-term prosperity and environmental balance.\",\n  \"key_findings\": [\n    \"Tourism remains a cornerstone of the Thai economy, with efforts focused on sustainable and high-value tourism to mitigate environmental and social impacts.\",\n    \"The automotive industry, electronics, and agricultural processing are key manufacturing sectors contributing significantly to Thailand's GDP.\",\n    \"Thailand is actively promoting a bio-circular-green (BCG) economic model to drive sustainable growth and enhance competitiveness.\",\n    \"Challenges in the tourism sector include managing over-tourism, maintaining infrastructure, and adapting to global travel trends.\",\n    \"The digital economy is a growing focus, with investments in digital infrastructure and e-commerce platforms to support economic diversification.\",\n    \"Thai culture is deeply rooted in Theravada Buddhism, influencing daily life, festivals, and architecture.\",\n    \"Traditional Thai arts, such as classical dance, puppetry, and music, are vital aspects of the country's cultural identity.\",\n    \"Sustainable agriculture initiatives are being implemented to improve food security and reduce environmental footprints in rural areas.\",\n    \"The government is investing in large-scale infrastructure projects to enhance connectivity and support economic development.\",\n    \"Water management and renewable energy projects are critical components of Thailand's sustainable development strategy.\",\n    \"Healthcare and wellness tourism are emerging as significant segments within the broader tourism industry.\",\n    \"Educational reforms are underway to equip the workforce with skills relevant to the evolving industrial landscape.\"\n  ],\n  \"news_highlights\": [\n    \"Thailand's Economy Shows Promising Growth Despite Global Headwinds - Bangkok Post, 2024\",\n    \"Tourism Authority of Thailand Launches 'Sustainable Journey' Campaign for 2025 - The Nation, 2024\",\n    \"New High-Speed Rail Projects to Boost Thai Connectivity and Trade - Thai PBS World, 2025\",\n    \"Bangkok Ranked Among Top Cities for Digital Nomads in Southeast Asia - TechCrunch, 2024\",\n    \"Government Unveils Incentives for Green Investments in Manufacturing Sector - Reuters, 2024\",\n    \"Thai Farmers Embrace Smart Farming Technologies for Increased Yields - ASEAN Economic News, 2025\"\n  ],\n  \"scholarly_insights\": [\n    \"The impact of digital transformation on Thailand's SME competitiveness highlights the need for tailored support programs (Chaisongkram et al., 2022, Journal of Digital Economy).\",\n    \"Analyzing the resilience of Thailand's tourism sector to global crises reveals strategies for future sustainable recovery (Wonglorsaichon & Srisomkaew, 2023, Tourism Management Perspectives).\",\n    \"Sustainable agriculture practices in northern Thailand demonstrate positive environmental and socio-economic outcomes for local communities (Panyadee et al., 2021, Environmental Science & Policy).\",\n    \"The adoption of renewable energy technologies in Thailand faces policy and infrastructure challenges, requiring integrated energy planning (Suttibak & Limmeechokchai, 2020, Renewable and Sustainable Energy Reviews).\",\n    \"Cultural heritage preservation through community-based tourism initiatives strengthens local economies and identity (Jittithavorn & Bunngam, 2022, Journal of Cultural Heritage Management and Sustainable Development).\",\n    \"Challenges and opportunities for electric vehicle adoption in Thailand's automotive industry point to future policy directions (Chaiwiwatworakul et al., 2023, Energy Policy).\"\n  ],\n  \"wikipedia_summary\": \"Thailand, officially the Kingdom of Thailand and formerly known as Siam, is a country in Southeast Asia. It is bordered to the north by Myanmar and Laos, to the east by Laos and Cambodia, to the south by the Gulf of Thailand and Malaysia, and to the west by the Andaman Sea and Myanmar. The country is a constitutional monarchy, with a rich history spanning diverse kingdoms and empires, culminating in its emergence as a modern nation-state. Its unique cultural identity is a blend of indigenous traditions, Buddhist influences, and historical interactions with neighboring countries. Thailand is the only Southeast Asian country that has never been colonized by a European power.\",\n  \"sources\": [\n    \"https://www.bangkokpost.com/thailand-economy-2024\",\n    \"https://www.nationthailand.com/thailand-tourism-2025-sustainable\",\n    \"https://www.thaipbsworld.com/thailand-high-speed-rail-projects\",\n    \"https://techcrunch.com/bangkok-digital-nomads-2024\",\n    \"https://www.reuters.com/thailand-green-investments-2024\",\n    \"https://www.asean-economic-news.com/thai-smart-farming-2025\",\n    \"https://en.wikipedia.org/wiki/Thailand\",\n    \"https://scholar.google.com/scholar?q=Chaisongkram+2022+Thailand+SME+digital+transformation\",\n    \"https://scholar.google.com/scholar?q=Wonglorsaichon+2023+Thailand+tourism+resilience\",\n    \"https://scholar.google.com/scholar?q=Panyadee+2021+Thailand+sustainable+agriculture\",\n    \"https://scholar.google.com/scholar?q=Suttibak+2020+Thailand+renewable+energy\",\n    \"https://scholar.google.com/scholar?q=Jittithavorn+2022+Thailand+cultural+tourism\",\n    \"https://scholar.google.com/scholar?q=Chaiwiwatworakul+2023+Thailand+EV+industry\"\n  ]\n}\n```"
+        }
+      }
+    ],
+    "Query Refiner": [
+      {
+        "json": {
+          "output": {
+            "topic": "facts about thailand",
+            "searchQueries": [
+              "major industries in thailand",
+              "challenges facing thailand’s tourism sector",
+              "recent economic developments in thailand",
+              "cultural traditions unique to thailand",
+              "case studies of sustainable development projects in thailand"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "SerpApi": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Generate PDF HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Merge Split Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search News": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download PDF": {
+      "main": [
+        [
+          {
+            "node": "Send Research to Gmail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Refiner": {
+      "main": [
+        [
+          {
+            "node": "Research AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Research AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input Validation": {
+      "main": [
+        [
+          {
+            "node": "Query Refiner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate PDF HTML": {
+      "main": [
+        [
+          {
+            "node": "Convert HTML to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Search Web": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Split Items": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse Research Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Query Refiner",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert HTML to PDF": {
+      "main": [
+        [
+          {
+            "node": "Download PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Research Output": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Query Refiner",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Input Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "32ebf041-43ca-4c46-9bf5-ec3078c0ca0c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "43869d5f62212a47b6334f8fb6c6a5c7aec4381cb23902e51447e8f84df3ad91"
+  },
+  "id": "EBwoF8m8Xq3kRcGX",
+  "tags": []
+}

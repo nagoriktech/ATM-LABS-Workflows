@@ -1,0 +1,994 @@
+{
+  "name": "Extract Google Trends Keywords & Summarize Articles in Google Sheets",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c6f11286-2b1c-4f43-b185-2c1b8b62ae77",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -384,
+        -80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {
+          "explicitArray": false,
+          "normalize": false
+        }
+      },
+      "id": "a5bfd50f-760f-4dae-ae8b-704f6d3bb5d5",
+      "name": "XML",
+      "type": "n8n-nodes-base.xml",
+      "position": [
+        656,
+        80
+      ],
+      "executeOnce": true,
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://trends.google.it/trending/rss?geo=US",
+        "options": {}
+      },
+      "id": "2a41b544-60e4-46cb-b5fc-69bbd1e0487e",
+      "name": "GoogleTrends",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        400,
+        80
+      ],
+      "executeOnce": true,
+      "retryOnFail": true,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "25d7e553-9678-40ad-bb69-e4eb4bce4d11",
+              "name": "min_traffic",
+              "type": "number",
+              "value": 500
+            },
+            {
+              "id": "decd0a3d-ddc5-45c3-a56f-ee1f14705019",
+              "name": "max_results",
+              "type": "number",
+              "value": 3
+            },
+            {
+              "id": "12cdd78a-45a7-499e-8fe5-0ab6a7da8a10",
+              "name": "jina_key",
+              "type": "string",
+              "value": "jina_22319ad08c734c1588643e4233e9ad0dAoOWxJnSR840oqQ0sOmT8dwj3xGp"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "17c20d14-59ee-466b-84d8-b3c0c7686fd7",
+      "name": "CONFIG",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -128,
+        80
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1gw0a2q9rHHS73oNejkXANnNP9q-q9tHRPx1c1gyYoyA",
+          "mode": "list",
+          "cachedResultName": "News Trends",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gw0a2q9rHHS73oNejkXANnNP9q-q9tHRPx1c1gyYoyA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gw0a2q9rHHS73oNejkXANnNP9q-q9tHRPx1c1gyYoyA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "b7207213-8ac9-45e0-bf98-a9b32070f717",
+      "name": "Get saved keywords",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        144,
+        80
+      ],
+      "executeOnce": false,
+      "typeVersion": 4.5,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HBUcSC8TyEZnv7nr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "29856660-9a6f-4499-9dd4-325f80346275",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -144,
+        592
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7230decf-45d9-4006-b005-614fb1dede10",
+              "name": "summary",
+              "type": "string",
+              "value": "={{ $('content1').item.json.data.text.replaceAll('\\n', ' ').trim() }}\n---\n{{ $('content2').item.json.data.text.replaceAll('\\n', ' ').trim() }}\n---\n{{ $('content3').item.json.data.text.replaceAll('\\n', ' ').trim() }}"
+            },
+            {
+              "id": "ad8f7dcd-fc93-41f3-b643-db4a2b569119",
+              "name": "trending_keyword",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.trending_keyword }}"
+            },
+            {
+              "id": "a3838385-90e2-4308-b147-5ef6de4a2c19",
+              "name": "approx_traffic",
+              "type": "number",
+              "value": "={{ $('New keywords').item.json.approx_traffic }}"
+            },
+            {
+              "id": "fc8523d5-a68d-443b-ad49-9057dee85617",
+              "name": "pubDate",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.pubDate }}"
+            },
+            {
+              "id": "139fd57f-8ccc-453b-9f8f-94c9546bbd1c",
+              "name": "status",
+              "type": "string",
+              "value": "idea"
+            },
+            {
+              "id": "39fa6799-78db-453e-ad29-359ab441e912",
+              "name": "news_item_url1",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.news_item_url1 }}"
+            },
+            {
+              "id": "1e6e7545-526a-4003-ac92-520fa04cfe1d",
+              "name": "news_item_title1",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.news_item_title1 }}"
+            },
+            {
+              "id": "12c019fc-2fe6-41e8-a8b8-e38bdfa16215",
+              "name": "news_item_title2",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.news_item_title2 }}"
+            },
+            {
+              "id": "b14b5835-66b7-448c-b9a5-d9f85d9f7f12",
+              "name": "news_item_url2",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.news_item_url2 }}"
+            },
+            {
+              "id": "4df8d3e0-7c8d-40e1-8ed7-b1743a8bbf17",
+              "name": "news_item_title3",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.news_item_title3 }}"
+            },
+            {
+              "id": "7fe45e6d-1978-49b4-b289-c33e3d68f71a",
+              "name": "news_item_url3",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.news_item_url3 }}"
+            },
+            {
+              "id": "ef39509c-c4e7-49b1-9ee8-ad82a8af9514",
+              "name": "news_item_picture1",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.news_item_picture1 }}"
+            },
+            {
+              "id": "a2210ea6-8ee5-408a-9ba1-5e07bd4d7f1b",
+              "name": "news_item_source1",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.news_item_source1 }}"
+            },
+            {
+              "id": "b6136672-4c09-4da0-ba5b-d9026877ca1e",
+              "name": "news_item_picture2",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.news_item_picture2 }}"
+            },
+            {
+              "id": "f9a54dca-079c-4431-af34-6bb98a6d8711",
+              "name": "news_item_source2",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.news_item_source2 }}"
+            },
+            {
+              "id": "aa38fecd-3743-447f-aa54-a1a86b5ad717",
+              "name": "news_item_picture3",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.news_item_picture3 }}"
+            },
+            {
+              "id": "2ff53574-9f9d-4e35-afbe-161e77a58515",
+              "name": "news_item_source3",
+              "type": "string",
+              "value": "={{ $('New keywords').item.json.news_item_source3 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "de0ac2ae-a317-42c0-a428-1d574e653188",
+      "name": "Mapping",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        128,
+        592
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1gw0a2q9rHHS73oNejkXANnNP9q-q9tHRPx1c1gyYoyA",
+          "mode": "list",
+          "cachedResultName": "News Trends",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gw0a2q9rHHS73oNejkXANnNP9q-q9tHRPx1c1gyYoyA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gw0a2q9rHHS73oNejkXANnNP9q-q9tHRPx1c1gyYoyA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "idea",
+            "pubDate": "={{ $json.pubDate }}",
+            "approx_traffic": "={{ $json.approx_traffic }}",
+            "news_item_url1": "={{ $json.news_item_url1 }}",
+            "news_item_url2": "={{ $json.news_item_url2 }}",
+            "news_item_url3": "={{ $json.news_item_url3 }}",
+            "news_item_title1": "={{ $json.news_item_title1 }}",
+            "news_item_title2": "={{ $json.news_item_title2 }}",
+            "news_item_title3": "={{ $json.news_item_title3 }}",
+            "trending_keyword": "={{ $json.trending_keyword }}",
+            "news_item_source1": "={{ $json.news_item_source1 }}",
+            "news_item_source2": "={{ $json.news_item_source2 }}",
+            "news_item_source3": "={{ $json.news_item_source3 }}",
+            "news_item_picture1": "={{ $json.news_item_picture1 }}",
+            "news_item_picture2": "={{ $json.news_item_picture2 }}",
+            "news_item_picture3": "={{ $json.news_item_picture3 }}",
+            "abstract": "={{ $json.summary.replaceAll('  ', '').substring(0, 49999) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "trending_keyword",
+              "displayName": "trending_keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "approx_traffic",
+              "displayName": "approx_traffic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "abstract",
+              "displayName": "abstract",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pubDate",
+              "displayName": "pubDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "news_item_url1",
+              "displayName": "news_item_url1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "news_item_title1",
+              "displayName": "news_item_title1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "news_item_url2",
+              "displayName": "news_item_url2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "news_item_title2",
+              "displayName": "news_item_title2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "news_item_url3",
+              "displayName": "news_item_url3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "news_item_title3",
+              "displayName": "news_item_title3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "news_item_picture1",
+              "displayName": "news_item_picture1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "news_item_source1",
+              "displayName": "news_item_source1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "news_item_picture2",
+              "displayName": "news_item_picture2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "news_item_source2",
+              "displayName": "news_item_source2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "news_item_picture3",
+              "displayName": "news_item_picture3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "news_item_source3",
+              "displayName": "news_item_source3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2cdc72ad-6a0f-490c-9fd2-14f62c6b8a47",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        704,
+        384
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HBUcSC8TyEZnv7nr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const max_results = $('CONFIG').first().json.max_results;\nconst min_traffic = $('CONFIG').first().json.min_traffic;\n\nconst gsheet = $(\"Get saved keywords\").all();\nconst gsheetKeys = gsheet.map(record => record.json.trending_keyword);\n\nconst items = $('XML').first().json.rss.channel.item;\nconst trafficKey = Object.keys(items[0]).find(key => key.includes(\"approx_traffic\"));\nconst parseTraffic = (traffic) => parseInt(traffic.replace('+', ''), 10);\n\nconst newItems = items.map(item => {\n    const links = Array.isArray(item[\"ht:news_item\"]) ? item[\"ht:news_item\"].slice(0, 3) : [];\n\n    const flattenedLinks = links.reduce((acc, news, index) => {\n        acc[`news_item_url${index + 1}`] = news[\"ht:news_item_url\"];\n        acc[`news_item_title${index + 1}`] = news[\"ht:news_item_title\"];\n        acc[`news_item_picture${index + 1}`] = news[\"ht:news_item_picture\"];\n        acc[`news_item_source${index + 1}`] = news[\"ht:news_item_source\"];\n        return acc;\n    }, {});\n\n    return {\n        trending_keyword: item.title,\n        approx_traffic: parseTraffic(item[trafficKey]),\n        pubDate: item.pubDate,\n        ...flattenedLinks, // Aggiungi i link\n    };\n}).filter(item => \n    item.approx_traffic >= min_traffic && \n    !gsheetKeys.includes(item.trending_keyword) // Filtra quelli già presenti in Google Sheets\n);\n\nlet sortedItems = newItems.sort((a, b) => b.approx_traffic - a.approx_traffic);\nif (max_results > 0) {\n    sortedItems = sortedItems.slice(0, max_results);\n}\n\nreturn sortedItems;\n"
+      },
+      "id": "d7d5748e-250e-48dc-817e-fd7253236f7c",
+      "name": "New keywords",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        896,
+        80
+      ],
+      "typeVersion": 2,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "url": "=https://r.jina.ai/{{ $('New keywords').item.json.news_item_url1 }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('CONFIG').item.json.jina_key }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Remove-Selector",
+              "value": "a, link, script, footer, img, svg"
+            },
+            {
+              "name": "X-Retain-Images",
+              "value": "none"
+            },
+            {
+              "name": "X-Return-Format",
+              "value": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d32ca03f-786d-4406-ba8f-bd4cfe8d202d",
+      "name": "content1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        144,
+        880
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://r.jina.ai/{{ $('New keywords').item.json.news_item_url2 }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('CONFIG').item.json.jina_key }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Remove-Selector",
+              "value": "a, link, script, footer, img, svg"
+            },
+            {
+              "name": "X-Retain-Images",
+              "value": "none"
+            },
+            {
+              "name": "X-Return-Format",
+              "value": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4e6dca24-9040-424e-b8c4-451501302323",
+      "name": "content2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        400,
+        880
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "=https://r.jina.ai/{{ $('New keywords').item.json.news_item_url3 }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('CONFIG').item.json.jina_key }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Remove-Selector",
+              "value": "a, link, script, footer, img, svg"
+            },
+            {
+              "name": "X-Retain-Images",
+              "value": "none"
+            },
+            {
+              "name": "X-Return-Format",
+              "value": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3022004-ee8c-44d5-ad9f-07c2ccf7ac74",
+      "name": "content3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        688,
+        880
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "11 */1 * * *"
+            }
+          ]
+        }
+      },
+      "id": "2356b04b-c33b-413b-9847-32dfaf6748de",
+      "name": "Start every hour past 11 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -384,
+        80
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "content": "## Cron trigger\nGoogle Trends update the RSS feed every 10 minutes. This will start wordflow 1 minute after. ",
+        "height": 1300,
+        "color": 5
+      },
+      "id": "4482eb03-8f4f-413f-bc0c-b164dcd093e1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -464,
+        -240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## CONFIGURATION\nmin_traffic is a numeric value. Google Trend RSS has an approx traffic value 100, 200, 500, 1000 etc.\n\nmax_result is a numeric value used to limit max rss to scrape\n\njina_key is the jina.ai API key",
+        "height": 480,
+        "color": 3
+      },
+      "id": "153e91a3-6b9c-430e-ae5e-6044dda95970",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -208,
+        -240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Google Sheet Database\nThis is main sheet where all your Editorial plan will be saved.\n\nThe column status value could be a trigger for other automations",
+        "height": 480
+      },
+      "id": "49d2ac78-f986-4ed4-97a1-dfd0ceee1a4e",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        64,
+        -240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Google Trends request\n\nWe get last kwyword in trend. Every item has a main keyword and 3 URL. We will use those url to scrape content and generate a combined summary",
+        "height": 480
+      },
+      "id": "5366b135-1821-4e63-898f-fe4d614b6bdd",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        320,
+        -240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Simple conversion\n\nConverts XML RSS into a more readable json object",
+        "height": 480
+      },
+      "id": "5e7b9f43-ab9f-4179-8260-e076e6fb0e2f",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        576,
+        -240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Building dataset\n\nHere we limits results, filter by mmin traffic and we flat the RSS structure to adapt to Google Sheet, fields are renamed as per description.\n\nThen RSS result and Google Sheet is compared, if a new keyword is found we have result. If RSS give a keyword already srtored, this node doesn't give any output.",
+        "height": 480
+      },
+      "id": "bc8ce92f-c3b7-42b0-9d05-71bb9f0d90b9",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        848,
+        -240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Data mapping\n\nHere you have all fields needed in Google Sheet.\n\nWhile done, the content of 3 website linked in Google Trends RSS will be merged in a single Summary field",
+        "height": 460
+      },
+      "id": "6dad82f7-180c-4599-8bfe-c7f48d004605",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        64,
+        288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Data check\n\nSometimes scraping HTML content fails (for some reasons), that's normal but this should avoid to save a zero content if all 3 scraping nodes will fail",
+        "height": 460,
+        "color": 3
+      },
+      "id": "061d61d7-d2fc-4cad-9265-2f53ae8afa95",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        320,
+        288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Data mapping\n\nHere you have all fields needed in Google Sheet.\n\nWhile done, the content of 3 website linked in Google Trends RSS will be merged in a single Summary field",
+        "height": 460
+      },
+      "id": "6d0fe0b4-903f-4819-a29d-b2ec0fb124a8",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -208,
+        288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "42b15ebc-f2f7-4dc0-957f-b04d1bdacb41",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.summary.length > 100 }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "34a1697e-1eb1-4b45-86eb-c9ab9eac343b",
+      "name": "If we have scraped min 1 url -> Save",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        400,
+        592
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {},
+      "id": "be8dc49f-c339-4b9e-a321-792d1727cc6e",
+      "name": "All scraping node failed. Don't save record without summary",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        704,
+        592
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Scraping\n\nHere jina.ai will get text content from 3 Google Trends URLs",
+        "height": 300,
+        "width": 1280,
+        "color": 7
+      },
+      "id": "f5197909-7d1d-4b62-a0ee-06c47365b4b9",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -208,
+        768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Saving output\n\n",
+        "height": 460,
+        "width": 500,
+        "color": 4
+      },
+      "id": "96d3f178-8621-4ec8-9e65-913c967c1fa3",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        576,
+        288
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "XML": {
+      "main": [
+        [
+          {
+            "node": "New keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CONFIG": {
+      "main": [
+        [
+          {
+            "node": "Get saved keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapping": {
+      "main": [
+        [
+          {
+            "node": "If we have scraped min 1 url -> Save",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "content1": {
+      "main": [
+        [
+          {
+            "node": "content2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "content2": {
+      "main": [
+        [
+          {
+            "node": "content3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "content3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleTrends": {
+      "main": [
+        [
+          {
+            "node": "XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New keywords": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Mapping",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "content1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get saved keywords": {
+      "main": [
+        [
+          {
+            "node": "GoogleTrends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start every hour past 11 minutes": {
+      "main": [
+        [
+          {
+            "node": "CONFIG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "CONFIG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If we have scraped min 1 url -> Save": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "All scraping node failed. Don't save record without summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "60468dd4-f6dc-401a-a087-232184b512a6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "edb67d3a7f9d12c7abb88f04023272f13c5753dec2ada987b4428826f48ef7ab"
+  },
+  "id": "tBFtHQKFjoY9NUfa",
+  "tags": []
+}

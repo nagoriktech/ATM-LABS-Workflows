@@ -1,0 +1,1625 @@
+{
+  "name": "AI Data Extraction with Dynamic Prompts and Airtable",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "2162daf8-d23d-4b8f-8257-bdfc5400a3a8",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "row.updated"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "row.updated"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "48e112f6-afe8-40bf-b673-b37446934a62",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "field.created"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "field.created"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "5aa258cd-15c2-4156-a32d-afeed662a38e",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.event_type }}",
+                    "rightValue": "field.updated"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "field.updated"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a72f25f2-d43c-43ad-8552-a6cd45305d4a",
+      "name": "Event Type",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        1360,
+        -384
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "jsCode": "const fields = $input.first().json.fields\n    .filter(item => item.description)\n    .map((item, idx) => ({\n      id: item.id,\n      order: idx,\n      name: item.name,\n      type: item.type,\n      description: item.description,\n    }));\n\nreturn { json: { fields } };"
+      },
+      "id": "31df964d-8fcb-4c36-8a81-78d3d2abc5c3",
+      "name": "Get Prompt Fields",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        672,
+        -384
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.File[0].url }}",
+        "options": {}
+      },
+      "id": "7c2426a6-4d85-4726-9b16-7beeadcbb439",
+      "name": "Get File Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2800,
+        80
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "a553974e-a5c9-47e6-8233-4c4075d76c03",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "position": [
+        2960,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "63d7c52e-d5bf-4f4c-9e37-1d5feaea20f4",
+              "name": "id",
+              "type": "string",
+              "value": "={{ $('Row Reference').item.json.id }}"
+            },
+            {
+              "id": "3ad72567-1d17-4910-b916-4c34a43b1060",
+              "name": "={{ $('Event Ref').first().json.field.name }}",
+              "type": "string",
+              "value": "={{ $json.text.trim() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4a36327d-5693-4952-83bc-25fc1a4cf5ed",
+      "name": "Get Result",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3568,
+        144
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "3b6b8068-e544-401d-87e0-2a9d62d87348",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        2368,
+        -16
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {},
+      "id": "60220591-0171-4885-b4a6-b66dafd1cca8",
+      "name": "Row Reference",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        2560,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<file>\n{{ $json.text }}\n</file>\n\nData to extract: {{ $('Event Ref').first().json.field.description }}\noutput format is: {{ $('Event Ref').first().json.field.type }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You assist the user in extracting the required data from the given file.\n* Keep you answer short.\n* If you cannot extract the requested data, give you response as \"n/a\"."
+            }
+          ]
+        }
+      },
+      "id": "11a711df-5763-4f48-b2cc-ae3e178076c9",
+      "name": "Generate Field Value",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        3120,
+        80
+      ],
+      "typeVersion": 1.5
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $('Row Ref').first().json;\nconst fields = $('Get Prompt Fields').first().json.fields;\nconst missingFields = fields\n  .filter(field => field.description && !row[field.name]);\n\nreturn missingFields;"
+      },
+      "id": "c82165c4-27aa-43a6-9382-ba91deeaba9c",
+      "name": "Fields to Update",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        3136,
+        -544
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "472e8f1f-03d4-4fac-955e-686ef5b98d85",
+      "name": "Loop Over Items1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        2400,
+        -656
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {},
+      "id": "7460d52f-a19e-4f91-8422-7ccd3d56c5e9",
+      "name": "Row Ref",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        2576,
+        -544
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Row Ref').item.json.File[0].url }}",
+        "options": {}
+      },
+      "id": "60506420-0007-4c4c-868e-dc98a210f8f0",
+      "name": "Get File Data1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2816,
+        -544
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "5116e7a3-a572-4547-b588-c3467ffb42cd",
+      "name": "Extract from File1",
+      "type": "n8n-nodes-base.extractFromFile",
+      "position": [
+        2976,
+        -544
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e376ba60-8692-4962-9af7-466b6a3f44a2",
+              "name": "={{ $('Fields to Update').item.json.name }}",
+              "type": "string",
+              "value": "={{ $json.text.trim() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8cd5d14b-05e1-4ef8-b91a-329e161431be",
+      "name": "Get Result1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3696,
+        -496
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<file>\n{{ $('Extract from File1').first().json.text }}\n</file>\n\nData to extract: {{ $json.description }}\noutput format is: {{ $json.type }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You assist the user in extracting the required data from the given file.\n* Keep you answer short.\n* If you cannot extract the requested data, give you response as \"n/a\" followed by \"(reason)\" where reason is replaced with reason why data could not be extracted."
+            }
+          ]
+        }
+      },
+      "id": "bd40873b-3fa5-4271-ac72-5b7fa35e682c",
+      "name": "Generate Field Value1",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        3296,
+        -544
+      ],
+      "typeVersion": 1.5
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "7ad58f0b-0354-49a9-ab2f-557652d7b416",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.File[0].url }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "61abdec6-3253-47b5-bc0c-68ed5d4d2468",
+      "name": "Filter Valid Rows",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        2096,
+        -656
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "5b4a7393-788c-42dc-ac1f-e76f833f8534",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.field.description }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bf2ecf9f-dc9e-47eb-ad52-48fd5e097244",
+      "name": "Filter Valid Fields",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        1920,
+        -16
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {},
+      "id": "cee4b08b-0337-4fb1-9bc1-c794bd8fe2c0",
+      "name": "Event Ref",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        1728,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "e0fcccd5-3448-493a-9add-c78ad249c918",
+      "name": "Event Ref1",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        1728,
+        -656
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Try It Out!\n### This n8n template powers a \"dynamic\" or \"user-defined\" prompts with PDF workflow pattern for a [Airtable](https://airtable.com/invite/r/cKzxFYVc) table. Simply put, it allows users to populate a spreadsheet using prompts without touching the underlying template.\n\n**Check out the video demo I did for n8n Studio**: https://www.youtube.com/watch?v=_fNAD1u8BZw\n\n**Check out the example Airtable here:** https://airtable.com/appAyH3GCBJ56cfXl/shrXzR1Tj99kuQbyL\n\nThis template is intended to be used as a webhook source for Airtable. **Looking for a Baserow version? [Click here](https://n8n.io/workflows/2780-ai-data-extraction-with-dynamic-prompts-and-baserow)**\n\n## How it works\n* Each Airtable.io tables offers integration feature whereby changes to the table can be sent as events to any accessible webhook. This allows for a reactive trigger pattern which makes this type of workflow possible. For our usecase, we capture the vents of `row_updated`, `field_created` and `field_updated`.\n* Next, we'll need an \"input\" column in our Airtable.io table. This column will be where our context lives for evaluating the prompts against. In this example, our \"input\" column name is \"file\" and it's where we'll upload our PDFs. Note, this \"input\" field is human-controlled and never updated from this template.\n* Now for the columns (aka \"fields\" in Airtable). Each field allows us to define a name, type and description and together form the schema. The first 2 are self-explaintory but the \"description\" will be for users to provide their prompts ie. what data should the field to contain.\n* In this template, a webhook trigger waits for when a row or column is updated. The incoming event comes with lots of details such as the table, row and/or column Ids that were impacted.\n* We use this information to fetch the table's schema in order to get the column's descriptions (aka dynamic prompts).\n* For each triggered event, we download our input ie. the PDF and ready it for our AI/LLM. By iterating through the available columns and feeding the dynamic prompts, our LLM can run those prompts against the PDF and thus generating a value response for each cell.\n* These values are then collected and used to update the Airtable Record.\n\n## How to use\n* You'll need to publish this workflow and make it accessible to our Airtable instance.\n* you must run the \"Create Airtable Webhooks\" mini-flow to link it to your Airtable.\n* This template is reusable for other Airtables but the webhooks need to be created each time for each table.\n\n### Need Help?\nJoin the [Discord](https://discord.com/invite/XPKeKXeB7d) or ask in the [Forum](https://community.n8n.io/)!\n\nHappy Flowgramming!",
+        "height": 1120,
+        "width": 520
+      },
+      "id": "983ed6ae-daba-43df-9315-7b986d118094",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -672,
+        -1248
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "696a4b80-fed0-483d-a55f-304a2e9e11c6",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        3296,
+        -384
+      ],
+      "typeVersion": 1.1,
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "c69d2600-d176-4cbd-9dfb-b549805d2f23",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        3120,
+        272
+      ],
+      "typeVersion": 1.1,
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "[![airtable.io](https://res.cloudinary.com/daglih2g8/image/upload/f_auto,q_auto/v1/n8n-workflows/airtable_logo)](https://airtable.com/invite/r/cKzxFYVc)",
+        "height": 120,
+        "width": 300,
+        "color": 7
+      },
+      "id": "16b82cc2-9d92-425c-a7e6-f26bb381bec5",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -672,
+        -1376
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "=https://api.airtable.com/v0/bases/{{ $('Airtable Webhook').first().json.body.base.id }}/webhooks/{{ $('Airtable Webhook').first().json.body.webhook.id }}/payloads",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "options": {}
+      },
+      "id": "97e32feb-286f-44ce-b7f3-b1e434b38b04",
+      "name": "Get Webhook Payload",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        992,
+        -384
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "636CL2rcBa3eaysO",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const webhook = $('Airtable Webhook').first().json;\nconst schema = $('Get Prompt Fields').first().json;\nconst { payloads } = $input.first().json;\nif (!payloads.length) return [];\n\nconst event = payloads[payloads.length - 1];\nconst baseId = webhook.body.base.id;\nconst tableId = Object.keys(event.changedTablesById)[0];\nconst table = event.changedTablesById[tableId];\n\nreturn {\n  baseId,\n  tableId,\n  event_type: getEventType(table),\n  fieldId: getFieldId(table),\n  field: getField(getFieldId(table)),\n  rowId: getRecordId(table),\n}\n\nfunction getEventType(changedTableByIdObject) {\n  if (changedTableByIdObject['createdFieldsById']) return 'field.created';\n  if (changedTableByIdObject['changedFieldsById']) return 'field.updated'\n  if (changedTableByIdObject['changedRecordsById']) return 'row.updated';\n  return 'unknown';\n}\n\nfunction getFieldId(changedTableByIdObject) {\n  const field = changedTableByIdObject.createdFieldsById\n    || changedTableByIdObject.changedFieldsById\n    || null;\n\n  return field ? Object.keys(field)[0] : null;\n}\n\nfunction getField(id) {\n  return schema.fields.find(field => field.id === id);\n}\n\nfunction getRecordId(changedTableByIdObject) {\n  const record = changedTableByIdObject.changedRecordsById\n    || null;\n\n  return record ? Object.keys(record)[0] : null;\n}"
+      },
+      "id": "b2e09c83-6a23-4b77-8d14-64a99507eb4b",
+      "name": "Parse Event",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1168,
+        -384
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "resource": "base",
+        "operation": "getSchema",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Airtable Webhook').item.json.body.base.id }}"
+        }
+      },
+      "id": "32337bfc-69c8-4c59-aaa1-43b95eb50f31",
+      "name": "Get Table Schema",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        496,
+        -384
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "636CL2rcBa3eaysO",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.baseId }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.tableId }}"
+        },
+        "filterByFormula": "NOT({File} = \"\")",
+        "options": {}
+      },
+      "id": "a2c492bc-0dde-4579-96ba-28f66abd51a6",
+      "name": "Fetch Records",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        2096,
+        -16
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "636CL2rcBa3eaysO",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Event Ref').first().json.baseId }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Event Ref').first().json.tableId }}"
+        },
+        "columns": {
+          "value": {},
+          "schema": [
+            {
+              "id": "id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": true,
+              "required": false,
+              "displayName": "id",
+              "defaultMatch": true
+            },
+            {
+              "id": "Name",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File",
+              "type": "array",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "File",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Full Name",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Full Name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": true,
+              "required": false,
+              "displayName": "Created",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Modified",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": true,
+              "required": false,
+              "displayName": "Last Modified",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Address",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Address",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [
+            "id"
+          ]
+        },
+        "options": {}
+      },
+      "id": "45f5aef4-5e2f-47dc-8c23-8d7db1a51429",
+      "name": "Update Row",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        3760,
+        144
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "636CL2rcBa3eaysO",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.baseId }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.tableId }}"
+        },
+        "id": "={{ $json.rowId }}",
+        "options": {}
+      },
+      "id": "a6e7f810-269f-4467-b94e-978597e9cb70",
+      "name": "Get Row",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        1920,
+        -656
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "636CL2rcBa3eaysO",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{\n{\n  id: $('Row Ref').item.json.id,\n  ...$input.all()\n    .map(item => item.json)\n    .reduce((acc, item) => ({\n      ...acc,\n      ...item,\n    }), {})\n}\n}}",
+        "options": {}
+      },
+      "id": "c44e3059-1abf-4be5-83ed-2dc8a7d2f241",
+      "name": "Add Row ID to Payload",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        3872,
+        -496
+      ],
+      "executeOnce": true,
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Event Ref1').first().json.baseId }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Event Ref1').first().json.tableId }}"
+        },
+        "columns": {
+          "value": {},
+          "schema": [
+            {
+              "id": "id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": true,
+              "required": false,
+              "displayName": "id",
+              "defaultMatch": true
+            },
+            {
+              "id": "Name",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File",
+              "type": "array",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "File",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Full Name",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Full Name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Address",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Address",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": true,
+              "required": false,
+              "displayName": "Created",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Modified",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": true,
+              "required": false,
+              "displayName": "Last Modified",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [
+            "id"
+          ]
+        },
+        "options": {}
+      },
+      "id": "ba43a2ef-1e0b-4889-b367-e50a01f0eb42",
+      "name": "Update Record",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        4048,
+        -496
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "636CL2rcBa3eaysO",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "a82f0ae7-678e-49d9-8219-7281e8a2a1b2",
+        "options": {}
+      },
+      "id": "a8ee7364-d7e9-4ff1-82dd-3e0bc964eb75",
+      "name": "Airtable Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        176,
+        -384
+      ],
+      "webhookId": "a82f0ae7-678e-49d9-8219-7281e8a2a1b2",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {},
+      "id": "f15b8e2c-a3db-402b-b514-77f777ce2fd3",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -32,
+        -880
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "012cb420-1455-4796-a2ac-a31e6abf59ba",
+              "name": "appId",
+              "type": "string",
+              "value": "appbhg0A0gXGe6rJW"
+            },
+            {
+              "id": "e863b66c-420f-43c6-aee2-43aa5087a0a5",
+              "name": "tableId",
+              "type": "string",
+              "value": "tblQE5rkTIxXgINhQ"
+            },
+            {
+              "id": "e470be1a-5833-47ed-9e2f-988ef5479738",
+              "name": "notificationUrl",
+              "type": "string",
+              "value": "https://kzsakib5.app.n8n.cloud/webhook/a82f0ae7-678e-49d9-8219-7281e8a2a1b2"
+            },
+            {
+              "id": "e4b3213b-e3bd-479b-99ec-d1aa31eaa4c8",
+              "name": "inputField",
+              "type": "string",
+              "value": "File"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "63d69fcb-4fe0-426f-a831-08813fc9a5be",
+      "name": "Set Airtable Vars",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        160,
+        -880
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "base",
+        "operation": "getSchema",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.appId }}"
+        }
+      },
+      "id": "406524af-9275-4eba-8153-bc20ee40b717",
+      "name": "Get Table Schema1",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        336,
+        -1056
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "636CL2rcBa3eaysO",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{\n$input.all()\n    .map(item => item.json)\n    .find(item => item.id === $('Set Airtable Vars').first().json.tableId)\n    .fields\n    .find(field => field.name === $('Set Airtable Vars').first().json.inputField)\n}}",
+        "options": {}
+      },
+      "id": "a8163141-5648-45b6-80ef-aaa9e9d0aeca",
+      "name": "Get \"Input\" Field",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        512,
+        -1056
+      ],
+      "executeOnce": true,
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.airtable.com/v0/bases/{{ $('Set Airtable Vars').first().json.appId }}/webhooks",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"notificationUrl\": $('Set Airtable Vars').first().json.notificationUrl,\n  \"specification\": {\n    \"options\": {\n      \"filters\": {\n        \"fromSources\": [ \"client\" ],\n        \"dataTypes\": [ \"tableData\" ],\n        \"changeTypes\": [ \"update\" ],\n        \"recordChangeScope\": $('Set Airtable Vars').first().json.tableId,\n        \"watchDataInFieldIds\": [$json.id]\n      }\n    }\n  }\n}\n}}",
+        "options": {}
+      },
+      "id": "c667b703-7fad-4445-b47a-f5a33d388836",
+      "name": "RecordsChanged Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        688,
+        -1056
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "636CL2rcBa3eaysO",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.airtable.com/v0/bases/{{ $('Set Airtable Vars').first().json.appId }}/webhooks",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "airtableTokenApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"notificationUrl\": $('Set Airtable Vars').first().json.notificationUrl,\n  \"specification\": {\n    \"options\": {\n      \"filters\": {\n        \"fromSources\": [ \"client\" ],\n        \"dataTypes\": [ \"tableFields\" ],\n        \"changeTypes\": [ \"add\", \"update\" ],\n        \"recordChangeScope\": $('Set Airtable Vars').first().json.tableId\n      }\n    }\n  }\n}\n}}",
+        "options": {}
+      },
+      "id": "deff9580-644b-4aa7-a508-a1d7ac0529c8",
+      "name": "FieldsChanged Webhook",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        688,
+        -880
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "636CL2rcBa3eaysO",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### 8. Using an Items Loop\n[Learn more about the Split in Batches node](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.splitinbatches/)\n\nSimilar to Step 4, the Split in Batches node is a preference for user experience - changes are seen in the Airtable quicker.\n",
+        "height": 460,
+        "width": 420,
+        "color": 7
+      },
+      "id": "63711417-fc16-4841-ba5a-793e0a529266",
+      "name": "Sticky Note12",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2288,
+        -208
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 9. Generating Value using LLM\n[Learn more about the Extract From File node](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.extractfromfile/)\n\nPretty much identical to Step 5 but instead of updating every field/column, we only need to generate a value for one. \n",
+        "height": 500,
+        "width": 700,
+        "color": 7
+      },
+      "id": "d510dd07-89dd-4c6e-9efc-cf845cbba81a",
+      "name": "Sticky Note11",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2736,
+        -96
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 10. Update the Airtable Record\n[Learn more about the Edit Fields node](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.set/)\n\nAs with Step 6, the LLM response is used to update the row however only under the field that was created/changed. Once complete, the loop continues and the next row is processed.\n",
+        "height": 440,
+        "width": 500,
+        "color": 7
+      },
+      "id": "80955ab6-a8ab-43d2-8f5d-25e4ac1f3935",
+      "name": "Sticky Note13",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3456,
+        -96
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 6. Update the Airtable Record\n[Learn more about the Edit Fields node](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.set/)\n\nFinally, we can collect the LLM responses and combine them to build an API request to update our Airtable record - the Id of which we got from initial webhook. After this is done, we can move onto the next row and repeat the process.\n",
+        "height": 440,
+        "width": 600,
+        "color": 7
+      },
+      "id": "31f7bb21-a559-489a-8497-7cded25a380a",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3632,
+        -720
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 5. PDFs, LLMs and Dynamic Prompts? Oh My!\n[Learn more about the Basic LLM node](https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.chainllm/)\n\nThis step is where it all comes together! In short, we give our LLM the PDF contents as the context and loop through our dynamic prompts (from the schema we pulled earlier) for our row. At the end, our LLM should have produced a value for each column requested.\n\n**Note**: There's definitely a optimisation which could be done for caching PDFs but it beyond the scope of this demonstration.\n",
+        "height": 516,
+        "width": 860,
+        "color": 7
+      },
+      "id": "6292811d-17d4-4b16-8ddf-42e0b1663b8e",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2752,
+        -816
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 4. Using an Items Loop\n[Learn more about the Split in Batches node](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.splitinbatches/)\n\nA split in batches node is used here to update a row at a time however, this is a preference for user experience - changes are seen in the Airtable quicker.\n",
+        "height": 460,
+        "width": 420,
+        "color": 7
+      },
+      "id": "f79a9795-0126-49dc-ae23-ebf1ac8d1e9e",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2320,
+        -816
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 3. Filter Only Rows with Valid Input\n[Learn more about the Split Out node](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.splitout/)\n\nThis step handles one or more updated rows where \"updated\" means the \"input\" column (ie. \"file\" in our example) for these rows were changed. For each affected row, we'll get the full row to figure out only the columns we need to update - this is an optimisation to avoid redundant work ie. generating values for columns which already have a value.",
+        "height": 400,
+        "width": 620,
+        "color": 7
+      },
+      "id": "883c520b-ba33-4dfe-8aee-2782f5bdde6d",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1680,
+        -864
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 7. Listing All Applicable Rows Under The Column\n[Learn more about the Filter node](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.filter)\n\nTo keep things performant, we can decide to get only rows with inputfield populated as this is required to perform the extraction. This can easily be achieved with Airtable filters.",
+        "height": 360,
+        "width": 600,
+        "color": 7
+      },
+      "id": "002af597-4534-4a11-a96d-49c5757375b0",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1680,
+        -208
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 2b. Update Every Row under the Field\nThis branch updates all applicable rows under field when the field/column is created or changed. Watch out - if you have 1000s of rows, this could take a while!",
+        "height": 120,
+        "width": 390,
+        "color": 5
+      },
+      "id": "42c8f084-8c38-48f1-b3c5-3f611303e2a7",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1248,
+        -96
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 2a. Updates Minimal Number of Rows\nThis branch updates only the rows impacted.",
+        "height": 80,
+        "width": 330,
+        "color": 5
+      },
+      "id": "faf7ff5a-9679-478f-8b2d-59e3e7db91ce",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1312,
+        -688
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 2. Event Router Pattern\n[Learn more about the Switch node](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.switch/)\n\nA simple switch node can be used to determine which event to handle. The difference between our row and field events is that row event affect a single row whereas field events affect all rows. \n",
+        "height": 440,
+        "width": 760,
+        "color": 7
+      },
+      "id": "c9624ced-248b-4b21-815b-d06a7023b4ac",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        896,
+        -576
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 1. Get Table Schema\n[Learn more about the Airtable node](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.airtable/)\n\nFor this operation, we'll use the handy Airtable node. I recommend getting familiar with this node for all your Airtable needs!\n",
+        "height": 440,
+        "width": 480,
+        "color": 7
+      },
+      "id": "182966c3-b3be-4c85-9b41-c71b4ca0c6d9",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        -576
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## ⭐️ Creating Airtable Webhooks\nTo link this workflow with Airtable, you'll have to create webhooks for the Base.\nYou'll only really need to do this this once but if these webhooks are inactive after 7 days, you'll need to create them again.\n\nCheck out the Airtable Developer documentation for more info: [https://airtable.com/developers/web/api/webhooks-overview](https://airtable.com/developers/web/api/webhooks-overview)",
+        "height": 580,
+        "width": 1020,
+        "color": 5
+      },
+      "id": "65823386-13e5-4c4e-8318-345b06fa518c",
+      "name": "Sticky Note14",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -112,
+        -1248
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Row": {
+      "main": [
+        [
+          {
+            "node": "Filter Valid Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Row Ref": {
+      "main": [
+        [
+          {
+            "node": "Get File Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Ref": {
+      "main": [
+        [
+          {
+            "node": "Filter Valid Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Ref1": {
+      "main": [
+        [
+          {
+            "node": "Get Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event Type": {
+      "main": [
+        [
+          {
+            "node": "Event Ref1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Event Ref",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Event Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Result": {
+      "main": [
+        [
+          {
+            "node": "Update Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Row": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Result1": {
+      "main": [
+        [
+          {
+            "node": "Add Row ID to Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Event": {
+      "main": [
+        [
+          {
+            "node": "Event Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Records": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File Data": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Row Reference": {
+      "main": [
+        [
+          {
+            "node": "Get File Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Record": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File Data1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Row Reference",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Table Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fields to Update": {
+      "main": [
+        [
+          {
+            "node": "Generate Field Value1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Table Schema": {
+      "main": [
+        [
+          {
+            "node": "Get Prompt Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Row Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Generate Field Value",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Valid Rows": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get \"Input\" Field": {
+      "main": [
+        [
+          {
+            "node": "RecordsChanged Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Prompt Fields": {
+      "main": [
+        [
+          {
+            "node": "Get Webhook Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Table Schema1": {
+      "main": [
+        [
+          {
+            "node": "Get \"Input\" Field",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Field Value1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Airtable Vars": {
+      "main": [
+        [
+          {
+            "node": "Get Table Schema1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "FieldsChanged Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Fields to Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Field Value",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Valid Fields": {
+      "main": [
+        [
+          {
+            "node": "Fetch Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Webhook Payload": {
+      "main": [
+        [
+          {
+            "node": "Parse Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Field Value": {
+      "main": [
+        [
+          {
+            "node": "Get Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Row ID to Payload": {
+      "main": [
+        [
+          {
+            "node": "Update Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Field Value1": {
+      "main": [
+        [
+          {
+            "node": "Get Result1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Airtable Vars",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4d5a87df-2933-4164-963e-8421f54d021c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "edb67d3a7f9d12c7abb88f04023272f13c5753dec2ada987b4428826f48ef7ab"
+  },
+  "id": "SAqRUvfJgZwJNLLg",
+  "tags": []
+}
