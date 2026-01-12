@@ -1,0 +1,650 @@
+{
+  "name": "AI Speechwriting Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Route Flow Based on Message Content').item.json.text }}",
+        "options": {
+          "systemMessage": "={{ $json.system_prompt }}\n\nYou are generating text for a Telegram message. The text should be plain. No * or **"
+        }
+      },
+      "id": "273311dc-556e-4869-a0cb-dd827cdc7c16",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1760,
+        544
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-001",
+        "options": {}
+      },
+      "id": "6e3ec572-8a34-4ccb-8e9a-0611227a4f62",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [
+        1728,
+        1104
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "b68e15d7-9572-4afe-a2ed-2fad0e2ba4ac",
+      "name": "Recieve Telegram Message",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        -368,
+        544
+      ],
+      "webhookId": "20140af0-c902-44db-9c53-051def981f9a",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b37e51e5-e2c7-4328-b02b-80d08164d595",
+              "name": "text",
+              "type": "string",
+              "value": "={{ $json.message.text||\"\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4fb9072f-e419-40ed-a7cd-e9e576e1f969",
+      "name": "Check For Text or Voice Message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -160,
+        544
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Recieve Telegram Message').item.json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "id": "43365d21-1427-477a-b9e7-5a066ecc3ef8",
+      "name": "Download Audio File",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        288,
+        416
+      ],
+      "webhookId": "68e0f93e-5dd0-41aa-89e4-4e7a6be9d3b2",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "1e3a4077-c14c-4628-afdb-76295925f2c3",
+      "name": "Transcribe Audio File",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        512,
+        416
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "d60f6ce2-afd0-4ee1-a7c3-3d5bbdb68ea2",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.text }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8d3e5828-4dd3-414e-94a4-95d4a049489c",
+      "name": "If Voice Message",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        48,
+        544
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "import re\n\ndef clean_markdown_for_telegram(text):\n  \"\"\"\n  Removes common Markdown formatting characters from a string.\n\n  Args:\n    text: The input string.\n\n  Returns:\n    A new string with Markdown characters removed.\n  \"\"\"\n  markdown_chars = r\"[*_~`\\[\\]()#+\\-=|{}.!]\"\n  cleaned_text = re.sub(markdown_chars, \"\", text)\n  cleaned_text = \" \".join(cleaned_text.split()).strip()\n  return cleaned_text\n\n# Loop over input items and create new items with the cleaned text\noutput_items = []\nfor item in _input.all():\n  feedback_text = item.json.get(\"output\", \"\")\n  cleaned_feedback = clean_markdown_for_telegram(feedback_text)\n  output_items.append({\"json\": {\"cleanedText\": cleaned_feedback}})\n\nreturn output_items"
+      },
+      "id": "bc2b54fd-0548-434d-9cfa-5c9ddcb01bd0",
+      "name": "Code to remove unwanted characters from LLM response",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2176,
+        544
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "def split_text_for_telegram(text, max_length=4000):\n  \"\"\"\n  Splits a long text into a list of strings, each with a maximum length\n  suitable for Telegram messages.\n\n  Args:\n    text: The input string to split.\n    max_length: The maximum length of each resulting string (default: 4000).\n\n  Returns:\n    A list of strings, where each string is a chunk of the original text\n    with a maximum length of max_length.\n  \"\"\"\n  if len(text) <= max_length:\n    return [text]\n\n  chunks = []\n  start_index = 0\n  while start_index < len(text):\n    end_index = min(start_index + max_length, len(text))\n\n    split_point = end_index\n    if end_index < len(text):\n      last_sentence_end = -1\n      for i in range(start_index + max_length - 1, start_index - 1, -1):\n        if i < len(text) and text[i] in ['.', '?', '!']:\n          last_sentence_end = i + 1\n          break\n      if last_sentence_end > start_index:\n        split_point = last_sentence_end\n\n    chunks.append(text[start_index:split_point])\n    start_index = split_point\n\n  return chunks\n\noutput_items = []\nmax_length = 4000\n\nfor item in _input.all():\n  text = item.json.get(\"cleanedText\", \"\")\n  text_chunks = split_text_for_telegram(text, max_length)\n  for chunk in text_chunks:\n    output_items.append({\"json\": {\"telegramTextChunk\": chunk}})\n\nreturn output_items"
+      },
+      "id": "b02e538d-785c-42ab-a7d4-b56473653ae0",
+      "name": "Code to split output into chunks under 4000 characters",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2400,
+        544
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Recieve Telegram Message').item.json.message.chat.id }}",
+        "text": "={{ $json.telegramTextChunk }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "35a8d036-b594-4f52-805e-1ffd2e853b44",
+      "name": "Respond to Telegram Message",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2608,
+        544
+      ],
+      "webhookId": "4c77b108-e066-4538-986a-7535143cfaac",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "mode": "delete",
+        "deleteMode": "all"
+      },
+      "id": "2c0ded5d-975d-4409-a7f0-44f62acc9ea9",
+      "name": "Wipe Conversation Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "position": [
+        1056,
+        272
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Recieve Telegram Message').item.json.message.from.id }}",
+        "contextWindowLength": 25
+      },
+      "id": "66ce8eb7-8de0-4b86-a51a-c66dd8e05896",
+      "name": "Store Conversation Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        1232,
+        1104
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d5b33b03-241b-4193-915a-4eb4dfef05e9",
+              "name": "system_prompt",
+              "type": "string",
+              "value": "\"I am preparing to give a speech. Your role is to act as my speech preparation assistant. Please guide me through the process of getting ready to deliver this speech effectively. Ask me relevant questions and suggest steps we should take to ensure a successful presentation.\n\nPotential areas we can work on include:\n\nDefining the core message and key takeaways.\nUnderstanding the audience's needs and expectations.\nStructuring the speech for maximum impact.\nCrafting engaging content and supporting materials.\nDeveloping effective opening and closing remarks.\nPracticing delivery and managing speaking anxiety.\nAnticipating potential questions from the audience.\nConsidering the logistics of the presentation (e.g., time limits, equipment).\nWhere should we begin?"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0cb0cbb5-6cf6-4266-a244-7dc49f4212ec",
+      "name": "Set prompt to start a new speech",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1456,
+        272
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ddbff433-f4bb-4ac1-a954-7fb32c942a9b",
+              "name": "system_prompt",
+              "type": "string",
+              "value": "I want you to act as a speech synthesizer and improvement agent. You have access to the content of several speeches I have previously provided, along with the constructive feedback I received on each and with this information your task is to generate a new speech.\n\nThis new speech should incorporate the following:\n\nKey themes and ideas that were present and well-received in my previous speeches.\nStructural elements and transitions that were identified as effective in past feedback.\nEngagement techniques that were noted as successful.\nAvoidance of areas for improvement highlighted in the feedback (e.g., rambling sections, unclear points, pacing issues).\nIncorporation of specific suggestions for improvement that were given.\nA similar tone and style to my previous speeches, while aiming for enhanced clarity and impact based on the feedback.\nPlease provide the complete text of the new speech. Feel free to ask clarifying questions if needed about the new topic, audience, or goal, or if you need a reminder of specific feedback points from my previous speeches. I am ready when you are.\""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6c0dbd84-ff98-4b1b-a99d-17380d801769",
+      "name": "Set prompt to generate a speech based on the feedback",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1456,
+        512
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b86d5905-872a-40fa-9855-054cd8991a0d",
+              "name": "system_prompt",
+              "type": "string",
+              "value": "I'd like you to act as a speech feedback agent. I will deliver a speech to you, and I want you to provide constructive criticism and insights on various aspects of my delivery and content.  Please pay attention to:  Clarity and Conciseness: Was the message easy to understand? Were there any parts that felt rambling or unnecessary? Engagement: How engaging was the speech overall? Were there moments where your attention might have drifted? Structure and Flow: Did the speech progress logically? Were the transitions smooth? Pacing and Timing: Was the speech delivered at an appropriate pace? Did it feel rushed or too slow? Vocal Delivery (if applicable): (If you are able to describe vocal elements) How was the tone, pitch, and volume? Did it enhance or detract from the message? Content and Impact: Was the content compelling and relevant? Did the speech achieve its intended purpose (as I will describe beforehand)? What was the overall impact of the message? Strengths: What were the most effective aspects of the speech? Areas for Improvement: What specific suggestions do you have to make the speech even better? Before I begin, I will briefly tell you the topic, my intended audience, and my goal for the speech. Are you ready?"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "588b73de-90cf-4924-8257-c4fa6b95e293",
+      "name": "Set prompt to provide feedback on speech",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1456,
+        720
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": false,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "8b36fb19-1a5a-4fe1-aec2-7de8b5829972",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "new speech"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "new_speech"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": false,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "708d114d-1146-4d8a-b972-cfb5a53a8d77",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.text }}",
+                    "rightValue": "generate speech"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "generate_speech"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "ignoreCase": true
+        }
+      },
+      "id": "65dac049-537b-4518-ab42-6d3849992133",
+      "name": "Route Flow Based on Message Content",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        800,
+        560
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "content": "## Dynamic System Prompting:\n\nThis node sets the AI's system prompt according to the user's request identified in the incoming message.",
+        "height": 900,
+        "width": 220
+      },
+      "id": "da25562f-1145-4742-b0b1-7a10cf9677f5",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1392,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Telegram-Ready Output: Formatting and Length Management:\n\nThese code nodes perform two crucial tasks:\n1.  **Formatting:** Removing characters that could cause issues with Telegram's message parsing.\n2.  **Chunking:** Dividing messages longer than Telegram's 4000-character limit into multiple shorter messages for sequential delivery.",
+        "height": 720,
+        "width": 440
+      },
+      "id": "eb1c30f1-ad8e-4cdd-bcb2-eaa12877eaea",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2112,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Clearing AI Agent Memory:\n\nThis node clears the AI agent's short-term memory. This helps to minimize the influence of past interactions on future responses, thereby reducing the likelihood of the AI generating inaccurate or irrelevant information (hallucinations).",
+        "height": 420,
+        "width": 340
+      },
+      "id": "ff8dc09e-89fc-4624-99ed-de41767b8c06",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1008,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Processing Telegram Messages:\n\nThis section handles incoming messages from Telegram. It first checks if the message contains text.\n\n1.  **Text Message:** If the message includes text, it's directly routed to the analysis switch node.\n2.  **Audio Message:** If the message is an audio file:\n    * The audio file is downloaded.\n    * The audio is transcribed into text.\n    * The transcribed text is then sent to the analysis switch node.\n\nFinally, the analyzed text (whether directly from a text message or transcribed from audio) is forwarded for further processing based on the analysis results.",
+        "height": 740,
+        "width": 1160
+      },
+      "id": "4449e40b-dd9f-4f1c-a984-ef14b3c93bdf",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -208,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Gemini-Powered Response and Conversation Storage:\n\nThis node utilizes the Google Gemini model to generate a response to the user's prompt and stores the ongoing conversation.",
+        "height": 740,
+        "width": 300
+      },
+      "id": "c6a77790-d04d-4589-ae8f-96a618338c3a",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1728,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## This n8n workflow acts as your personal AI speechwriting coach, directly accessible through Telegram. It listens to your spoken or typed drafts, provides insightful feedback on clarity, engagement, structure, and content, and iteratively refines your message based on your updates. Once you're ready, it synthesizes a brand-new speech or talk incorporating all the improvements and your accumulated ideas. This tool streamlines the speechwriting process, offering on-demand AI assistance to help you craft impactful and well-structured presentations.",
+        "height": 140,
+        "width": 2740,
+        "color": 4
+      },
+      "id": "9f89db34-b269-4e5a-b09b-1008675ccf13",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -208,
+        -192
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code to remove unwanted characters from LLM response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Voice Message": {
+      "main": [
+        [
+          {
+            "node": "Download Audio File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Route Flow Based on Message Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio File": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Audio File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Audio File": {
+      "main": [
+        [
+          {
+            "node": "Route Flow Based on Message Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recieve Telegram Message": {
+      "main": [
+        [
+          {
+            "node": "Check For Text or Voice Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wipe Conversation Memory": {
+      "main": [
+        [
+          {
+            "node": "Set prompt to start a new speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Conversation Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Wipe Conversation Memory",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check For Text or Voice Message": {
+      "main": [
+        [
+          {
+            "node": "If Voice Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set prompt to start a new speech": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Flow Based on Message Content": {
+      "main": [
+        [
+          {
+            "node": "Wipe Conversation Memory",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set prompt to generate a speech based on the feedback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set prompt to provide feedback on speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set prompt to provide feedback on speech": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code to remove unwanted characters from LLM response": {
+      "main": [
+        [
+          {
+            "node": "Code to split output into chunks under 4000 characters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set prompt to generate a speech based on the feedback": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code to split output into chunks under 4000 characters": {
+      "main": [
+        [
+          {
+            "node": "Respond to Telegram Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1bef0e48-25a0-46ee-b9d8-f9b54de7e8dd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "93ed6a94a482e1415c1391a4d98bec025d67c846672cce4bbbb4a9390479302a"
+  },
+  "id": "wVyhOFc04QrsTWtW",
+  "tags": []
+}

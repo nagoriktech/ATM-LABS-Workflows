@@ -1,0 +1,1058 @@
+{
+  "name": "restuarant order booking",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=User: {{ $json.text }}",
+        "options": {
+          "systemMessage": "=You are a polite and friendly restaurant assistant.\nYour goal is to help users place, track, update, or cancel their food orders easily.\nYou must always speak in a polite and respectful way with customers.\n\nImportant Instructions:\n\n0. Don’t ask first about food or order. Always greet politely in short messages.\n\n1. When the user greets, reply politely. When the user asks for food, first show them the menu.\n\n   - If user asks for a single menu item → show only that item.\n   - Menu sheet is connected, use it to get data.\n   - Do NOT add anything to Airtable when user only views the menu.\n\n2. When the user wants to place an order:\n   - Ask for their Name, Phone Number, and Delivery Address.\n   - Then ask which items they want from the menu.\n   - After confirmation, calculate the total amount and tell the user:\n     “Your total bill is ___ BDT.”\n   - Then generate a short Order ID (Example: ORD-372).\n   - After user confirms, add the order in the Create Order sheet (only once).\n   - Politely tell the user:\n     “Your order has been placed successfully! Your estimated delivery time is around 30 minutes.”\n   - Give the user the Order ID and tell him:\n     “Once you receive your order, please message back ‘Delivered’ with your Order ID.”\n\n3. When the user says: “Order is delivered”:\n   - Take the Order ID.\n   - Go to the UPDATE Airtable (Update node), find that Order ID, and update ONLY the status to “Delivered”.\n   - Do NOT create a new order.\n\n4. When the user wants to update an order:\n   - Ask for the Order ID and updated items.\n   - Go to the Update sheet and update the record.\n   - Do NOT create a new order.\n\n5. When the user wants to cancel an order:\n   - Ask for the Order ID.\n   - Update the same record status to “Cancelled”.\n   - Do NOT create a new record.\n\n6. When the user wants to track an order:\n   - Ask for the Order ID.\n   - Fetch data from the sheet and respond with current status (Preparing / Out for Delivery / Delivered) and ETA.\n\n7. Always stay polite and professional.\n   Examples:\n   - “Thank you for ordering with us! 😊”\n   - “Your food is being prepared fresh.”\n   - “We appreciate your patience.”\n8. Always respond in JSON according to schema. No extra text outside JSON.\n\n9. The status in Airtable should only be updated when the user specifically says Update, Cancel, or Delivered. Otherwise, Airtable should only store the basic order details without changing the status.\n\n10. When user confirm the order then dont remove the data from sheet just upadte the delivered.\n-------------------------------------\nTrigger (User Message)\n      ↓\nIf message contains “menu”\n      → Show menu sheet data\n\nIf message contains “order”\n      → Ask for details (name, phone, address and items)\n      → Calculate price\n      → Generate short Order ID (like ORD-372)\n      → Save to Create Order sheet (only once)\n      → Return total price + Order ID\n\nIf message contains “track”\n      → Ask for Order ID\n      → Search in sheet\n      → Return ETA or current status\n\nIf message contains “cancel”\n      → Ask for Order ID\n      → Update status to “Cancelled”\n      → Do NOT create new record\n\nIf message contains “update”\n      → Ask for Order ID and new items\n      → Update the existing record\n      → Do NOT create new record\n-------------------------------------\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -368,
+        -32
+      ],
+      "id": "0b5c8f2f-4884-4ea7-a511-9b44bdd83f28",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "EY",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -480,
+        240
+      ],
+      "id": "4b110040-d20e-4f46-bfee-b0251e3c2c91",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1568,
+        -48
+      ],
+      "id": "addfe386-9b4d-4f38-8c7a-95335cfef21f",
+      "name": "Telegram Trigger",
+      "webhookId": "5f56fa25-2c9c-4199-b25b-baa001481bcb",
+      "credentials": {
+        "telegramApi": {
+          "id": "a0hDlVmMqjYOJOqS",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to generate the order id",
+        "jsCode": "return \"ORD-\" + new Date().getTime();"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        240
+      ],
+      "id": "bc1f84b7-6c2d-4092-8511-4a90229aba34",
+      "name": "Generate order id"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "899088fc-da0f-4364-8bcd-bb8f035ce261",
+              "leftValue": "={{ $json.message.voice }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1360,
+        -48
+      ],
+      "id": "2eb2821a-42eb-492b-8509-24d86f8ad091",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1056,
+        -336
+      ],
+      "id": "7ca98cd0-0ba1-4342-8e61-29aaf332e03f",
+      "name": "Get a file",
+      "webhookId": "7f2ec931-a19c-43e6-a8e6-4b2f62e3498a",
+      "credentials": {
+        "telegramApi": {
+          "id": "uWnhsyeEA3IS9P2h",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Arrane the incoming data. Dont show them prepare time. Present them a well manner strucuter of simple text."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -16,
+        -32
+      ],
+      "id": "d0badf0e-eb5f-4c60-be17-82c2c26dc0f9",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "translate",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -848,
+        -336
+      ],
+      "id": "d0357a30-61a3-4aeb-b1ec-e3a65b665696",
+      "name": "Translate a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "6weGd6GfUkbmzLlb",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ZiWCqvtw7I51RE3v_EPFIjtPSdZCKdocW72_FmHnC6A",
+          "mode": "list",
+          "cachedResultName": "Restaurant booking system",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZiWCqvtw7I51RE3v_EPFIjtPSdZCKdocW72_FmHnC6A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 388522070,
+          "mode": "list",
+          "cachedResultName": "Search Menu",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZiWCqvtw7I51RE3v_EPFIjtPSdZCKdocW72_FmHnC6A/edit#gid=388522070"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -176,
+        240
+      ],
+      "id": "044c7100-4bf3-4668-9f41-e2e04ef67e30",
+      "name": "Menu",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RlOeKPl3TgJufFcL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZiWCqvtw7I51RE3v_EPFIjtPSdZCKdocW72_FmHnC6A",
+          "mode": "list",
+          "cachedResultName": "Restaurant booking system",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZiWCqvtw7I51RE3v_EPFIjtPSdZCKdocW72_FmHnC6A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZiWCqvtw7I51RE3v_EPFIjtPSdZCKdocW72_FmHnC6A/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name ": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Name_', ``, 'string') }}",
+            "Phone Number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Phone_Number', ``, 'string') }}",
+            "Location": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Location', ``, 'string') }}",
+            "Order Id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Id', ``, 'string') }}",
+            "Order": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order', ``, 'string') }}",
+            "Price": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Price', ``, 'string') }}",
+            "Update Order": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Update_Order', ``, 'string') }}",
+            "Cancel": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cancel', ``, 'string') }}",
+            "Delivered": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Delivered', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name ",
+              "displayName": "Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Order Id",
+              "displayName": "Order Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Order",
+              "displayName": "Order",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Update Order",
+              "displayName": "Update Order",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cancel",
+              "displayName": "Cancel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Delivered",
+              "displayName": "Delivered",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -32,
+        240
+      ],
+      "id": "8739700a-3764-42ba-b9bd-fb9266b864fd",
+      "name": "Create Order",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RlOeKPl3TgJufFcL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZiWCqvtw7I51RE3v_EPFIjtPSdZCKdocW72_FmHnC6A",
+          "mode": "list",
+          "cachedResultName": "Restaurant booking system",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZiWCqvtw7I51RE3v_EPFIjtPSdZCKdocW72_FmHnC6A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZiWCqvtw7I51RE3v_EPFIjtPSdZCKdocW72_FmHnC6A/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Order Id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Id__using_to_match_', ``, 'string') }}",
+            "Name ": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Name_', ``, 'string') }}",
+            "Phone Number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Phone_Number', ``, 'string') }}",
+            "Location": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Location', ``, 'string') }}",
+            "Order": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order', ``, 'string') }}",
+            "Price": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Price', ``, 'string') }}",
+            "Update Order": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Update_Order', ``, 'string') }}",
+            "Cancel": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Cancel', ``, 'string') }}",
+            "Delivered": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Delivered', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Order Id"
+          ],
+          "schema": [
+            {
+              "id": "Name ",
+              "displayName": "Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Order Id",
+              "displayName": "Order Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Order",
+              "displayName": "Order",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Update Order",
+              "displayName": "Update Order",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cancel",
+              "displayName": "Cancel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Delivered",
+              "displayName": "Delivered",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        128,
+        240
+      ],
+      "id": "93487ff0-ddaf-44b7-a757-b0e2e75113c9",
+      "name": "Update order",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RlOeKPl3TgJufFcL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        -656
+      ],
+      "id": "26fc858b-1614-4d62-b6a1-323d5185dca6",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "hash"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1024,
+        -624
+      ],
+      "id": "7317eaa4-e816-4eb6-a224-4f9d5f0717a3",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ZiWCqvtw7I51RE3v_EPFIjtPSdZCKdocW72_FmHnC6A",
+          "mode": "list",
+          "cachedResultName": "Restaurant booking system",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZiWCqvtw7I51RE3v_EPFIjtPSdZCKdocW72_FmHnC6A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZiWCqvtw7I51RE3v_EPFIjtPSdZCKdocW72_FmHnC6A/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -768,
+        -656
+      ],
+      "id": "2c08b016-761f-4026-bb80-ae8db43d8dcd",
+      "name": "Get data ",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RlOeKPl3TgJufFcL",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Get data from the sheet.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a Restaurant Order Analytics Agent. Your job is to analyze order data from a connected spreadsheet and provide comprehensive sales reports.\n\nCORE RESPONSIBILITIES:\n1. Read all orders from the connected data sheet\n2. Analyze order status carefully\n3. Count how many of each menu item was sold\n4. Calculate total revenue\n5. Provide a clear summary to the user\n\nDATA STRUCTURE:\n- Each row represents ONE order\n- Each order contains: menu items ordered, order status, and price\n- Status column may contain \"cancelled\", \"delivered\", or be empty/blank\n\nCRITICAL ORDER STATUS RULES:\n- If status shows \"cancelled\" → SKIP this order completely, do NOT include in any calculations\n- If status shows \"delivered\" → INCLUDE this order in calculations\n- If status is EMPTY or BLANK (no status written) → INCLUDE this order in calculations\n- Only exclude orders that explicitly say \"cancelled\"\n\nANALYSIS REQUIREMENTS:\n- Count each menu item from valid orders (e.g., Chicken Biryani, Zinger Burger, etc.)\n- Calculate total price of all valid orders (delivered + empty status)\n- Do NOT calculate or mention cancelled order prices or items\n- Do NOT include cancelled orders in item counts\n\nOUTPUT REQUIREMENTS:\n- Provide total orders count\n- Provide processed orders count (delivered + blank)\n- Provide cancelled orders count\n- List all items sold with quantities\n- Calculate total revenue from processed orders only\n- Present everything in clear, structured format\n\nIMPORTANT REMINDERS:\n- ONLY exclude orders with \"cancelled\" status\n- Include orders with \"delivered\" status\n- Include orders with empty/blank status\n- Be accurate with numbers and prices"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -928,
+        -912
+      ],
+      "id": "1becf480-ed0b-4529-9262-4fbe199c9f4d",
+      "name": "Calculator Bot"
+    },
+    {
+      "parameters": {
+        "chatId": "=1774923818",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -48,
+        -912
+      ],
+      "id": "651cdff3-2b8b-445b-bd01-fb7286001cdc",
+      "name": "Send to admin",
+      "webhookId": "3c673298-3c7a-4746-bed4-7742d3eea449",
+      "credentials": {
+        "telegramApi": {
+          "id": "uWnhsyeEA3IS9P2h",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Arrane the incoming data. Dont show them prepare time. Present them a well manner strucuter of simple text.\nThis is for manager so write only dear manager..\nAlso include the current date {{ $now.format('YYYY-MM-DD') }}."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -448,
+        -912
+      ],
+      "id": "7efb63f9-167b-455a-aeb0-c59d86629e89",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -80,
+        -672
+      ],
+      "id": "b5af4476-dd7b-4a91-94fa-c8c5293a31f1",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "6weGd6GfUkbmzLlb",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"name\": \"restaurant_order_analytics\",\n  \"strict\": true,\n  \"schema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"summary\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"total_orders\": {\n            \"type\": \"number\",\n            \"description\": \"Total number of orders in the sheet\"\n          },\n          \"processed_orders\": {\n            \"type\": \"number\",\n            \"description\": \"Number of orders that were delivered or have blank status\"\n          },\n          \"cancelled_orders\": {\n            \"type\": \"number\",\n            \"description\": \"Number of orders that were cancelled\"\n          }\n        },\n        \"required\": [\n          \"total_orders\",\n          \"processed_orders\",\n          \"cancelled_orders\"\n        ],\n        \"additionalProperties\": false\n      },\n      \"items_sold\": {\n        \"type\": \"array\",\n        \"description\": \"List of all menu items sold with their quantities from processed orders only\",\n        \"items\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"item_name\": {\n              \"type\": \"string\",\n              \"description\": \"Name of the menu item\"\n            },\n            \"quantity\": {\n              \"type\": \"number\",\n              \"description\": \"Total quantity of this item sold\"\n            }\n          },\n          \"required\": [\n            \"item_name\",\n            \"quantity\"\n          ],\n          \"additionalProperties\": false\n        }\n      },\n      \"revenue\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"total_revenue\": {\n            \"type\": \"number\",\n            \"description\": \"Total revenue from all processed orders only\"\n          },\n          \"currency\": {\n            \"type\": \"string\",\n            \"description\": \"Currency code or symbol\",\n            \"enum\": [\"Rs.\", \"PKR\", \"USD\", \"EUR\"]\n          }\n        },\n        \"required\": [\n          \"total_revenue\",\n          \"currency\"\n        ],\n        \"additionalProperties\": false\n      }\n    },\n    \"required\": [\n      \"summary\",\n      \"items_sold\",\n      \"revenue\"\n    ],\n    \"additionalProperties\": false\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -624,
+        -656
+      ],
+      "id": "a66d878c-e799-47e3-a949-1709e2f8885e",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        -32
+      ],
+      "id": "4a92dab6-d214-40e1-988d-6e45725fd6dc",
+      "name": "Send a text message",
+      "webhookId": "3c673298-3c7a-4746-bed4-7742d3eea449",
+      "credentials": {
+        "telegramApi": {
+          "id": "a0hDlVmMqjYOJOqS",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5cc02226-9b74-43e0-8afe-4f10a107ef9b",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -816,
+        -32
+      ],
+      "id": "41d3ccd2-d996-4b53-a8d3-7d07f98b646c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1248,
+        -912
+      ],
+      "id": "360f20c8-c32f-4196-a9e9-4edbf1c177b7",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1232,
+        -656
+      ],
+      "id": "ed7b8ec1-ff3f-4df8-bd0e-43af340a39d5",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "6weGd6GfUkbmzLlb",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -832,
+        320
+      ],
+      "id": "b6225359-5c32-446f-b8fb-ef177a062dad",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "6weGd6GfUkbmzLlb",
+          "name": "OpenAi account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Basic LLM Chain1": [
+      {
+        "json": {
+          "text": "Dear Manager,\n\nDate: 2025-10-Oct 30\n\nHere is the summary of today's order analysis:\n\n- Total orders: 1\n- Processed orders: 1\n- Cancelled orders: 0\n\nItems sold:\n- Pizza: 2\n- Burger: 4\n- Beef Tehari: 1\n- Kacchi Biriyani: 3\n\nTotal revenue: 3100"
+        }
+      }
+    ],
+    "Calculator Bot": [
+      {
+        "json": {
+          "output": {
+            "total_orders_count": 1,
+            "processed_orders_count": 1,
+            "cancelled_orders_count": 0,
+            "items_sold": {
+              "Pizza": 2,
+              "Burger": 4,
+              "Beef Tehari": 1,
+              "Kacchi Biriyani": 3
+            },
+            "total_revenue": 3100,
+            "summary": "Order Analysis Summary:\n- Total orders: 1\n- Processed orders: 1 (delivered or blank status)\n- Cancelled orders: 0\n\nItem sales:\n- Pizza: 2\n- Burger: 4\n- Beef Tehari: 1\n- Kacchi Biriyani: 3\n\nTotal revenue from processed orders: 3100"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate order id": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Translate a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Translate a recording": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Menu": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Order": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update order": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calculator Bot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "Calculator Bot",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get data ": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calculator Bot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator Bot": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Send to admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Calculator Bot",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Calculator Bot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Calculator Bot",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f066da66-5dcd-40da-a586-4c975a8548da",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c8a7c4f7fe778490eebe35a2b86f4dd54ebdaa474dda3d31e8ddbd18df6403f5"
+  },
+  "id": "AOE3TkdqXyWRoLBR",
+  "tags": []
+}

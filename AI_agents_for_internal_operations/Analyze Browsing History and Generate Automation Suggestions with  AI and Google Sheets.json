@@ -1,0 +1,467 @@
+{
+  "name": "browsing_history_automation_analyzer",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "ecc05a00-2dde-48a8-98e8-b73071b61277",
+      "name": "When clicking ‘Execute workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -1232,
+        224
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_xB85_JaCLx6pOGaFgDg69vMorMUJK6uaaZO2sXLvbk",
+          "mode": "list",
+          "cachedResultName": "browsing_history_automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_xB85_JaCLx6pOGaFgDg69vMorMUJK6uaaZO2sXLvbk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1701994703,
+          "mode": "list",
+          "cachedResultName": "sample_browsing_history",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_xB85_JaCLx6pOGaFgDg69vMorMUJK6uaaZO2sXLvbk/edit#gid=1701994703"
+        },
+        "options": {}
+      },
+      "id": "e267fff6-a054-4669-811f-5169a4974cc9",
+      "name": "Get row(s) in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -1008,
+        224
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0qQzV3DmSlI358f0",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "5d9d468c-cdc3-40c8-94ac-05260397ff1e",
+              "operator": {
+                "type": "string",
+                "operation": "notRegex"
+              },
+              "leftValue": "={{ $json.group[0].domain }}",
+              "rightValue": "=/(?:youtube\\.com|google\\.(com|[a-z]{2})|chatgpt\\.com|openai\\.com|chromewebstore.google.com)/i"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ca36293c-1b8c-4c40-8b23-24e6b87c96da",
+      "name": "remove unwanted domains",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        -576,
+        224
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst grouped = {};\n\n// Group items by domain\nfor (const item of items) {\n  const url = item.json.url;\n  const domain = url.split(\"/\")[2]; // Extract domain\n  item.json.domain = domain;\n\n  if (!grouped[domain]) {\n    grouped[domain] = [];\n  }\n\n  grouped[domain].push(item.json); // Store just the data part\n}\n\n// Convert grouped object to n8n-friendly format\nconst result = [];\n\nfor (const group of Object.values(grouped)) {\n  result.push({\n   \n      group: group, // Now `group` is the array under an object\n    \n  });\n}\n\nreturn result;\n"
+      },
+      "id": "0b6aa023-1130-4470-b1d3-528e2b85ce10",
+      "name": "groupe history by domain",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -800,
+        224
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is a grouped browsing history from one domain. Analyze whether it's automatable and why.\n\nHistory:{{ $json.prompt }}\n\n\nPlease analyze and tell me:\n- Is this automatable?\n- What should be automated?\n- What is the automation rating?\n-save result on google sheet",
+        "options": {
+          "systemMessage": "=You are an expert automation analyst AI that uses tools to analyze web browsing history and determine if tasks can be automated.\n\nYou have access to tools such as:\n- Google Sheets (to save recommendations)\n- Web automation platforms (e.g., browser scripts, Apify, Puppeteer, n8n)\n- APIs and schedulers (to trigger tasks periodically)\n-search n8n templates\n\nYour responsibilities:\n1. Analyze the user's browsing history grouped by domain.\n2. Identify repetitive, frequent, or structured browsing behavior.\n3. Determine whether automation is possible.\n4. If yes, describe the specific action(s) to automate using available tools.\n5. Record your output in a structured format for use with Google Sheets.\n\nUse your tools wisely:\n- Save automation suggestions into a structured row (domain, automatable, what to automate, reason, automation rating).\n- Suggest appropriate tools (e.g., \"Use Apify to scrape dashboard\", \"Use n8n to schedule login\").\n\nOutput format:\n```json\n{\n  \"domain\": \"<example.com>\",\n  \"automatable\": true,\n  \"what_to_automate\": \"<Brief, tool-aware suggestion>\",\n  \"reason\": \"<Why it's suitable or not>\",\n  \"tool\": \"<Suggested tool: n8n, Apify, Google Apps Script, etc.>\",\n  \"automation_rating\": \"High\" // Or Medium, Low, Not Automatable,\nn8n_template:templates urls\n}\n"
+        }
+      },
+      "id": "3ebf40d7-ef3e-4094-8ce2-156ba40f0cb2",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        160,
+        256
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "batchSize": "=1",
+        "options": {}
+      },
+      "id": "ae110600-ae5f-4274-8ae0-9232dc7acf5a",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -352,
+        224
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nreturn {\n  prompt:JSON.stringify($json)}"
+      },
+      "id": "2ec4bf73-30e5-442e-8061-d0df2f8646be",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -96,
+        256
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Loop Over Items').item.json.group[0].domain }}"
+      },
+      "id": "4fe7bf4e-297f-42d9-b673-7d8f571cad54",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        432,
+        496
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "toolDescription": "get n8n template list from search page",
+        "url": "https://n8n.io/workflows/?sort=views:desc",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7b7f45bd-b510-4c52-908b-5f3f1b7c4eed",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "position": [
+        512,
+        640
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "content": "# 🧠 Browsing History Automation Analyzer – Automation Toolkit (Google Sheets + AI)\n\nThis **n8n workflow** analyzes your browsing history to identify opportunities for automation. It reads history from a Google Sheet, groups visits by domain, filters out irrelevant entries, and uses AI to recommend what can be automated — including how and why.\n\n---\n\n## 📌 What It Does\n\n- 📄 **Reads** your browsing history from Google Sheets\n- 🌐 **Groups** history by domain\n- 🚫 **Filters out** common non-actionable domains (e.g., YouTube, Google)\n- 🤖 **Uses AI** to analyze whether your activity on each site is automatable\n- 💡 **Provides suggestions** including what to automate, how to do it, and which tools to use\n- 📝 **Saves results** into a new tab in the same Google Sheet\n- 🔍 **Searches for n8n workflow templates** related to the suggested automation\n\n---\n\n## 📊 Demo Sheet\n\nInput + output are handled via the following Google Sheet:\n\n**📎 Spreadsheet**:  \n[View on Google Sheets](https://docs.google.com/spreadsheets/d/1V26KDJLBZno6e_VxaBqhsK_JOOOn_5N6uww2apcAeoc/edit?usp=drivesdk)\n\n- **Sheet: `history`** → Input browsing history\n- **Sheet: `automations`** → Output AI automation suggestions\n\n---\n\n## 🧠 AI Analysis Logic\n\nThe AI agent receives each domain's browsing history and responds with:\n- `domain`: The website domain\n- `automatable`: true/false\n- `what_to_automate`: Specific actions that can be automated\n- `reason`: Why it's suitable (or not) for automation\n- `tool`: Suggested automation tool (e.g., n8n, Apify)\n- `automation_rating`: High, Medium, Low, or Not Automatable\n- `n8n_template`: Relevant automation template (if found)\n\n---\n\n## 🔧 Technologies Used\n\n| Tool                     | Purpose                             |\n|--------------------------|-------------------------------------|\n| **n8n**                  | Workflow automation                 |\n| **LangChain AI Agent**  | AI-based analysis                   |\n| **Google Sheets Node**   | Input/output data handling          |\n| **OpenRouter (LLM)**     | Language model for intelligent reasoning |\n| **JavaScript Code Node** | Grouping and formatting logic       |\n| **Filter Node**          | Remove unwanted domains             |\n| **HTTP Request Node**    | Search n8n.io templates             |\n\n---\n\n## 💻 Chrome History Export\n\nYou can use this Chrome extension to export your browsing history in a format compatible with the workflow:\n\n🔗 [Export Chrome History Extension](https://chromewebstore.google.com/detail/export-chrome-history/dihloblpkeiddiaojbagoecedbfpifdj?pli=1)\n\n---\n\n## 📧 Want Personalized Automation Advice?\n\nIf you'd like **personalized automation recommendations** based on your browsing history—just like what this workflow provides—feel free to contact me directly:\n\n> 📩 **msaidwolfltd@gmail.com**\n\nI'll help you discover what tasks you can automate to save time and boost productivity.\n\n---\n\n## 🚀 Example Use Cases\n\n- Automate daily logins to dashboards\n- Auto-fill forms on repetitive websites\n- Schedule data exports from web portals\n- Trigger reminders based on recurring visits\n- Discover opportunities for scraping and integration\n\n---\n\n## 📜 License\n\nThis workflow is provided as-is for educational and personal use. For commercial or customized use, contact the author.\n\n---\n\n",
+        "height": 2440,
+        "width": 740
+      },
+      "id": "0994e9f7-7357-4005-826d-0faa3611d496",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1312,
+        432
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        608
+      ],
+      "id": "42f6a4b4-82a3-45b5-a5c1-1b8e3a16b5ae",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "wIXy1qZotSXCZ3Ho",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "use this to save analyse result to google sheet ",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1_xB85_JaCLx6pOGaFgDg69vMorMUJK6uaaZO2sXLvbk",
+          "mode": "list",
+          "cachedResultName": "browsing_history_automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_xB85_JaCLx6pOGaFgDg69vMorMUJK6uaaZO2sXLvbk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2129239195,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_xB85_JaCLx6pOGaFgDg69vMorMUJK6uaaZO2sXLvbk/edit#gid=2129239195"
+        },
+        "columns": {
+          "value": {
+            "domain": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('domain__using_to_match_', ``, 'string') }}",
+            "reason": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('reason', ``, 'string') }}",
+            "automatable": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('automatable', ``, 'string') }}",
+            "n8n_template": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('n8n_template', ``, 'string') }}",
+            "what_to_automate": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('what_to_automate', ``, 'string') }}",
+            "automation_rating": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('automation_rating', ``, 'string') }}"
+          },
+          "schema": [
+            {
+              "id": "domain",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "domain",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "automatable",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "automatable",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "what_to_automate",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "what_to_automate",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reason",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "reason",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "automation_rating",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "automation_rating",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "n8n_template",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "n8n_template",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "domain"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "b770e6e5-e00a-425b-a132-0b75a6984f91",
+      "name": "Append or update row in sheet in Google Sheets",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "position": [
+        320,
+        736
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "0qQzV3DmSlI358f0",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "groupe history by domain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "remove unwanted domains": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "groupe history by domain": {
+      "main": [
+        [
+          {
+            "node": "remove unwanted domains",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "28e2d449-01fc-4c3d-a2df-6f88dfc4b025",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8d401f885e1d55f4ab54b9409be28c0a99616546f3fde5dcc217c9802d0a05db"
+  },
+  "id": "NmAvEgDh0QlgvgL0",
+  "tags": []
+}

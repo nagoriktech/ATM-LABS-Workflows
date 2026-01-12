@@ -1,0 +1,704 @@
+{
+  "name": "Marketing email",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "filters": {
+          "includeSpamTrash": false,
+          "q": "=before:{{ $now.minus(14 * $('Increment Loop Var').first().json.page, 'days').format('yyyy/MM/dd') }} after: {{ $now.minus(3 * ($('Increment Loop Var').first().json.page + 1), 'days').format('yyyy/MM/dd') }} -label:n8n-skipped"
+        }
+      },
+      "id": "dba5f305-5279-4ab9-8795-45c2c24450fb",
+      "name": "Gmail Get Email",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -1680,
+        -128
+      ],
+      "webhookId": "c8979b0a-2ec3-484d-a11b-eac321cc0642",
+      "notesInFlow": true,
+      "typeVersion": 2.1,
+      "alwaysOutputData": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xhHhZaSrO6HK8b4A",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "d44bb567-6cb2-4d82-bc02-6412b452104f",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -2336,
+        16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f2c0d5f6-6957-449a-afbb-e7a5d7347111",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [
+        -1424,
+        96
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2cSbWKvARy5fsQKD",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": "={{ $json.output.emailId }}"
+      },
+      "id": "724c7fed-0984-4e8b-8302-ce15662470fc",
+      "name": "GmailDeleteEmail",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -864,
+        -320
+      ],
+      "webhookId": "ab1d1ae0-ebd9-411d-b807-17976867597a",
+      "retryOnFail": false,
+      "typeVersion": 2.1,
+      "alwaysOutputData": false,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xhHhZaSrO6HK8b4A",
+          "name": "Gmail account 2"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Classify the email with decimal values (0 to 1) for isUnwantedConfidence, isMarketingConfidence, and isSpamConfidence, where 0 means clearly wanted (e.g., billing, invoices, orders, job applications, security) and 1 means clearly unwanted (e.g., promotions, setup reminders, irrelevant alerts); treat system-generated alerts or device activity (like sound played, device found, location pinged) as unwanted unless they are security-related; use 0.5 as the baseline for deletion and provide a concise briefReason explaining the classification.\n\n{{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "3861d60e-8eab-493e-bc75-3f8e178eb43f",
+      "name": "AI Check Email",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1456,
+        -128
+      ],
+      "retryOnFail": true,
+      "typeVersion": 1.8,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"emailId\",\n    \"isUnwantedConfidence\",\n    \"isMarketingConfidence\",\n    \"isSpamConfidence\",\n    \"briefReason\",\n    \"emailFrom\"\n  ],\n  \"properties\": {\n    \"emailId\": {\n      \"type\": \"string\",\n      \"description\": \"id from the email itself\"\n    },\n    \"isUnwantedConfidence\": {\n      \"type\": \"number\",\n      \"minimum\": 0,\n      \"maximum\": 1,\n      \"description\": \"confidence that the email is unwanted\"\n    },\n    \"isMarketingConfidence\": {\n      \"type\": \"number\",\n      \"minimum\": 0,\n      \"maximum\": 1,\n      \"description\": \"confidence that the email is marketing\"\n    },\n    \"isSpamConfidence\": {\n      \"type\": \"number\",\n      \"minimum\": 0,\n      \"maximum\": 1,\n      \"description\": \"confidence that the email is spam\"\n    },\n    \"briefReason\": {\n      \"type\": \"string\",\n      \"description\": \"a short reason why, more context for the reader\"\n    },\n    \"emailFrom\": {\n      \"type\": \"string\",\n      \"description\": \"the email address of the sender\"\n    }\n  }\n}\n"
+      },
+      "id": "2064db43-a9d8-4812-9460-a4f51dae5cd0",
+      "name": "Unwanted Email Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        -1312,
+        96
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "id": "c2b58601-60ff-45b4-a8a3-0d8543844a2d",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "leftValue": "={{ $json.output.isUnwantedConfidence }}",
+              "rightValue": 0.5
+            },
+            {
+              "id": "ec441e67-046a-4c9c-bce7-85d984b86442",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "leftValue": "={{ $json.output.isMarketingConfidence }}",
+              "rightValue": 0.5
+            },
+            {
+              "id": "80f9ced7-15b0-4dee-97a4-4b3f9ae9c81f",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "leftValue": "={{ $json.output.isSpamConfidence }}",
+              "rightValue": 0.5
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5f22ac0d-ffba-4b0a-b9ec-9314d29cb968",
+      "name": "If Unwanted Marketing or Spam",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1072,
+        -224
+      ],
+      "typeVersion": 2.2,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "chatId": "1774923818",
+        "text": "=Email Deleted | {{ $('If Unwanted Marketing or Spam').item.json.output.emailFrom }} | {{ $('If Unwanted Marketing or Spam').item.json.output.briefReason }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "84d2da47-a434-4607-ab09-f546af92db50",
+      "name": "Telegram Sent Email Deleted Notification",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -640,
+        -224
+      ],
+      "webhookId": "4b52da48-c12a-45fc-8ba2-9fd2583f2dc5",
+      "typeVersion": 1.2,
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Kn9WnWw40AkM36sT",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "1774923818",
+        "text": "=Skipping Email | {{ $('If Unwanted Marketing or Spam').item.json.output.emailFrom }} | {{ $('If Unwanted Marketing or Spam').item.json.output.briefReason }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "c99e547a-3fd7-459d-9d9c-762b9b9f300e",
+      "name": "Telegram Sent Email Not Deleted Notification",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -640,
+        -32
+      ],
+      "webhookId": "4b52da48-c12a-45fc-8ba2-9fd2583f2dc5",
+      "typeVersion": 1.2,
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Kn9WnWw40AkM36sT",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "1774923818",
+        "text": "=AI Error | Can't Check Email | Error: {{ JSON.stringify($json) }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a06a8e3f-df5e-463a-92aa-6977e1a850e4",
+      "name": "Telegram Sent AI Error Notification",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -640,
+        176
+      ],
+      "webhookId": "4b52da48-c12a-45fc-8ba2-9fd2583f2dc5",
+      "typeVersion": 1.2,
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Kn9WnWw40AkM36sT",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "1774923818",
+        "text": "=Can't Delete Email",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "68495871-fcc5-4f04-bc02-379afc6fe486",
+      "name": "Telegram Sent Delete Email Failed Notification",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -640,
+        -432
+      ],
+      "webhookId": "4b52da48-c12a-45fc-8ba2-9fd2583f2dc5",
+      "typeVersion": 1.2,
+      "alwaysOutputData": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "Kn9WnWw40AkM36sT",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "id": "40849d25-eb8f-4ac9-8706-7e5656d979f0",
+      "name": "Success",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        -416,
+        -128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "596ff68a-1df1-4148-8899-fdfa36238023",
+              "name": "page",
+              "type": "number",
+              "value": "={{ ($('Forward Prev Page Num').isExecuted) ? $('Forward Prev Page Num').first().json.prevPage + 1 : $('Initialize Loop Vars').first().json.page }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5155c706-577b-4b50-ba4e-c3d2274cea3f",
+      "name": "Increment Loop Var",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1888,
+        -128
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "596ff68a-1df1-4148-8899-fdfa36238023",
+              "name": "prevPage",
+              "type": "number",
+              "value": "={{ $('Increment Loop Var').first().json.page }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cf9aed49-ab85-4668-8f9a-0894b1966abf",
+      "name": "Forward Prev Page Num",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        32,
+        112
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5e1583e5-597d-40e9-b656-5f3259b4fe25",
+              "name": "page",
+              "type": "number",
+              "value": 0
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b9d08eb3-097d-4d35-9ef8-36f2089bd841",
+      "name": "Initialize Loop Vars",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -2112,
+        16
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "64b13d6a-7ff2-4730-9a0a-3a3cadeb061b",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        -192,
+        -128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.output.emailId }}",
+        "labelIds": "=INBOX"
+      },
+      "id": "d100f1fd-91d1-409c-b4c1-723186e47ff1",
+      "name": "Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -864,
+        -32
+      ],
+      "webhookId": "a756798a-0ce2-4735-b65c-2373fe1c0891",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xhHhZaSrO6HK8b4A",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "AI Check Email": [
+      {
+        "json": {
+          "output": {
+            "emailId": "199d936d576f2214",
+            "isUnwantedConfidence": 0.1,
+            "isMarketingConfidence": 0,
+            "isSpamConfidence": 0,
+            "briefReason": "Legitimate Google Sheets share request for an HR workflow document.",
+            "emailFrom": "drive-shares-dm-noreply@google.com"
+          }
+        }
+      },
+      {
+        "json": {
+          "output": {
+            "emailId": "199d79e52e4425d5",
+            "isUnwantedConfidence": 0,
+            "isMarketingConfidence": 0,
+            "isSpamConfidence": 0,
+            "briefReason": "This is a security alert from Google regarding account access, which is considered a wanted communication.",
+            "emailFrom": "no-reply@accounts.google.com"
+          }
+        }
+      },
+      {
+        "json": {
+          "output": {
+            "emailId": "199d79d758f156fa",
+            "isUnwantedConfidence": 0.6,
+            "isMarketingConfidence": 0.1,
+            "isSpamConfidence": 0.1,
+            "briefReason": "This is a test email containing a Behance portfolio link, likely non-critical and not marketing or spam.",
+            "emailFrom": "Nadvee <nadvee646@gmail.com>"
+          }
+        }
+      },
+      {
+        "json": {
+          "output": {
+            "emailId": "199d792efbdd7dbd",
+            "isUnwantedConfidence": 0.1,
+            "isMarketingConfidence": 0.2,
+            "isSpamConfidence": 0.1,
+            "briefReason": "This is an email to complete a signup, indicating it is a transactional email and expected by the user.",
+            "emailFrom": "notifications@urlscan.io"
+          }
+        }
+      },
+      {
+        "json": {
+          "output": {
+            "emailId": "199cebf0b03fd350",
+            "isUnwantedConfidence": 0.05,
+            "isMarketingConfidence": 0,
+            "isSpamConfidence": 0,
+            "briefReason": "Legitimate security alert from Google regarding account access.",
+            "emailFrom": "Google <no-reply@accounts.google.com>"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Telegram Sent Email Not Deleted Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Success": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Forward Prev Page Num",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Check Email": {
+      "main": [
+        [
+          {
+            "node": "If Unwanted Marketing or Spam",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram Sent AI Error Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Get Email": {
+      "main": [
+        [
+          {
+            "node": "AI Check Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GmailDeleteEmail": {
+      "main": [
+        [
+          {
+            "node": "Telegram Sent Email Deleted Notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram Sent Delete Email Failed Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Increment Loop Var": {
+      "main": [
+        [
+          {
+            "node": "Gmail Get Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Loop Vars": {
+      "main": [
+        [
+          {
+            "node": "Increment Loop Var",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forward Prev Page Num": {
+      "main": [
+        [
+          {
+            "node": "Initialize Loop Vars",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Check Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unwanted Email Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Check Email",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Unwanted Marketing or Spam": {
+      "main": [
+        [
+          {
+            "node": "GmailDeleteEmail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Initialize Loop Vars",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Sent AI Error Notification": {
+      "main": [
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Sent Email Deleted Notification": {
+      "main": [
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Sent Email Not Deleted Notification": {
+      "main": [
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Sent Delete Email Failed Notification": {
+      "main": [
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2b558d9e-450f-4f6b-819b-c974bef95f26",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c0c3fe71cadf27e20e684308c0530c747e9c1a4ed38a7f10a34a9b19fa0b1bce"
+  },
+  "id": "h4NJdTmWMyCnjJUI",
+  "tags": []
+}

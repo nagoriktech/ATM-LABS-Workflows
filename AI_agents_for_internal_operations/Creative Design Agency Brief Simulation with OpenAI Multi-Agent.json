@@ -1,0 +1,597 @@
+{
+  "name": "Creative Design Agency Brief Simulation with OpenAI Multi-Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ff1c97b0-f02a-406f-b344-31a5ad362a02",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -672,
+        208
+      ],
+      "webhookId": "creative-webhook-id",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are the Creative Director of a multi-agent creative agency. \nYour job is to interpret the client’s request, break it down into creative directions, \nand delegate work to your six specialists: Brand Strategist, Graphic Designer, Creative Copywriter, \nUI/UX Designer, Web Designer, and Motion Graphics Designer.\n\nAlways return your output in STRICT JSON format with the following six sections:\n\n{\n  \"project_summary\": \"2–3 sentence high-level overview of the client request\",\n  \"brand_strategy\": \"Clear direction from the Brand Strategist on positioning, values, and competitive approach\",\n  \"graphic_design\": \"Visual identity guidance including logo ideas, color palette, and typography\",\n  \"copywriting\": \"Messaging framework, tagline ideas, and campaign copy guidance\",\n  \"ui_ux_design\": \"Recommendations for user experience, wireframes, interaction design, and usability principles\",\n  \"web_design\": \"Website or landing page layout, responsive design direction, accessibility notes\",\n  \"motion_graphics\": \"Concepts for animations, video, or dynamic visual storytelling\"\n}\n\nRules:\n- ALWAYS include all 6 sections, even if the client request does not explicitly ask for them. \n- Each section must contain relevant and creative guidance (minimum 2–3 sentences). \n- Do not include any text outside of the JSON object. \n- The JSON must be valid and parseable.\n"
+        }
+      },
+      "id": "f4f1c7c4-5807-4c87-a285-95189bb2113b",
+      "name": "Creative Director Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -96,
+        208
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {},
+      "id": "5ad0ef99-9e91-49e1-8de8-260d46113bd3",
+      "name": "Think",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "position": [
+        -560,
+        432
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this AI Agent that specializes in visual identity creation, logo design, print materials, packaging design, and brand visual elements",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "11737bfa-5071-43c7-ab15-c18582c5d80e",
+      "name": "Graphic Designer",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        432,
+        432
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this AI Agent that specializes in user interface design, user experience optimization, wireframing, prototyping, and interaction design",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "713ecd2f-5443-4c23-904a-0ee403607aa0",
+      "name": "UI/UX Designer",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        -144,
+        432
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this AI Agent that specializes in brand positioning, market research, competitive analysis, brand guidelines, and strategic creative direction",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "9bb931d9-d528-4888-8e16-7b7802d8ea91",
+      "name": "Brand Strategist",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        144,
+        432
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this AI Agent that specializes in animated graphics, video effects, promotional videos, explainer animations, and dynamic visual content",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "718aeba8-7bfc-4a38-9742-b35f806a8764",
+      "name": "Motion Graphics Designer",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        1008,
+        432
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this AI Agent that specializes in website design, landing pages, responsive layouts, web accessibility, and digital user experiences",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "a7ca0392-2827-4689-b884-71f61ef8317b",
+      "name": "Web Designer",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        -432,
+        432
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "call this AI Agent that specializes in creative content writing, advertising copy, brand messaging, taglines, and persuasive marketing content",
+        "text": "={{ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "e6e453a8-7634-477d-8b11-d09f8e7e34d0",
+      "name": "Creative Copywriter",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        720,
+        432
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "=gpt-4.1-mini",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "3566810f-1efa-4927-a745-7417c3da48b3",
+      "name": "OpenAI Chat Model Director",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -688,
+        432
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "46a97acc-9efe-4d55-a13c-fca08c11db60",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        512,
+        640
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "4d288249-a6d8-4e3a-a3e5-0ea19bea39ca",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -64,
+        640
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "5411727c-330c-4926-9835-81937b5ace9f",
+      "name": "OpenAI Chat Model3",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        224,
+        640
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "034be5ca-5288-45e7-a2d2-b2e44cb89801",
+      "name": "OpenAI Chat Model4",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1088,
+        640
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "=gpt-4.1-mini",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "c3b1fd90-ca6e-4344-b328-3941a17ce800",
+      "name": "OpenAI Chat Model5",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -352,
+        640
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "e7ab968a-6f8f-485f-b8ce-fb130c700294",
+      "name": "OpenAI Chat Model6",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        800,
+        640
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n  <title>Creative Director Brand Brief</title>\n  <style>\n    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500&display=swap');\n\n    body {\n      font-family: 'Roboto', sans-serif;\n      background-color: #fdfdfd;\n      margin: 0;\n      padding: 32px;\n      color: #333;\n    }\n\n    .wrap {\n      max-width: 960px;\n      margin: 0 auto;\n    }\n\n    h1 {\n      font-family: 'Montserrat', sans-serif;\n      font-size: 32px;\n      text-align: center;\n      margin-bottom: 32px;\n      color: #1f3d7a;\n      letter-spacing: 1px;\n    }\n\n    .card {\n      background: linear-gradient(145deg, #ffffff, #f0f4ff);\n      border-radius: 16px;\n      padding: 36px;\n      margin-bottom: 24px;\n      box-shadow: 0 12px 30px rgba(0,0,0,0.08);\n      transition: transform 0.2s ease, box-shadow 0.2s ease;\n    }\n\n    .card:hover {\n      transform: translateY(-5px);\n      box-shadow: 0 20px 40px rgba(0,0,0,0.12);\n    }\n\n    .section {\n      margin-top: 28px;\n      transition: background 0.3s ease, transform 0.2s ease;\n    }\n\n    .section:hover {\n      transform: translateX(4px);\n      filter: brightness(1.03);\n    }\n\n    .section-title {\n      font-family: 'Montserrat', sans-serif;\n      font-size: 20px;\n      font-weight: 700;\n      margin-bottom: 12px;\n      position: relative;\n      display: inline-block;\n      padding-bottom: 6px;\n    }\n\n    /* Colored underline for section headers */\n    .section-title::after {\n      content: \"\";\n      position: absolute;\n      width: 60%;\n      height: 4px;\n      background: #ff6f61;\n      left: 0;\n      bottom: 0;\n      border-radius: 2px;\n    }\n\n    p {\n      font-size: 16px;\n      line-height: 1.7;\n      color: #444;\n      margin-top: 0;\n    }\n\n    /* Alternate section background colors */\n    .brand-strategy { background: #eaf6f6; padding: 18px; border-radius: 12px; }\n    .graphic-design { background: #fff3e6; padding: 18px; border-radius: 12px; }\n    .copywriting { background: #fef6e7; padding: 18px; border-radius: 12px; }\n    .ui-ux-design { background: #e7f4fe; padding: 18px; border-radius: 12px; }\n    .web-design { background: #f9e7fe; padding: 18px; border-radius: 12px; }\n    .motion-graphics { background: #e8fef1; padding: 18px; border-radius: 12px; }\n\n    footer {\n      text-align: center;\n      margin-top: 36px;\n      font-size: 14px;\n      color: #888;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"wrap\">\n    <h1>Creative Director Output — Brand Identity Brief</h1>\n\n    <div class=\"card\">\n      <div class=\"section\">\n        <div class=\"section-title\">Project Summary</div>\n        <p>{{$json[\"project_summary\"]}}</p>\n      </div>\n\n      <div class=\"section brand-strategy\">\n        <div class=\"section-title\">Brand Strategy</div>\n        <p>{{$json[\"brand_strategy\"]}}</p>\n      </div>\n\n      <div class=\"section graphic-design\">\n        <div class=\"section-title\">Graphic Design</div>\n        <p>{{$json[\"graphic_design\"]}}</p>\n      </div>\n\n      <div class=\"section copywriting\">\n        <div class=\"section-title\">Copywriting</div>\n        <p>{{$json[\"copywriting\"]}}</p>\n      </div>\n\n      <div class=\"section ui-ux-design\">\n        <div class=\"section-title\">UI / UX Design</div>\n        <p>{{$json[\"ui_ux_design\"]}}</p>\n      </div>\n\n      <div class=\"section web-design\">\n        <div class=\"section-title\">Web Design</div>\n        <p>{{$json[\"web_design\"]}}</p>\n      </div>\n\n      <div class=\"section motion-graphics\">\n        <div class=\"section-title\">Motion Graphics</div>\n        <p>{{$json[\"motion_graphics\"]}}</p>\n      </div>\n\n      <footer>Generated by your AI Creative Director • n8n Workflow</footer>\n    </div>\n  </div>\n</body>\n</html>\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        208
+      ],
+      "id": "05263476-1138-4f6e-bea1-2c951a3b02fa",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: items[0].json.output is a string containing JSON\n// Output: parsed and cleaned JSON fields\nreturn items.map(item => {\n  let data = {};\n  try {\n    // Parse the string inside \"output\"\n    data = JSON.parse(item.json.output);\n  } catch (e) {\n    throw new Error(\"Failed to parse AI output: \" + e.message);\n  }\n  return { json: data };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        208
+      ],
+      "id": "cfa0b805-bc45-4fbf-b698-3f11d9381d08",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Make sure the HTML string exists\nconst html = $json[\"html\"]; // replace \"html\" with your actual field name\nif (!html) throw new Error(\"HTML content is undefined!\");\n\nreturn items.map(item => {\n  return {\n    json: {},\n    binary: {\n      htmlFile: {\n        data: Buffer.from(html, \"utf8\").toString(\"base64\"),\n        fileName: \"BrandBrief.html\",\n        mimeType: \"text/html\"\n      }\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        208
+      ],
+      "id": "7e35476e-89f1-46a5-9ca1-e5d77c824211",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "sendTo": "najmussakib.nagorik@gmail.com",
+        "subject": "=Brand Identity Brief {{ new Date().toLocaleString() }}",
+        "message": "<p>Greetings,</p>\n\n<p>We’ve prepared your comprehensive brand identity brief using our AI Creative Director. It includes project summary, brand strategy, design directions, UI/UX guidelines, web design, and motion graphics insights.</p>\n\n<p>Please find your Brand Brief attached as an HTML file.</p>\n\n<p>We hope this brief inspires your next steps in building a standout brand!</p>\n\n<p>Best regards,<br/>Kazi Sakib</p>\n",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "htmlFile"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1024,
+        208
+      ],
+      "id": "19ff4472-6e0a-4560-acb8-ee15ebb9bf8f",
+      "name": "Send a message",
+      "webhookId": "ad30082d-b37d-4e38-8702-585de40e4197",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xUCItSN2KcMWBYcp",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Creative Director Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Web Designer": {
+      "ai_tool": [
+        [
+          {
+            "node": "Creative Director Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UI/UX Designer": {
+      "ai_tool": [
+        [
+          {
+            "node": "Creative Director Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brand Strategist": {
+      "ai_tool": [
+        [
+          {
+            "node": "Creative Director Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Graphic Designer": {
+      "ai_tool": [
+        [
+          {
+            "node": "Creative Director Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Graphic Designer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "UI/UX Designer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Brand Strategist",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Motion Graphics Designer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Web Designer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Creative Copywriter",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creative Copywriter": {
+      "ai_tool": [
+        [
+          {
+            "node": "Creative Director Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Motion Graphics Designer": {
+      "ai_tool": [
+        [
+          {
+            "node": "Creative Director Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model Director": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Creative Director Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Creative Director Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creative Director Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4f2a4a7e-8162-4f5a-ab3a-7310d2a256cb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "edb67d3a7f9d12c7abb88f04023272f13c5753dec2ada987b4428826f48ef7ab"
+  },
+  "id": "joIoWUStNBh8s6jJ",
+  "tags": []
+}

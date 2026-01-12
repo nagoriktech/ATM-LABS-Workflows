@@ -1,0 +1,688 @@
+{
+  "name": "AI-Powered Telegram Task Manager with MCP Server",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "fac3f86a-f388-4791-a43b-05d16ab39825",
+      "name": "Incoming Message",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        -720,
+        -208
+      ],
+      "webhookId": "75921955-c8ed-4ff6-8de2-e436c6bbe69d",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "hkggKKxNuqkNxHIC",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "562ffc95-cf8e-4d4d-8f5b-29b3ff22d5ee"
+      },
+      "id": "e9879086-3fd0-4de0-a1ec-5409894d3466",
+      "name": "MCP Server Trigger",
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "position": [
+        -560,
+        352
+      ],
+      "webhookId": "562ffc95-cf8e-4d4d-8f5b-29b3ff22d5ee",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a helpful assistant. Whenever askes to update a task, call the get_tasks tools first to retrieve the appropriate task ids then use that to update the tasks.\n\nToday's date: {{ $now }}\n"
+        }
+      },
+      "id": "706785b2-ac89-40df-80f4-0a0d0ada212d",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        848,
+        -208
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://kzsakib5.app.n8n.cloud/mcp/562ffc95-cf8e-4d4d-8f5b-29b3ff22d5ee/sse",
+        "options": {}
+      },
+      "id": "2ad8c52e-31a9-4293-94e0-319bd512255b",
+      "name": "MCP Client",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "position": [
+        1056,
+        16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "17aa8ac4-7e58-4e54-8e6b-6911ab030c6d",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        816,
+        16
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Incoming Message').item.json.message.from.id }}",
+        "contextWindowLength": 20
+      },
+      "id": "858f86e5-286f-4ca7-8bce-001e08f7c234",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        928,
+        16
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ab70dc2d-35d0-4742-988f-ed7077633467",
+              "name": "chatInput",
+              "type": "string",
+              "value": "={{ $json.message.text }}"
+            },
+            {
+              "id": "6439fc2c-dc2d-41fc-b8a3-b33ef80d2878",
+              "name": "id",
+              "type": "number",
+              "value": "={{ $json.message.from.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "81d120cf-d187-4bfc-b01d-603efec604ff",
+      "name": "chatInput",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        384,
+        -80
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "task": "MTEyMTc5ODI1NTkyNzQ2MzQ5NjA6MDow",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', `Title summary of the task to be done`, 'string') }}",
+        "additionalFields": {
+          "completed": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Completion_Date', `Date the task was completed`, 'string') }}",
+          "dueDate": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Due_Date', `Date the task should be completed`, 'string') }}",
+          "notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Notes', `Detailed description of the task`, 'string') }}"
+        }
+      },
+      "id": "2f30f88e-d8fb-49a0-ae37-5f0d5676268f",
+      "name": "create_todays_task",
+      "type": "n8n-nodes-base.googleTasksTool",
+      "position": [
+        -720,
+        576
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "KTOZLhLkE97Rn5Ls",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "df6bd510-e63f-41b1-b5b4-d2c612d5b8d0",
+              "name": "chatOutput",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4bb12638-65ae-4928-8f56-04b93f8158cd",
+      "name": "chatOutput",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1248,
+        -208
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Incoming Message').item.json.message.chat.id }}",
+        "text": "={{ $json.chatOutput }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_notification": false
+        }
+      },
+      "id": "40c0b398-f153-4174-bd22-6ee6790acebd",
+      "name": "sendMessage",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1472,
+        -208
+      ],
+      "webhookId": "c5eb133f-338f-4918-8e49-83ac339d841b",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "hkggKKxNuqkNxHIC",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "task": "MTEyMTc5ODI1NTkyNzQ2MzQ5NjA6MDow",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', `Title summary of the task to be done`, 'string') }}",
+        "additionalFields": {
+          "completed": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Completion_Date', `Date the task was completed`, 'string') }}",
+          "dueDate": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Due_Date', `Date the task should be completed`, 'string') }}",
+          "notes": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Notes', `Detailed description of the task`, 'string') }}"
+        }
+      },
+      "id": "e17e0dcc-d7dd-4ae2-97b7-e31a88b14b42",
+      "name": "create_upcoming_task",
+      "type": "n8n-nodes-base.googleTasksTool",
+      "position": [
+        -608,
+        576
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "KTOZLhLkE97Rn5Ls",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "task": "MTEyMTc5ODI1NTkyNzQ2MzQ5NjA6MDow",
+        "taskId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Task_ID', `The task id tom be marked as completed. Get it from the get tasks tool`, 'string') }}",
+        "updateFields": {}
+      },
+      "id": "577ba232-79e5-4f6f-8305-955b5aa21101",
+      "name": "complete_task",
+      "type": "n8n-nodes-base.googleTasksTool",
+      "position": [
+        -480,
+        576
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "KTOZLhLkE97Rn5Ls",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "task": "MTEyMTc5ODI1NTkyNzQ2MzQ5NjA6MDow",
+        "returnAll": true,
+        "additionalFields": {}
+      },
+      "id": "1a20479b-1de0-40e5-90b3-edbaa9d069be",
+      "name": "get_todays_tasks",
+      "type": "n8n-nodes-base.googleTasksTool",
+      "position": [
+        -368,
+        576
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "KTOZLhLkE97Rn5Ls",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "task": "MTEyMTc5ODI1NTkyNzQ2MzQ5NjA6MDow",
+        "returnAll": true,
+        "additionalFields": {}
+      },
+      "id": "5bebb5ec-3561-40ee-9fd2-d208f605e297",
+      "name": "get_upcoming_tasks",
+      "type": "n8n-nodes-base.googleTasksTool",
+      "position": [
+        -240,
+        576
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleTasksOAuth2Api": {
+          "id": "KTOZLhLkE97Rn5Ls",
+          "name": "Google Tasks account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "8415cc8d-65a2-448e-a106-1ceb54634dfd",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "leftValue": "={{ $json.message.voice }}",
+                    "rightValue": ""
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Voice Note"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "4ac43d48-3d74-479e-b78c-aed597723ab4",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -496,
+        -208
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eb7f5d62-e4f3-4b4e-9f1b-6c329feafb3e",
+              "name": "file_id",
+              "type": "string",
+              "value": "={{ $json.message.voice.file_id }}"
+            },
+            {
+              "id": "803031b8-6b21-47fa-b339-ad674ccbbb1e",
+              "name": "file_unique_id",
+              "type": "string",
+              "value": "={{ $json.message.voice.file_unique_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "291e590c-eebb-4669-bb7c-873bf86cf4d9",
+      "name": "audio_id",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -288,
+        -320
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.file_id }}",
+        "additionalFields": {}
+      },
+      "id": "542bb0d8-8d6a-4b7b-8c6f-d264c274a17b",
+      "name": "download_audio",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -64,
+        -320
+      ],
+      "webhookId": "c2dbc0eb-0f3a-4f11-9525-804bd5bef4b1",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "hkggKKxNuqkNxHIC",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d57b4fc2-10f7-46cd-a89c-0021a92f41d1",
+              "name": "chatInput",
+              "type": "string",
+              "value": "={{ $json.content.parts[0].text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3bce943c-123c-4f06-aab2-ba1ba813f4ca",
+      "name": "audioInput",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        592,
+        -320
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## Main Function to Receive and Send Telegram Messages\n",
+        "height": 540,
+        "width": 2180,
+        "color": 4
+      },
+      "id": "d598b909-3140-4ded-8841-3868255bb477",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -768,
+        -400
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## MCP Server to Carry Out Actions",
+        "height": 480,
+        "width": 640,
+        "color": 3
+      },
+      "id": "a9b20630-8191-4686-81fb-51c3f0152b05",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -768,
+        256
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-pro",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-pro"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -320
+      ],
+      "id": "c96eabf4-a883-4db2-b86c-cd35ce86fb00",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zyG98t4KMY2vctV9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "audio_id",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "chatInput",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "chatOutput",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "audio_id": {
+      "main": [
+        [
+          {
+            "node": "download_audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "chatInput": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "audioInput": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "chatOutput": {
+      "main": [
+        [
+          {
+            "node": "sendMessage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "complete_task": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "download_audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Incoming Message": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_todays_tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_todays_task": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_upcoming_tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_upcoming_task": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "audioInput",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f9bfae1c-d699-43bc-ae2a-afb18fb97c40",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "edb67d3a7f9d12c7abb88f04023272f13c5753dec2ada987b4428826f48ef7ab"
+  },
+  "id": "zwufLNzuugnT0obU",
+  "tags": []
+}

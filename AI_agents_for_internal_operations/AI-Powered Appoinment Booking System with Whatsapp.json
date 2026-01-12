@@ -1,0 +1,625 @@
+{
+  "name": "AI-Powered Appoinment Booking System with Whatsapp",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=[Identity]\n\nYou are an AI assistant for Nadvee Salon, a smart and helpful digital receptionist designed to handle service inquiries, manage bookings, and assist with appointment modifications or cancellations.\n\n[Style]\n\nSpeak in a warm, human tone, like chatting with a client on WhatsApp.\n\nRespond naturally, clearly, and respectfully.\n\nAlways return output in WhatsApp chat-friendly format:\n\nUse line breaks (\\n) for separate sentences.Dont show (\\n) in output as word.\n\nUse friendly, concise language.\n\nOptional emojis for casual friendliness (😊, 💇‍♀️, 📅, ⏰).\n\nKeep answers helpful, short, and human-like, never robotic.\n\nAlways polite and provide next steps.\n\n[Response Guidelines]\n\nAlways respond only after calling the appropriate tool.\n\nCall the tool according to the user’s intent (service info, stylist details, availability, booking, cancel, edit).\n\nIn StylistAvailableSlots Tool, always pass services as an array.\n\nStructure responses in conversational WhatsApp style, not lists.\n\nNever share or speak URLs.\n\nRefer to today as {{$now.day}} and current time as {{$now}}.\n\nRespect privacy: never repeat personal info unless necessary.\n\nUse phone number from {{ $json.messages[0].from }} for booking.\n\nKeep replies short, friendly, and human-like.\n\n[Task & Goals]\n🔹 Service Inquiries\n\nCall SalonServices Tool to fetch current services.\n\nIf requested service unavailable → politely suggest valid services.\n\nWait for user confirmation before moving to stylists.\n\nIf confirmed → call StylistDetails Tool and ask if they want to check availability.\n\n🔹 Booking Appointments\n\nStep-by-step flow: service → stylist → time.\n\nCall StylistAvailableSlots Tool (services must be an array).\n\nSuggest only future slots.\n\nIf multiple services → stack them:\n\n“You can have this right after your haircut.”\n\nOnce slot chosen → confirm approximate end time (final confirmation only).\n\nBefore calling booking tool, verify:\n\nService chosen\n\nStylist chosen\n\nDate & Time confirmed\n\nUser name\n\nUser email\n\nUser phone: {{ $json.messages[0].from }} (do not ask the user)\n\nIf any detail missing → ask politely first.\n\nWhen all details are ready → call UserSalonBooking Tool and confirm.\n\n🔹 Cancel Appointment\n\nAsk for phone number.\n\nCall GetUserAppointmentDetails Tool.\n\nConfirm details → ask reason → call UserCancelAppointment Tool.\n\n🔹 Edit Appointment\n\nAsk for phone number.\n\nCall GetUserAppointmentDetails Tool.\n\nConfirm existing appointment.\n\nAsk what they want to change (service, stylist, date/time).\n\nValidate with GetStylistAndServices Tool.\n\nIf valid → update via UpdateBooking Tool.\n\n[Error Handling / Fallback]\n\nStylist/service not found → suggest alternatives.\n\nSlot unavailable → suggest nearest future slot.\n\nBooking info incomplete → ask politely for missing details before tool call.\n\nSystem error → apologize and silently trigger transfer_call_tool.\n\n[WhatsApp Formatting Rules]\n\nAlways reply in WhatsApp chat style.\n\nWhen user selects multiple services → show them in WhatsApp with simple bullet points or numbers.\n\nUse line breaks for clarity.\n\nKeep messages friendly, short, and human-like.\n\nOptional emojis (😊, 💇‍♀️, 📅, ⏰).\n\nNo Markdown tables or lists; just plain text with natural line breaks.\n\n[User Input]\n\nHere is the user input:\n\n{{ $json.messages[0].text.body }}",
+        "options": {}
+      },
+      "id": "153ddbeb-9d05-4b23-bd47-917b01b9d34f",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        384,
+        384
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=739807829221879",
+        "contextWindowLength": 10
+      },
+      "id": "3f510730-5bc8-4d3f-bc1e-070705b32a69",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        96,
+        464
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM",
+          "mode": "list",
+          "cachedResultName": "Salon Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Order Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit#gid=0"
+        },
+        "columns": {
+          "value": {
+            "Date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Date', `send user selected date in this format:YYYY-MM-DD`, 'string') }}",
+            "Phone": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Phone', `Send user Phone number`, 'string') }}",
+            "Services": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Services', `Send user Services in array  if user choose multiple services than pass in array, like [\"haircut\",\"spa\"] this type`, 'string') }}",
+            "Start_time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_time', `Send user Services Start Time in this format. hh:mm`, 'string') }}",
+            "Stylist_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Stylist_name', `Send user selected stylist name`, 'string') }}",
+            "customer_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_name', `send user name`, 'string') }}"
+          },
+          "schema": [
+            {
+              "id": "Date",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Date",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Phone",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Services",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Services",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Start_time",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Start_time",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Stylist_name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Stylist_name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "customer_name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8c283b08-38bb-41e8-b624-9dedef73f522",
+      "name": "Booking services",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "position": [
+        800,
+        704
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KFJN5XrWgBy612x8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM",
+          "mode": "list",
+          "cachedResultName": "Salon Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1649437378,
+          "mode": "list",
+          "cachedResultName": "Suggest Stylist",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit#gid=1649437378"
+        },
+        "options": {}
+      },
+      "id": "d2cf5673-fac0-41ee-b579-cd52d8fdee53",
+      "name": "SuggestStylist",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "position": [
+        384,
+        752
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KFJN5XrWgBy612x8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM",
+          "mode": "list",
+          "cachedResultName": "Salon Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 515400882,
+          "mode": "list",
+          "cachedResultName": "Opening Hours",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit#gid=515400882"
+        },
+        "options": {}
+      },
+      "id": "e367ddeb-97a0-44c6-9330-e09780ce95b2",
+      "name": "openingHour",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "position": [
+        672,
+        736
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KFJN5XrWgBy612x8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM",
+          "mode": "list",
+          "cachedResultName": "Salon Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1891498582,
+          "mode": "list",
+          "cachedResultName": "Services",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit#gid=1891498582"
+        },
+        "options": {}
+      },
+      "id": "1f98d7ab-2340-4eb2-be73-6e5f16211c6a",
+      "name": "salonservices",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "position": [
+        256,
+        704
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KFJN5XrWgBy612x8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM",
+          "mode": "list",
+          "cachedResultName": "Salon Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1330401159,
+          "mode": "list",
+          "cachedResultName": "Particular Stylist Details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit#gid=1330401159"
+        },
+        "options": {}
+      },
+      "id": "26377c32-96b2-4d39-81b8-e59ac42f0d3c",
+      "name": "perticullerstylistsdetails",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "position": [
+        928,
+        656
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KFJN5XrWgBy612x8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM",
+          "mode": "list",
+          "cachedResultName": "Salon Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Order Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit#gid=0"
+        },
+        "columns": {
+          "value": {
+            "Date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Date', ``, 'string') }}",
+            "Phone": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Phone__using_to_match_', ``, 'string') }}",
+            "Services": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Services', ``, 'string') }}",
+            "Start_time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_time', ``, 'string') }}",
+            "Stylist_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Stylist_name', ``, 'string') }}",
+            "customer_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('customer_name', ``, 'string') }}"
+          },
+          "schema": [
+            {
+              "id": "Date",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Date",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Phone",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Services",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Services",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Start_time",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Start_time",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Stylist_name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Stylist_name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "customer_name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "Phone"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "f944a131-19da-44c2-b6da-f21e973ae9d6",
+      "name": "Updatebooking",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "position": [
+        1040,
+        608
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KFJN5XrWgBy612x8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM",
+          "mode": "list",
+          "cachedResultName": "Salon Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Order Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16hNOtMj-NWfXGVeUPOKGbdOtSfKqs63BkhEWqgjUDJM/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Phone",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9f33ab7e-42db-46f9-89dd-ef6164ae2c69",
+      "name": "Getbookingdetails",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "position": [
+        544,
+        752
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KFJN5XrWgBy612x8",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        128,
+        96
+      ],
+      "id": "42116724-a1f9-40fb-9bb0-2f64988f625f",
+      "name": "WhatsApp Trigger",
+      "webhookId": "53ba50c7-daca-4bcc-beda-8e73e4f014b0",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "WTa4iWZcaVXXrpg6",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "=739807829221879",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        160
+      ],
+      "id": "0c0a4d22-4601-4597-bd1c-ef47d4912de6",
+      "name": "Send message",
+      "webhookId": "7277a572-36b3-42e0-8257-ff74278f19f5",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "bH7kdwKiKcNczk4k",
+          "name": "WhatsApp account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        48,
+        272
+      ],
+      "id": "c8440fce-7ade-4565-8314-13704da8da08",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2cSbWKvARy5fsQKD",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "openingHour": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Updatebooking": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "salonservices": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SuggestStylist": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Booking services": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Getbookingdetails": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "perticullerstylistsdetails": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b9f38758-e78c-49c8-939a-4a72bbd93cc9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c0c3fe71cadf27e20e684308c0530c747e9c1a4ed38a7f10a34a9b19fa0b1bce"
+  },
+  "id": "1G2TvfOCyOGSgPhu",
+  "tags": []
+}

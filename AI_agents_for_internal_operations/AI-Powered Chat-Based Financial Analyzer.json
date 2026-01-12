@@ -1,0 +1,429 @@
+{
+  "name": "AI-Powered Chat-Based Financial Analyzer",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        -256
+      ],
+      "id": "13baa6b9-b1b8-414a-b3d0-a79ca91fc55b",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "717d214d-0a8b-4fe9-937a-97c31130a6d3",
+              "name": "ticker",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        -32
+      ],
+      "id": "d097570c-96e3-47a8-ab0a-fcdd6704b54f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.chart-img.com/v2/tradingview/advanced-chart/storage",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "pUTOdWxcRI5LokPD4fQbW4vCu0i83N0D60RbB7oK"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"theme\": \"dark\",\n  \"interval\": \"1W\",\n  \"symbol\": \"NASDAQ:{{ $json.ticker }}\",\n  \"override\": {\n    \"showStudyLastValue\": false\n  },\n  \"studies\": [\n    {\n      \"name\": \"Volume\",\n      \"forceOverlay\": true\n    },\n    {\n      \"name\": \"MACD\",\n      \"override\": {\n        \"Signal.linewidth\": 2,\n        \"Signal.color\": \"rgb(255,65,129)\"\n      }\n    }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        -256
+      ],
+      "id": "78fb36e2-d0bf-40f4-9f40-1d68198d4301",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        -32
+      ],
+      "id": "bc8a5d57-438d-4a80-8c87-395960659dcf",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert technical analyst specializing in the MACD (Moving Average Convergence Divergence) indicator. Analyze the provided MACD chart image meticulously. Identify and interpret the following elements:\n\n1.  **MACD Line and Signal Line:**\n    * Describe the current positions and trajectory of the MACD line and the signal line.\n    * Identify the most recent crossover: Was it a bullish (MACD line crossing above signal line) or bearish (MACD line crossing below signal line) crossover? Note its approximate timing or location on the chart.\n    * Assess the strength or weakness implied by the spread between the MACD line and the signal line.\n\n2.  **Histogram:**\n    * Describe the current state of the histogram (e.g., positive and increasing, positive and decreasing, negative and increasing, negative and decreasing).\n    * What does the histogram indicate about the momentum of the price movement (accelerating or decelerating)?\n    * Note any recent histogram crossovers of the zero line.\n\n3.  **Centerline (Zero Line) Crossovers:**\n    * Has the MACD line recently crossed the zero line?\n    * If so, was it a bullish (crossing above zero) or bearish (crossing below zero) signal? What does this imply about the longer-term momentum?\n\n4.  **Potential Divergences (Crucial, but hardest for LLMs with image only):**\n    * Carefully examine the MACD's peaks and troughs in relation to what might be inferred as corresponding price action (even if the price chart isn't directly visible, describe any *visual patterns* in the MACD that would typically indicate bullish or bearish divergence if correlated with price).\n    * Specifically look for:\n        * **Bullish Divergence:** Lower lows on the MACD while the (inferred) price makes higher lows, or lower lows on the MACD while (inferred) price makes equal lows.\n        * **Bearish Divergence:** Higher highs on the MACD while the (inferred) price makes lower highs, or higher highs on the MACD while (inferred) price makes equal highs.\n    * Describe any such patterns observed *within the MACD itself* that suggest potential divergence.\n\n5.  **Overall Momentum and Signal Interpretation:**\n    * Synthesize the observations above to provide an overall assessment of the current momentum (bullish, bearish, neutral, strengthening, waning).\n    * What is the primary signal the MACD is currently generating?\n\n**Important Considerations to Add to Your n8n Setup or Prompt (if feasible):**\n\n* **Timeframe Context (if known):** If you know the timeframe of the chart (e.g., \"1-hour,\" \"Daily,\" \"Weekly\"), adding this context can be helpful: \"Analyze the provided [Timeframe, e.g., Daily] MACD chart image...\" This helps the LLM understand the significance of certain movements.\n* **Asset Context (if known):** \"Analyze the provided MACD chart image for [Asset, e.g., BTC/USD]...\"\n* **Clarity of Image:** Ensure the image you pass is very clear, with distinct lines and histogram bars.\n\n**Example Prompt to paste into your n8n \"User Message\" field:**\n\n```text\nYou are an expert technical analyst specializing in the MACD indicator. Analyze the provided MACD chart image meticulously. Identify and interpret the following elements:\n\n1.  **MACD Line and Signal Line:** Describe their current positions, trajectory, the most recent crossover (bullish/bearish and approximate location), and the implied strength from their spread.\n2.  **Histogram:** Describe its current state (e.g., positive/negative, increasing/decreasing), what it indicates about momentum, and any recent zero line crossovers.\n3.  **Centerline (Zero Line) Crossovers:** Note any recent MACD line crossovers of the zero line (bullish/bearish) and their implication for longer-term momentum.\n4.  **Potential Divergences:** Describe any visual patterns within the MACD itself (peaks and troughs) that suggest potential bullish or bearish divergence.\n5.  **Overall Momentum and Signal Interpretation:** Synthesize these findings into an assessment of the current momentum and the primary signal the MACD is currently generating.\n\nProvide a concise, structured analysis.",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "HumanMessagePromptTemplate",
+              "messageType": "imageBinary"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        320,
+        -224
+      ],
+      "id": "cf42070f-a2df-4a1a-80e0-7470cc4d3374",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        -32
+      ],
+      "id": "4247906e-18dc-4016-84d7-3b14033d24fd",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a411ecd1-b642-4816-b007-15a7f4feee51",
+              "name": "response",
+              "value": "={{ $json.text }}\n\n{{ $('HTTP Request1').item.json.url }}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        -224
+      ],
+      "id": "afb316e2-6ebb-478a-8da4-1bc3b9251c50",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        -736
+      ],
+      "id": "a2b6d75c-e05f-43a3-b6be-34efdf303a10",
+      "name": "When chat message received",
+      "webhookId": "d7273b80-2e59-4191-99fa-08a4e462ab0e"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=Your purpose is to provide comprehensive stock analysis by integrating quantitative data, detailed technical chart analysis, and current sentiment/news.\n\n**Inputs Provided to You for this Task:**\n1.  **User's Company Request:** (e.g., \"tell me about Apple\")\n2.  **Detailed Technical Chart Analysis (from a previous step, if available):** This is a text-based analysis derived from a chart image (e.g., a multi-point MACD analysis including line positions, crossovers, histogram interpretation, centerline status, and identified divergences). *If this detailed analysis is not provided, note its absence and proceed with general technical observations if possible from the Stock Tool's chart.*\n\n**Your Process:**\n\n* **Step 1: Ticker Identification:**\n    * Determine the official stock ticker for the company mentioned in the \"User's Company Request.\"\n    * Clarify with the user if the company name is ambiguous.\n\n* **Step 2: Quantitative Data & Basic Chart (`Stock Tool`):**\n    * Use the identified **ticker** as input for the `Stock Tool` to fetch key financial metrics.\n    * The `Stock Tool` will also attempt to generate a basic price chart image/URL.\n\n* **Step 3: Qualitative Context & Sentiment (`Tavily Search`):**\n    * Use the `Tavily Search` tool to understand the current narrative surrounding the company.\n    * **Formulate a strong search query** using the company name *and* ticker, focusing on recent developments. Good search terms include: \"stock sentiment\", \"recent news\", \"earnings analysis\", \"analyst price targets\", \"investor outlook\", \"product developments\", \"competitive landscape\".\n    * *Example Tavily Query: `\"Apple (AAPL) recent news, stock sentiment, and analyst outlook\"`*.\n\n* **Step 4: Critical Synthesis & Integration:**\n    * **Integrate Financials:** Briefly present the key financial metrics from the `Stock Tool`.\n    * **Deep Dive into Technicals:**\n        * Thoroughly incorporate the **\"Detailed Technical Chart Analysis\"** (provided as input from the previous step). This should form the core of your technical perspective.\n        * If the `Stock Tool` provides a chart, visually reference it if it helps illustrate points from the detailed analysis or shows more recent price action not covered by the detailed analysis's image.\n        * Discuss key elements like identified trends, patterns (e.g., breakouts, consolidation), momentum (based on indicators from the detailed analysis like MACD), and any significant support/resistance levels hinted at by the detailed analysis.\n    * **Integrate Sentiment/News:** Weave in the findings from `Tavily Search`.\n    * **Correlate and Contrast:** Actively look for and discuss:\n        * Confirmations: Do the technical signals (from the detailed analysis) align with the current news/sentiment? (e.g., bullish MACD crossover during positive news flow).\n        * Divergences: Are there discrepancies? (e.g., bearish technical signals despite overly positive sentiment, or vice-versa).\n        * Impact: How might current events or sentiment be influencing the technical picture, or how might the technicals pre-empt or confirm sentiment shifts?\n\n* **Step 5: Structured Output Delivery:**\n    * Deliver a clear, insightful, and well-structured analysis.\n    * **Crucially, your output MUST feature distinct sections:**\n        1.  **Overall Summary/Snapshot:** A brief 2-3 sentence overview.\n        2.  **Quantitative Snapshot:** Key financial metrics from `Stock Tool`.\n        3.  **Detailed Technical Analysis:**\n            * Start with the core findings from the **\"Detailed Technical Chart Analysis\"** (MACD, etc.).\n            * Mention any other relevant technical observations (e.g., from the `Stock Tool` chart, or other common indicators if the detailed analysis included them like RSI).\n            * Conclude with a summary of the current technical posture (e.g., bullish, bearish, neutral, consolidating, reversing).\n        4.  **Qualitative Context: News & Sentiment:** Summarized findings from `Tavily Search`, including positive drivers, risks, and analyst viewpoints.\n        5.  **Integrated Outlook & Analyst View:**\n            * Synthesize all the above information.\n            * Discuss the alignment (or lack thereof) between technicals, fundamentals (briefly), and sentiment.\n            * Offer a balanced forward-looking perspective, highlighting potential catalysts and risks.\n    * **Chart Display:** If the `Stock Tool` provides a chart image or URL, **include it** in your response, ideally alongside or within the \"Quantitative Snapshot\" or \"Detailed Technical Analysis\" section. If including the image directly isn't possible, provide the URL.\n\n{{ $now }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        176,
+        -736
+      ],
+      "id": "3c0850ec-a068-4bf2-88e9-cea4bad3ed25",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        -512
+      ],
+      "id": "7824cdad-43e2-4ce9-b5d8-41a3fccecc09",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to conduct technical analysis",
+        "workflowId": {
+          "__rl": true,
+          "value": "KIKfzhJkyj4CGU7X",
+          "mode": "list",
+          "cachedResultName": "Stock Tool Demo"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        -512
+      ],
+      "id": "92afae6b-9558-417a-bbf5-fc218d3d6fce",
+      "name": "Stock Tool"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Call this tool to conduct sentiment analysis on the stock",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "search_depth",
+              "value": "advanced"
+            },
+            {
+              "name": "days",
+              "value": "7"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        -528
+      ],
+      "id": "39a7dc54-eb52-4915-b4a6-81d7a40cb9cd",
+      "name": "Tavily Tool"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        -512
+      ],
+      "id": "c34ed6a4-6505-4383-a737-320d2ae7a40c",
+      "name": "OpenAI Chat Model1"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": "TSLA"
+        }
+      }
+    ],
+    "Edit Fields": [
+      {
+        "json": {
+          "ticker": "TSLA"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stock Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d8d6608f-d45e-4bfb-b994-ff8ee2b1fecf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c8a7c4f7fe778490eebe35a2b86f4dd54ebdaa474dda3d31e8ddbd18df6403f5"
+  },
+  "id": "b3aw6mOXkXH3n7l3",
+  "tags": []
+}

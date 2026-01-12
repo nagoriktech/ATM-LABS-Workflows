@@ -1,0 +1,679 @@
+{
+  "name": "Collaborative Sales Planning with Multi-Agent AI, Google Docs, and Slack",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "6201c6e2-2cce-44c1-9387-f28fe18ae4d0",
+      "name": "When clicking ‘Execute workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        1248,
+        976
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a strategy consultant. Based on the following info, create a concise sales-season plan:\n\nCompany: AutomateWithMe\nProduct: Automation Services\nSale window: Aug to December annually\nPrimary channels: Amazon, Ebay\nSuccess metrics: Revenue\nAudience: SME owners (CEOs, CFOs, CIOs)\n\nOutput format:\n# Summary\n# Timeline\n# Marketing Plan (top 3 campaigns, channels)\n# Operations Readiness (inventory, staffing, fulfillment)\n# Pricing & Budget (discounts, budget split, targets)\n# Risks & Mitigations\n# Next 5 Actions\n",
+        "options": {
+          "systemMessage": "You are the CEO orchestrating three tool agents (departments) to produce a concise sales-season plan.\n\nTOOLS AVAILABLE\n1) MarketingDept – campaign ideas, channels, content calendar.\n2) OpsDept – inventory & staffing readiness, fulfillment steps, key risks.\n3) FinanceDept – pricing/discounts, budget split, targets.\n\nWORKFLOW\n- Read the user brief.\n- Call each tool once with only the info they need.\n- Merge their outputs into a single, consistent plan.\n- Resolve conflicts briefly (prefer feasibility over ambition).\n- Keep it action-oriented and short.\n\nFINAL OUTPUT (markdown sections)\n# Summary\n# Timeline (key dates)\n# Marketing Plan (top 3 campaigns, channels)\n# Operations Readiness (inventory, staffing, fulfillment)\n# Pricing & Budget (discounts, budget split, targets)\n# Risks & Mitigations\n# Next 5 Actions"
+        }
+      },
+      "id": "1a308cf0-a072-403e-a2d0-6acc35fb68d1",
+      "name": "CEO Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1984,
+        976
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "a7a22e0e-ff22-4247-9ec4-80160a4a9fbb",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1696,
+        1200
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "2I6nkGXnPJR1so01",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0237546-a7a6-4f52-b4c9-078f7ef6879f",
+              "name": "Company",
+              "type": "string",
+              "value": "AutomateWithMe"
+            },
+            {
+              "id": "e6fbc3e4-d59e-4ed3-9eac-553d2662bdec",
+              "name": "Product",
+              "type": "string",
+              "value": "Automation Services"
+            },
+            {
+              "id": "bc72c647-c2d9-462f-95da-c3889ca30d20",
+              "name": "Sale window",
+              "type": "string",
+              "value": "August to December annually"
+            },
+            {
+              "id": "663cc17d-b979-4b3c-99c9-d82f4ccdb03b",
+              "name": "Primary channels",
+              "type": "string",
+              "value": "Amazon, Ebay"
+            },
+            {
+              "id": "bb9172a7-38e3-4dfb-a181-991257f1d454",
+              "name": "Success metrics",
+              "type": "string",
+              "value": "Revenue"
+            },
+            {
+              "id": "65f42033-edef-4046-9d91-25107d52c81d",
+              "name": "Audience",
+              "type": "string",
+              "value": "SME's owner (CEO, CFO, CIO)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3a58db5c-db31-4b0d-b3b5-a72a6db4c5de",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1472,
+        976
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "f144230e-5c2f-400e-ba2e-5777cbee5153",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1920,
+        1408
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "2I6nkGXnPJR1so01",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "83428a80-0ac3-4b54-885d-474ffed703d8",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        2240,
+        1408
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "2I6nkGXnPJR1so01",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "You are the Marketing Department. From the brief, propose practical campaigns.\n\nOUTPUT (JSON):\n{\n  \"campaigns\":[\n    {\"name\":\"\",\"channel\":\"\",\"audience\":\"\",\"message\":\"\",\"kpi\":\"\"}\n  ],\n  \"content_calendar\":[\n    {\"date\":\"YYYY-MM-DD\",\"channel\":\"\",\"asset\":\"\",\"cta\":\"\"}\n  ],\n  \"notes\":\"\"\n}\n\nRULES\n- Max 3 campaigns, each tied to 1–2 channels.\n- KPIs: choose 1 per campaign (e.g., CTR, leads, revenue).\n- Be realistic with the given constraints and dates.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "7d6b60c5-19fa-4048-8528-685ddc30af37",
+      "name": "Marketing Agent",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        1824,
+        1200
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "You are Operations. Assess readiness and outline what must happen to deliver.\n\nOUTPUT (JSON):\n{\n  \"inventory_note\":\"\",\n  \"staffing_plan\":[{\"team\":\"\",\"need\":\"\",\"when\":\"\"}],\n  \"fulfillment_steps\":[{\"step\":\"\",\"owner\":\"\",\"due\":\"\"}],\n  \"operational_risks\":[{\"risk\":\"\",\"mitigation\":\"\"}]\n}\n\nRULES\n- Keep it feasible: call out shortages or bottlenecks.\n- Prefer simple, sequenced steps with clear owners and due dates.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "10d822f7-8440-4492-a695-7e9c31451e6d",
+      "name": "Operations Agent",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        2144,
+        1200
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "You are Finance. Recommend discounts, budget split, and targets.\n\nOUTPUT (JSON):\n{\n  \"discounts\":[{\"product\":\"\",\"type\":\"% or fixed\",\"value\":0,\"notes\":\"\"}],\n  \"budget_split\":{\"marketing\":0,\"ops\":0,\"contingency\":0},\n  \"targets\":{\"revenue\":0,\"roi\":0,\"gross_margin_pct\":0},\n  \"notes\":\"\"\n}\n\nRULES\n- Keep totals sensible and within constraints.\n- Tie discounts to campaigns and inventory realities.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "2e89b135-dc1e-47a8-bb91-e8df520cdfbf",
+      "name": "Finance Agent",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "position": [
+        2464,
+        1200
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "d60ec317-04c9-4bdd-9456-e756d01712c0",
+      "name": "OpenAI Chat Model3",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        2560,
+        1408
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "2I6nkGXnPJR1so01",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "uploadType",
+              "value": "multipart"
+            },
+            {
+              "name": "supportsAllDrives",
+              "value": "true"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "boundary",
+              "value": "foo_bar_baz"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "multipart/related; boundary=foo_bar_baz",
+        "body": "=--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n{\n  \"name\": \"Company Sale Plan {{ $today.format('yyyy-MM-dd-hhmm') }}\",\n  \"mimeType\": \"application/vnd.google-apps.document\",\n  \"parents\": [\"{{ $json['Drive Folder ID'] }}\"]\n}\n\n--foo_bar_baz\nContent-Type: text/markdown; charset=UTF-8\n\n{{ $json['Document Content'] }}\n--foo_bar_baz--",
+        "options": {}
+      },
+      "id": "4a7a4b7c-9d40-43b9-a94f-f697f53ccaad",
+      "name": "Create document file",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3088,
+        976
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fiwEyB5Kh9ydiwMF",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1ff0b9a4-7d60-44ec-b047-e49252f1ace9",
+              "name": "Drive Folder ID",
+              "type": "string",
+              "value": "1wULhkoxfSxH08xevjPpApVFjyimGW0pN"
+            },
+            {
+              "id": "75ab39ab-44d0-4272-bceb-fe63bd72a5ba",
+              "name": "Document Content",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "22b70461-a7da-4334-ab14-e18598a1dcc5",
+      "name": "Configure metadata ",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2864,
+        976
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "options": {
+          "channelId": "C09E9H19BC3",
+          "initialComment": "📄 The Sales Season Plan is ready!  Please find the generated PDF file attached for review and next steps.  "
+        }
+      },
+      "id": "c6a97ab3-4bc7-4db7-965d-c4b4d1765e56",
+      "name": "Upload a file",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        3536,
+        976
+      ],
+      "webhookId": "b4d5b0ca-b166-4000-abf8-df943fe711ae",
+      "typeVersion": 2.3,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "zCKCAUrhIfr8xFO8",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf"
+            }
+          }
+        }
+      },
+      "id": "ff105f89-29b2-4962-9c78-d62876b5827b",
+      "name": "Convert to PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        3312,
+        976
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "fiwEyB5Kh9ydiwMF",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Multi-Agent Architecture Free Bootstrap Template for Beginners\n[![Watch the video](https://wisestackai.s3.ap-southeast-1.amazonaws.com/n8n-multi-agent-architecture-free-bootstrap-template-for-beginners.jpg)](https://www.youtube.com/watch?v=BfMY2jFJR9k)\n\n_Free template to learn and reuse a multi-agent architecture in n8n. The company metaphor: a **CEO (orchestrator)** delegates to **Marketing, Operations, Finance** to produce a short sales-season plan, export it to PDF, and share it._\n\n## **Who’s it for**\n- Builders who want a **clear, minimal pattern** for multi-agent orchestration in n8n.  \n- Teams demoing/teaching agent collaboration with **one coordinator + three specialists**.  \n- Anyone needing a **repeatable template** to generate plans from multiple “departments”.\n\n## **How it works / What it does**\n1. **Trigger (Manual)** — Click *Execute workflow* to start.\n2. **Edit Fields** — Provide brief inputs (company, products, dates, constraints, channels, goals).\n3. **CEO Agent (Orchestrator)** — Reads the brief, calls 3 tool agents once, merges results, resolves conflicts.\n4. **Marketing Agent** — Proposes top campaigns + channels + content calendar.\n5. **Operations Agent** — Outlines inventory/staffing readiness, fulfillment steps, risks.\n6. **Finance Agent** — Suggests pricing/discounts, budget split, targets.\n7. **Compose Document** — CEO produces Markdown; node converts to Google Doc → **PDF**.\n8. **Share** — Upload the PDF to Slack (or Drive) for review.\n\n**Outputs**\n- **Markdown plan** with sections (Summary, Timeline, Marketing, Ops, Pricing, Risks, Next Actions).  \n- **Compact JSON** for automation (campaigns, budget, dates, actions).  \n- **PDF** file for stakeholders.\n\n## **How to set up**\n1. **Add credentials**\n   - OpenAI (or your LLM provider) for all agents.\n   - Google (Drive/Docs) to create the document and export PDF.\n   - Slack (optional) to upload/share the PDF.\n2. **Map nodes (suggested)**\n   - **When clicking ‘Execute workflow’** → **Edit Fields** (form with: `company`, `products`, `audience`, `start_date`, `end_date`, `channels`, `constraints`, `metrics`).\n   - **CEO Agent** (AI Tool Node) → calls **Marketing Agent**, **Operations Agent**, **Finance Agent** (AI Tool Nodes).\n   - **Configure metadata** (doc title from company + window).\n   - **Create document file** (Google Docs API) with CEO Markdown.\n   - **Convert to PDF** (export).\n   - **Upload a file** (Slack) to share.\n3. **Prompts (drop-in)**\n   - **CEO (system)**: orchestrate 3 tools; request concise JSON+Markdown; merge & resolve; output sections + JSON.\n   - **Marketing / Operations / Finance (system)**: each returns a small JSON per its scope (campaigns/calendar; staffing/steps/risks; discounts/budget/targets).\n4. **Test** — Run once; verify the PDF and Slack message.\n\n## **Requirements**\n- n8n (current version with **AI Tool Node**).  \n- LLM credentials (e.g., OpenAI).  \n- Google credentials for Docs/Drive (to create & export).  \n- Optional Slack bot token for file uploads.\n\n## **How to customize the workflow**\n- **Swap roles**: Replace departments (e.g., Product, Legal, Support) or add more tool agents.\n- **Change outputs**: Export to **DOCX/HTML/Notion**; add a cover page; attach brand styles.\n- **Approval step**: Insert **Slack “Send & Wait”** before PDF generation for review/edits.\n- **Data grounding**: Add RAG (Sheets/DB/Docs) so agents cite inventory, pricing, or past campaign KPIs.\n- **Automation JSON**: Extend the schema to match your CRM/PM tool and push `next_actions` into Jira/Asana.\n- **Scheduling**: Replace manual trigger with a **cron** (weekly/monthly planning).\n- **Localization**: Add a Translation agent or set language via input field.\n- **Guardrails**: Add length limits, cost caps (max tokens), and validation on agent JSON.",
+        "height": 2032,
+        "width": 1072
+      },
+      "id": "d1c23106-8c17-4be5-934a-75258e905064",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 1) Start the run (Manual Trigger)\n**Node:** *When clicking ‘Execute workflow’*  \n**What happens:** You kick off a single-run demo. Manual start keeps the flow predictable while you learn.  \n**Why it matters:** Lets you iterate on prompts/fields quickly before adding a schedule or webhook.",
+        "height": 208,
+        "width": 272
+      },
+      "id": "7a9df7ac-6068-415c-965a-abece6bbedc2",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1184,
+        704
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 2) Collect the brief (Edit Fields)\n**Node:** *Edit Fields*  \n**Inputs to capture (examples):**\n- `company`, `products`, `audience`\n- `start_date`, `end_date`\n- `channels` (e.g., “email, social, search”)\n- `constraints` (budget cap, stock limits, compliance)\n- `metrics` (revenue, ROI, CAC, leads)  \n**Tips:** validate dates and keep text short; agents will elaborate.",
+        "height": 304,
+        "width": 272
+      },
+      "id": "e2ebcc6d-fce8-4010-a5f3-946090b9bbd2",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1392,
+        1136
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 3) Orchestrate like a CEO (CEO Agent)\n**Node:** *AI Tool Node (CEO Agent)*  \n**Role:** Orchestrator. It reads the brief, assigns tasks to 3 department agents **once each**, then merges results.  \n**Key behavior to configure:**\n- Provide a **system prompt** that defines: goals, tools available, expected sections, JSON schema, and “call each tool exactly once”.  \n- Instruct it to **resolve conflicts** (e.g., finance budget vs. marketing ambition) by preferring feasibility.\n\n**Expected CEO outputs:**\n- **Markdown Plan** with sections: Summary, Timeline, Marketing, Ops, Pricing, Risks, Next Actions.  ",
+        "height": 288,
+        "width": 512
+      },
+      "id": "e76711dd-2192-45cf-9972-92ca9b10bf73",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1600,
+        640
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 4) Call Tool #1: Marketing Department\n**Node:** *AI Tool Node (Marketing Agent)*  \n**Input from CEO:** Slimmed brief + required fields (audience, channels, dates, constraints).  \n**Output (JSON):**\n```json\n{\n  \"campaigns\":[{\"name\":\"\",\"channel\":\"\",\"message\":\"\",\"kpi\":\"\"}],\n  \"content_calendar\":[{\"date\":\"YYYY-MM-DD\",\"channel\":\"\",\"asset\":\"\",\"cta\":\"\"}],\n  \"notes\":\"\"\n}\n```\n**What to teach learners:** Limit to 2–3 campaigns; pick 1 KPI per campaign; keep calendar realistic.",
+        "height": 336,
+        "width": 320,
+        "color": 3
+      },
+      "id": "43d6d083-b5ef-481d-bad7-71c7caa16467",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1776,
+        1552
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 5) Call Tool #2: Operations Department\n**Node:** *AI Tool Node (Operations Agent)*  \n**Input from CEO:** Products, window, constraints (inventory/staff).  \n**Output (JSON):**\n```json\n{\n  \"inventory_note\":\"\",\n  \"staffing_plan\":[{\"team\":\"\",\"need\":\"\",\"when\":\"\"}],\n  \"fulfillment_steps\":[{\"step\":\"\",\"owner\":\"\",\"due\":\"\"}],\n  \"operational_risks\":[{\"risk\":\"\",\"mitigation\":\"\"}]\n}\n```\n**Learning:** Prefer checklists with owners/due dates; call out bottlenecks early.",
+        "height": 336,
+        "width": 320,
+        "color": 5
+      },
+      "id": "18d2574c-7680-47ef-bebb-bb8f180171cd",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2144,
+        1552
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 6) Call Tool #3: Finance Department\n**Node:** *AI Tool Node (Finance Agent)*  \n**Input from CEO:** Campaign ideas + ops constraints.  \n**Output (JSON):**\n```json\n{\n  \"discounts\":[{\"product\":\"\",\"type\":\"%|fixed\",\"value\":0,\"notes\":\"\"}],\n  \"budget_split\":{\"marketing\":0,\"ops\":0,\"contingency\":0},\n  \"targets\":{\"revenue\":0,\"roi\":0,\"gross_margin_pct\":0},\n  \"notes\":\"\"\n}\n```\n**Learning:** Tie discounts to campaigns and stock positions; keep budget totals sensible.",
+        "height": 336,
+        "width": 320,
+        "color": 4
+      },
+      "id": "943bb712-8191-4cf3-8ada-739fbec2ebfc",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2512,
+        1552
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 7) Merge & reconcile (inside CEO Agent)\n**Node:** *CEO Agent continues*  \n**What happens:** CEO pulls the 3 JSONs, resolves conflicts (e.g., campaign count vs. budget), and produces:\n- Final **Markdown plan** (human-readable)  \n- Final **JSON payload** (machine-usable)  \n**Tip:** Ask CEO to output **both artifacts** in a single response under distinct keys (e.g., `plan_md`, `plan_json`).",
+        "height": 272,
+        "width": 448
+      },
+      "id": "8f4b4590-747b-4752-b684-6eafa4f15cc6",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2144,
+        640
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "#### Set document metadata (Configure metadata)\n**Node:** *Edit Fields / Set*  \n**What you set:** Document title, author, tags.  \n**Example title:** `{{ $json.plan_json.company }} — Sales Season Plan ({{ $json.plan_json.window.start }} → {{ $json.plan_json.window.end }})`  \n**Learning:** Keep naming deterministic for easy filing/search.\n\n#### Create the source document (Create document file)\n**Node:** *HTTP Request: Google Docs create* or n8n’s Google Docs node  \n**Input:** `plan_md` from CEO → convert Markdown → HTML (or use a Markdown-to-HTML helper) → write into a new Google Doc.  \n**Learning:** Markdown-in → Doc-out keeps content editable by humans.\n\n#### Export to PDF (Convert to PDF)\n**Node:** *HTTP Request: Google export* or Google Drive “download file”  \n**What happens:** The Doc is exported to PDF for sharing.  \n**Tip:** Save the PDF filename with the same deterministic title.",
+        "height": 400,
+        "width": 672
+      },
+      "id": "06e7fe68-b64f-453b-bc9b-37a3d1426b58",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2784,
+        528
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 11) Share the artifact (Upload a file)\n**Node:** *Slack: upload file* (or Drive/Email)  \n**Message (example):**\n```\n📄 Sales Season Plan is ready\nCompany: {{ $json.plan_json.company }}\nWindow: {{ $json.plan_json.window.start }} → {{ $json.plan_json.window.end }}\nThe PDF is attached. Please review and add comments.\n```\n**Learning:** Always include context (company/window) in the post.",
+        "height": 240,
+        "width": 688
+      },
+      "id": "ed5ac8ca-1512-4fd9-be4b-0785c98413cf",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3776,
+        896
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {
+    "CEO Agent": [
+      {
+        "json": {
+          "output": "# Summary\nAutomateWithMe will run a focused sales campaign from August to December targeting SME owners (CEOs, CFOs, CIOs) via Amazon and eBay. The strategy includes three main campaigns tied to peak seasonal periods, emphasizing automation services that boost SME efficiency and operational ROI. Operations readiness includes thorough inventory forecasting, staffing plans for peak demand, and clear fulfillment steps. Pricing and discounts will be moderate, timed to stimulate demand without eroding margins, supported by a $200K budget split mainly toward marketing and operational readiness. Risks like stockouts, staffing gaps, and platform compliance will be actively mitigated.\n\n# Timeline (key dates)\n| Date       | Key Activity                                       |\n|------------|----------------------------------------------------|\n| July 15    | Finalize demand forecast                            |\n| July 20    | Confirm supplier orders                             |\n| July 25    | Complete inventory count and reconciliation        |\n| July 30    | Finish staffing plan and start hiring as needed    |\n| August 1   | Sales window opens; launch “Boost Efficiency Holiday Prep” campaign and start fulfillment |\n| August 10  | Complete staff training                             |\n| August 15  | Inventory ramp-up and platform setup completed      |\n| Oct 1–15   | Run “End-of-Year Automation Upgrade” campaign       |\n| Nov 16–30  | Execute Black Friday / Cyber Week discount campaign |\n| Dec 10     | Launch “New Year, New Efficiency” lead capture      |\n| Dec 31     | Sales window closes; begin performance analysis    |\n\n# Marketing Plan\n**Top 3 Campaigns:**\n1. **Boost Efficiency Holiday Prep**  \n   - Channels: Amazon, eBay  \n   - Audience: SME owners preparing for holiday season  \n   - KPI: +15% sales conversion, 10,000 product page visits per channel  \n2. **End-of-Year Automation Upgrade**  \n   - Channels: Amazon, eBay  \n   - Audience: Current & new SME customers for upgrades and bundles  \n   - KPI: +20% average order value, 8% subscription upgrades  \n3. **New Year, New Efficiency**  \n   - Channels: Amazon, eBay  \n   - Audience: SME owners planning 2025 efficiency improvements  \n   - KPI: 1,000+ qualified leads, +25% email list signups  \n\n**Content Calendar (selected highlights):**\n- Aug 1-7: Launch promo banners and sponsored ads on Amazon and eBay  \n- Aug 15: Video demos and testimonials on Amazon  \n- Sept 10: Email campaign on eBay seller platform  \n- Oct 1-15: Bundled service listings and limited-time offers  \n- Nov 25-Dec 5: Holiday deals and flash sales on eBay  \n- Dec 10 & 15: New Year promo banners and lead capture incentives  \n\n# Operations Readiness\n- **Inventory:** Forecast demand conservatively with safety stock; place orders by July 20. Monitor supplier reliability and maintain contingency stock.  \n- **Staffing:** Hire seasonal/temporary workers by July 30; cross-train staff; complete training by August 10.  \n- **Fulfillment Steps:**  \n  - Finalize forecast (CEO/CFO/CIO) - July 15  \n  - Confirm orders (Procurement) - July 20  \n  - Inventory reconciliation (Ops Manager) - July 25  \n  - Staff training (Ops Lead) - August 10  \n  - Platform setup (CIO/IT) - August 15  \n  - Order fulfillment kickoff (Fulfillment Team) - August 1 ongoing  \n- **Risks & Mitigation:**  \n  - Stockouts: build safety stock; reorder quickly  \n  - Supplier delays: alternate suppliers, early ordering  \n  - Staffing shortages: early hires, overtime plans  \n  - Fulfillment errors: QC and staff training  \n  - Platform policy non-compliance: continuous updates and audits  \n  - IT failures: reliable IT infrastructure and backups  \n  - Negative customer feedback: proactive support and rapid resolution  \n\n# Pricing & Budget\n**Discounts:**  \n- Aug: 10% off first purchase (early-bird)  \n- Sept-Oct: 7% off orders > $500 (upsell)  \n- Oct-Nov: 5% site-wide steady discount  \n- Nov 16-30 (Black Friday/Cyber Week): 15% off service bundles  \n- Dec 1-15: 10% + free consultation  \n- Dec 16-31: 12% + referral bonus ($50)  \n\n**Budget Split (total $200,000):**  \n- Marketing: 50% ($100,000) — mostly Amazon and eBay ads, email marketing, content  \n- Operations: 30% ($60,000) — fulfillment, customer support, platform maintenance  \n- Contingency: 20% ($40,000) — buffer for unforeseen expenses  \n\n**Targets:**  \n- Revenue: $750,000 - $1,000,000  \n- ROI: 350%+ (3.5x marketing spend)  \n- Gross Margin: 60–65% after discounts and costs  \n\n# Risks & Mitigations\n- **Stockouts:** Safety stock, conservative forecasting, rapid reorder plans  \n- **Supplier Issues:** Early ordering, alternate suppliers  \n- **Staffing Shortfalls:** Early hiring, cross-training, overtime options  \n- **Fulfillment Errors:** Staff training, quality controls  \n- **Platform Compliance:** Ongoing policy review, staff training, audits  \n- **Tech Failures:** Reliable IT, backups, IT support ready  \n- **Negative Reviews:** Proactive customer service, quick complaint resolution  \n\n# Next 5 Actions\n1. Finalize demand forecast and place supplier orders by July 20.  \n2. Complete staffing plan; begin recruitment and training by July 30.  \n3. Update Amazon and eBay product listings with campaign assets by August 1.  \n4. Launch “Boost Efficiency Holiday Prep” campaign and fulfillment operations starting August 1.  \n5. Monitor campaign KPIs weekly; adjust marketing spend and staffing as needed."
+        }
+      }
+    ]
+  },
+  "connections": {
+    "CEO Agent": {
+      "main": [
+        [
+          {
+            "node": "Configure metadata ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "CEO Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finance Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "CEO Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to PDF": {
+      "main": [
+        [
+          {
+            "node": "Upload a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marketing Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "CEO Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Operations Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "CEO Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "CEO Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Marketing Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Operations Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Finance Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configure metadata ": {
+      "main": [
+        [
+          {
+            "node": "Create document file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create document file": {
+      "main": [
+        [
+          {
+            "node": "Convert to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6a26c29a-6093-4664-92a8-c963670cad0f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "92897899e43cb5f4ab79bd0f0cc53ff5ed4ac039aacc32039356fda35bcb92c7"
+  },
+  "id": "jY79WF3IEdgIsZqV",
+  "tags": []
+}

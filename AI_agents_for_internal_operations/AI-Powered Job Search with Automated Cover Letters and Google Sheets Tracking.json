@@ -1,0 +1,374 @@
+{
+  "name": "AI-Powered Job Search with Automated Cover Letters and Google Sheets Tracking",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        -448
+      ],
+      "id": "aec32408-4a33-43cc-abc6-e99d37db574f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "## Retrieve Job Data from adzuna.com Via API",
+        "height": 260,
+        "width": 960,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -576
+      ],
+      "id": "9b56d76e-2a74-4f15-a599-655bb91454d2",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Analyze and Match Resume to Job",
+        "height": 260,
+        "width": 960,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -208
+      ],
+      "id": "3d620877-6246-4dd4-af49-3ab5cdcacbd3",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Write Cover Letter and Update G Sheetss",
+        "height": 260,
+        "width": 960,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        160
+      ],
+      "id": "40aa8cfd-8230-43c2-852a-3dab29873542",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "job_title",
+              "value": "IT Auditor"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": false
+        }
+      },
+      "name": "Set Job Title1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        -448
+      ],
+      "id": "8d32516c-6828-41e7-8c99-43d3c243e083"
+    },
+    {
+      "parameters": {
+        "url": "https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=6c36bddc&app_key=c6709887df79d4b62cad054804f61c50&results_per_page=5&what={{$json.job_title}}",
+        "options": {}
+      },
+      "name": "Get Jobs from Adzuna1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1392,
+        -448
+      ],
+      "id": "a5e4bd96-3a4f-4e7b-a935-f6ea7e9a118e"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "name": "Split Jobs1",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        800,
+        -144
+      ],
+      "id": "4b4f3d58-ea95-46e3-9ce1-c6bf3233fd9b"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You're an AI that extracts key job info from the following JSON and returns it like this:\n{\"company_name\": \"\",\"location\": \"\",\"description\": \"(short summary max 200 chars)\"}",
+              "role": "system"
+            },
+            {
+              "content": "=Job data:\n{{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "name": "Summarize Job1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1104,
+        -144
+      ],
+      "id": "422fb254-ab89-4a9a-9b45-a415a888cbf4"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You're a professional assistant that writes custom, personalized cover letters based on the job description and resume provided.",
+              "role": "system"
+            },
+            {
+              "content": "=Job: {{ $('Summarize Job1').item.json.message.content.description }}\nCandidate resume:\nJohn Doe\nEmail: johndoe@email.com\nPhone: (555) 555-5555\n\nEDUCATION\nBachelor of Science in Business Administration, Example University\n\nEXPERIENCE\n- Sales Associate at RetailCo (2018–2020): Assisted customers, managed inventory, exceeded sales targets.\n- Customer Service Representative at ServiceCorp (2020–2022): Resolved customer issues, maintained high satisfaction ratings.\n\nSKILLS\n- Communication\n- Problem Solving\n- Teamwork\n\nCERTIFICATIONS\n- Certified Professional (CP)\n\n[End of Resume]"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "name": "Write Cover Letter1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        832,
+        224
+      ],
+      "id": "eb9581f1-dfd8-4691-bd40-450d92d870e9"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "17rDsMJ8rJXgDN07AFLVDVL14_0ObL8oT2d9E7XCzpj8",
+          "mode": "list",
+          "cachedResultName": "Job Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17rDsMJ8rJXgDN07AFLVDVL14_0ObL8oT2d9E7XCzpj8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17rDsMJ8rJXgDN07AFLVDVL14_0ObL8oT2d9E7XCzpj8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ $('Split Jobs1').item.json.title }}",
+            "Link": "={{ $('Split Jobs1').item.json.redirect_url }}",
+            "Summary": "={{ $('Split Jobs1').item.json.description }}",
+            "Cover Letter": "={{ $json.message.content.cover_letter }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cover Letter",
+              "displayName": "Cover Letter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1200,
+        224
+      ],
+      "id": "d0d4bf68-5714-4e5d-a169-99c63ec9adff",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.Title }}",
+        "emailType": "html",
+        "message": "={{ $('Write Cover Letter1').item.json.message.content.cover_letter }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1408,
+        224
+      ],
+      "id": "408d6e8c-7493-463b-99d1-07ea90452155",
+      "name": "Create a draft",
+      "webhookId": "c4aa81ae-e4ee-478f-bfc4-723c40abdcdd"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Job Title1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Job Title1": {
+      "main": [
+        [
+          {
+            "node": "Get Jobs from Adzuna1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Jobs from Adzuna1": {
+      "main": [
+        [
+          {
+            "node": "Split Jobs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Jobs1": {
+      "main": [
+        [
+          {
+            "node": "Summarize Job1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize Job1": {
+      "main": [
+        [
+          {
+            "node": "Write Cover Letter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Cover Letter1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c257a560-ce74-4d6e-a1e0-c56594b42f87",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c0c3fe71cadf27e20e684308c0530c747e9c1a4ed38a7f10a34a9b19fa0b1bce"
+  },
+  "id": "viVGDSkLeLzSNe76",
+  "tags": []
+}
