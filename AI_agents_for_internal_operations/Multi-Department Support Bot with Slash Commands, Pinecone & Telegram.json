@@ -1,0 +1,1689 @@
+{
+  "name": "Multi-Department Support Bot with Slash Commands, Pinecone & Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "35a9494a-ca0e-43da-bd95-fe07dd7806ca",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{$('Telegram Trigger').item.json.message.text}}",
+                    "rightValue": "/ReturnPolicy"
+                  }
+                ]
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "afb17bcd-17e4-4e68-96b3-2bbb6cd4fb82",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{$('Telegram Trigger').item.json.message.text}}",
+                    "rightValue": "/TechSupport"
+                  }
+                ]
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "8cb762a5-51de-4dba-b8fc-9a68f9ec06a1",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{$('Telegram Trigger').item.json.message.text}}",
+                    "rightValue": "/billing"
+                  }
+                ]
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "ed19a160-1fb9-4d93-92b8-9b8a1368567d",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{$('Telegram Trigger').item.json.message.text}}",
+                    "rightValue": "asakjlkadjclsdja"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 3
+        }
+      },
+      "id": "27952b64-19bb-4ce3-8a84-7c23338852b6",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        320,
+        1184
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "lets talk return policy",
+        "replyMarkup": "forceReply",
+        "forceReply": {
+          "force_reply": false
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "0b2d8746-3ab4-4cf6-aa4c-fbb67d12dcf1",
+      "name": "return policy",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        624,
+        992
+      ],
+      "webhookId": "c62a1217-aa18-4a94-a05a-abc3442877e1",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "jdeO9Q0lS8NPMcv7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "lets talk technical",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "f30b4d59-bdb5-4062-b86d-c88d3e21797c",
+      "name": "talk technical",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        768,
+        1184
+      ],
+      "webhookId": "c62a1217-aa18-4a94-a05a-abc3442877e1",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "jdeO9Q0lS8NPMcv7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "lets talk billing",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a70085c4-ac10-4bad-ad8c-db41b325b47c",
+      "name": "billing",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        768,
+        1376
+      ],
+      "webhookId": "c62a1217-aa18-4a94-a05a-abc3442877e1",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "jdeO9Q0lS8NPMcv7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {
+          "pineconeNamespace": "billing"
+        }
+      },
+      "id": "e54c0cc5-5113-43bb-90f2-557426f4e87c",
+      "name": "Pinecone Vector Store3",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        640,
+        2352
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "pineconeApi": {
+          "id": "ZSqvmziGZtltNdWv",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMonth",
+              "hour": 1
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1xTEFgsveAMplUBMS_LNnbxdTTvJ56UZp",
+          "mode": "list",
+          "cachedResultName": "billing",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1xTEFgsveAMplUBMS_LNnbxdTTvJ56UZp"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "3b751c7f-c630-4e70-807c-f113c6f21420",
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        176,
+        2560
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ES5Fx7CsHJoBzT0s",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "17af6357-d351-4966-83c5-062b662ee9b3",
+      "name": "Download file",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        400,
+        2560
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ES5Fx7CsHJoBzT0s",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## billing upload",
+        "height": 620,
+        "width": 960
+      },
+      "id": "fecddf51-d7c1-4034-8419-e664ed68f4a9",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        112,
+        2304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "id": "9e5e7a9a-efbf-4474-868b-d76379e0c6fe",
+      "name": "Embeddings Cohere3",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "position": [
+        624,
+        2576
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "cohereApi": {
+          "id": "Zm8tthZ8jlntDkMW",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "id": "5ec81e29-b3da-45ae-af9a-8caa935822be",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        752,
+        2592
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {},
+      "id": "c111cdb1-7d92-4f30-a34a-3305f9afc16b",
+      "name": "Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
+      "position": [
+        848,
+        2784
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {
+          "pineconeNamespace": "tech ques"
+        }
+      },
+      "id": "f97ce401-71d1-464f-bfe8-54454419be6a",
+      "name": "Pinecone Vector Store4",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        640,
+        3024
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "pineconeApi": {
+          "id": "ZSqvmziGZtltNdWv",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMonth",
+              "hour": 1
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1mn_wvAGxhRXPCJf6pIZqBqSlRiG5lTX3",
+          "mode": "list",
+          "cachedResultName": "tech questions ",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1mn_wvAGxhRXPCJf6pIZqBqSlRiG5lTX3"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "ba26ef35-74ab-483f-84ce-e734a0fb8202",
+      "name": "Google Drive Trigger1",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        176,
+        3216
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ES5Fx7CsHJoBzT0s",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "a4694464-9c91-4253-b319-aebf8d4b2ac0",
+      "name": "Download file1",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        400,
+        3216
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ES5Fx7CsHJoBzT0s",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## technical questions",
+        "height": 600,
+        "width": 1000
+      },
+      "id": "b5498ffc-69b8-4014-a9d8-466fac226623",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        96,
+        2976
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "id": "59c02f6e-c503-4dbd-bf23-caa860a42f41",
+      "name": "Embeddings Cohere4",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "position": [
+        624,
+        3232
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "cohereApi": {
+          "id": "Zm8tthZ8jlntDkMW",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "id": "0f4017d6-e00c-4e81-9932-70d0c1aa6ca4",
+      "name": "Default Data Loader1",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        752,
+        3264
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {},
+      "id": "7ce653b2-ba2d-4a29-8514-7cdef27247ed",
+      "name": "Character Text Splitter1",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
+      "position": [
+        848,
+        3440
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {
+          "pineconeNamespace": "return policy"
+        }
+      },
+      "id": "3eb61163-15a6-41ee-b5ed-c6056657145b",
+      "name": "Pinecone Vector Store5",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        640,
+        3872
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "pineconeApi": {
+          "id": "ZSqvmziGZtltNdWv",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMonth",
+              "hour": 1
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1WQer1_QwBqa31cBw1iDsznfzWrtKJ1Ht",
+          "mode": "list",
+          "cachedResultName": "return policy",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1WQer1_QwBqa31cBw1iDsznfzWrtKJ1Ht"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "f984edd9-e5fd-4af4-9ace-b6b0017429f8",
+      "name": "Google Drive Trigger2",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        176,
+        3872
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ES5Fx7CsHJoBzT0s",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "id": "64b41d7a-e78c-4f96-afba-45ebae40e7c6",
+      "name": "Download file2",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        400,
+        3872
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "ES5Fx7CsHJoBzT0s",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## return policy",
+        "height": 580,
+        "width": 980
+      },
+      "id": "e021139f-975b-420c-849b-e731e367fe56",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        112,
+        3808
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "id": "0533ef3f-d643-41ba-8b0c-946648f05bd4",
+      "name": "Embeddings Cohere5",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "position": [
+        624,
+        4112
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "cohereApi": {
+          "id": "Zm8tthZ8jlntDkMW",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "id": "4be49863-ca1c-4048-8295-2bf5b032a41a",
+      "name": "Default Data Loader2",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        752,
+        4128
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {},
+      "id": "71acedea-64ea-4504-be95-d070ef13d439",
+      "name": "Character Text Splitter2",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
+      "position": [
+        848,
+        4304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "e208a820-442b-4fb4-95ed-14d17af92d64",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        176,
+        576
+      ],
+      "webhookId": "e4985641-ce69-4278-9f65-c6e498d05ee9",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "jdeO9Q0lS8NPMcv7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "to connect to specific reply with their key:\nfor Billing: /billing\nfor Return Policy: /ReturnPolicy\nfor Tech Support: /TechSupport",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "666432fd-e28e-440a-b594-45945f047030",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1568,
+        176
+      ],
+      "webhookId": "5e468b80-2389-42c3-aa04-097ed524a6fc",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "jdeO9Q0lS8NPMcv7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 5,
+        "output": "={{ \n  $('Telegram Trigger').item.json.message.text === \"/start\" ? 0 :\n  $('Telegram Trigger').item.json.message.text === \"/end\" ? 3 :\n  ($json.active === \"true\" || $json.active === true)\n    ? ($json.department != null ? 2 : 4)\n    : 1\n}}\n"
+      },
+      "id": "c53a7a43-5a17-44e1-9e9d-e6d760068644",
+      "name": "Switch1",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        848,
+        560
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "reply with /start to get options. \nTo end chat reply with /end",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "30416846-1e78-420d-8373-783c92e3eec9",
+      "name": "Send a text message4",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1568,
+        384
+      ],
+      "webhookId": "ecee3aa8-e019-46c5-8020-9b8e6e59a7d8",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "jdeO9Q0lS8NPMcv7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "options": {
+          "systemMessage": "=You are a helpful assistant\n\n## job\n-your  job  is guide user on respective department\n- department: {{ $json.department }}\n\n## source\n- you can access data from respective vector store connected as tool\n## note\n- if user is on a department let say billing and asks questions for tech support respectully decline and ask user to end conversation with current department usind /end commant and start again\n- be precise in answers\n- definitely use the respective vector store tool to answer the questions\n\n## signoff as john wick"
+        }
+      },
+      "id": "21f8914a-0f05-47aa-8171-2ab0756ea98c",
+      "name": "AI Agent3",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1312,
+        576
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "vectore store for return policy.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {
+          "pineconeNamespace": "return policy"
+        }
+      },
+      "id": "54ea6aa4-29c8-4b02-aaef-8edbab1f9a47",
+      "name": "Pinecone Vector Store6",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        1312,
+        816
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "pineconeApi": {
+          "id": "ZSqvmziGZtltNdWv",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "id": "ec9d5195-0c5b-4e08-8bbe-02441231db3b",
+      "name": "Embeddings Cohere6",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "position": [
+        1408,
+        992
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "cohereApi": {
+          "id": "Zm8tthZ8jlntDkMW",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-chat-v3-0324:free",
+        "options": {}
+      },
+      "id": "e23a5c49-42c6-48ef-bca6-ae35d2050ab9",
+      "name": "OpenRouter Chat Model3",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "position": [
+        -176,
+        752
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "openRouterApi": {
+          "id": "RzyRWVcf29w7jC2c",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.user_id }}"
+      },
+      "id": "f3044ff5-cbe8-4c5d-815b-95a42f6fb13d",
+      "name": "Simple Memory3",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        1184,
+        800
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "vectore store for technical questions.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {
+          "pineconeNamespace": "tech ques"
+        }
+      },
+      "id": "082bacf2-ccc8-4069-b1ca-f23a4d40b6b7",
+      "name": "Pinecone Vector Store7",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        1600,
+        816
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "pineconeApi": {
+          "id": "ZSqvmziGZtltNdWv",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "id": "e0888eaf-bf12-4880-b815-c0eab131233a",
+      "name": "Embeddings Cohere7",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "position": [
+        1680,
+        992
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "cohereApi": {
+          "id": "Zm8tthZ8jlntDkMW",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "vectore store for billing data.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {
+          "pineconeNamespace": "billing"
+        }
+      },
+      "id": "8cabceea-a3a0-4a59-8c41-594c7ab5b4ef",
+      "name": "Pinecone Vector Store8",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "position": [
+        1904,
+        816
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "pineconeApi": {
+          "id": "ZSqvmziGZtltNdWv",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "embed-english-v3.0"
+      },
+      "id": "b35d471c-f111-447a-9d29-411d41843fb6",
+      "name": "Embeddings Cohere8",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "position": [
+        1984,
+        992
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "cohereApi": {
+          "id": "Zm8tthZ8jlntDkMW",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "3ef8abcc-60d7-4908-b10b-e4cc12b6931d",
+      "name": "Send a text message1",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1968,
+        576
+      ],
+      "webhookId": "cefa8b41-fc7c-4c5a-b2be-fc820b766610",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "jdeO9Q0lS8NPMcv7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE tg_user_sessions (\n    user_id BIGINT PRIMARY KEY,\n    department TEXT,\n    active BOOLEAN DEFAULT FALSE,\n    last_updated TIMESTAMP DEFAULT NOW()\n);\n",
+        "options": {}
+      },
+      "id": "bfc66c40-6718-47b5-824e-23230e1581e5",
+      "name": "Execute a SQL query",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        -576,
+        1072
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "s0PkKxyFfaD3nAWE",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO tg_user_sessions (user_id, active)\nSELECT {{ $json.message.from.id }}, FALSE\nWHERE NOT EXISTS (\n  SELECT 1 FROM tg_user_sessions WHERE user_id = {{ $json.message.from.id }}\n);\n",
+        "options": {}
+      },
+      "id": "46c3a084-72dd-40b2-a996-b1f33ef3ea6f",
+      "name": "Execute a SQL query1",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        400,
+        576
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "s0PkKxyFfaD3nAWE",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## just to create table",
+        "height": 220,
+        "width": 320
+      },
+      "id": "02cc494f-ced5-42a9-bb6c-3c227f1059db",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -656,
+        1024
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "tg_user_sessions",
+          "cachedResultName": "tg_user_sessions"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "user_id",
+              "value": "={{ $('Telegram Trigger').item.json.message.from.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "23d5d0a3-5761-4e71-abc0-95a16fc34f11",
+      "name": "Select rows from a table",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        624,
+        576
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "s0PkKxyFfaD3nAWE",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE tg_user_sessions\nSET active = FALSE,\n    department = NULL\nWHERE user_id = {{ $('Telegram Trigger').item.json.message.from.id }};\n",
+        "options": {}
+      },
+      "id": "681d50ad-d564-4d99-bd85-3d892e1b2cd0",
+      "name": "Execute a SQL query2",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        1568,
+        1184
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "s0PkKxyFfaD3nAWE",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "to continue chat again send /start",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "54c158f8-45a2-49c4-b7ec-eec28e432a31",
+      "name": "Send a text message2",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2288,
+        1184
+      ],
+      "webhookId": "4c4348e9-90c1-4666-8fc1-3a0c5b4f7ab2",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "jdeO9Q0lS8NPMcv7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## main bot",
+        "height": 1740,
+        "width": 2680
+      },
+      "id": "77b75b0e-b31d-4bb8-ae32-ce40b472def6",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -16,
+        32
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## working\n\n- listens for messages\n- /start or /end for conversations\n- uses PostgreSQL for user choice of department\n- data stored in pinecone vector store of respective departments\n- pdf files in googledrive (pinecone will be updated when new pdf is added )",
+        "height": 260,
+        "width": 380
+      },
+      "id": "be7b8014-84ac-45fa-b8da-770a054ae518",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -720,
+        624
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE tg_user_sessions\nSET active = TRUE,\n    department = 'Return Policy'\nWHERE user_id ={{ $json.result.chat.id }};\n",
+        "options": {}
+      },
+      "id": "30a36851-ee75-4451-89ac-27e0fb17d868",
+      "name": "return policy1",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        848,
+        992
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "s0PkKxyFfaD3nAWE",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE tg_user_sessions\nSET active = TRUE,\n    department = 'Tech Support'\nWHERE user_id ={{ $json.result.chat.id }};\n",
+        "options": {}
+      },
+      "id": "9d0102c7-23e6-4477-a8b1-e9881a0e407d",
+      "name": "tech questions",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        992,
+        1184
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "s0PkKxyFfaD3nAWE",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE tg_user_sessions\nSET active = TRUE,\n    department = 'Billing'\nWHERE user_id ={{ $json.result.chat.id }};\n",
+        "options": {}
+      },
+      "id": "34ff68fe-d0b0-4dc2-ab8f-871cc74c5ad6",
+      "name": "billing1",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        992,
+        1376
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "s0PkKxyFfaD3nAWE",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE tg_user_sessions\nSET active = TRUE,\n    department = NULL\nWHERE user_id = {{ $('Telegram Trigger').item.json.message.from.id }};\n",
+        "options": {}
+      },
+      "id": "a9f281bd-19da-44cc-a010-78637c02a11b",
+      "name": "Execute a SQL query3",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        1792,
+        176
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "s0PkKxyFfaD3nAWE",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "provide correct dpt|for Billing: /billing for Return Policy: /ReturnPolicy for Tech Support: /TechSupport",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "19e98416-d554-4a87-9c17-691da32f5656",
+      "name": "Send a text message3",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        736,
+        1600
+      ],
+      "webhookId": "b3e36a5a-d2c8-4fe5-b6bb-56bfe084250c",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "jdeO9Q0lS8NPMcv7",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        736
+      ],
+      "id": "ec9287ea-3d82-43f9-b884-8faca9a993cd",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "uJS1M53kjjoIgGnN",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "return policy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "talk technical",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "billing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute a SQL query2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "billing": {
+      "main": [
+        [
+          {
+            "node": "billing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "return policy": {
+      "main": [
+        [
+          {
+            "node": "return policy1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file2": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory3": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "talk technical": {
+      "main": [
+        [
+          {
+            "node": "tech questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere3": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store3",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere4": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store4",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere5": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store5",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere6": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store6",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere7": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store7",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere8": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store8",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store3",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store4",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader2": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store5",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query1": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger2": {
+      "main": [
+        [
+          {
+            "node": "Download file2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model3": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Pinecone Vector Store6": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store7": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store8": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Character Text Splitter1": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader1",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Character Text Splitter2": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader2",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select rows from a table": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3689e1e5-ba80-4c12-bf77-86cba39b89b3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5b21c7165de5a46f2ef9d804a5b8a3b067ca026abd6ebc70001d590b25d7eddb"
+  },
+  "id": "AyKLKVdnwpOezHjt",
+  "tags": []
+}

@@ -1,0 +1,1093 @@
+{
+  "name": "YouTube AI Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "name": "get_channel_details",
+        "description": "Get channel_id, title and description by handle/username.\nChannel_id is required to find videos and details about this channel.\nIf Youtube link to channel provided - parse handle from there or return channel_id. (e.g. https://www.youtube.com/@example_handle - example_handle)\n\n\nExample Input:\nexample_handle\n\nExample Output:\nid:UCOgz_YflAsYnGbdvzXuKNCA\ntitle:Daniel Simmons\ndescription:Digital Diary 🤎\\n\\n\\nWeekly videos around fashion...",
+        "workflowId": {
+          "__rl": true,
+          "value": "3crus12XpspV3rYF",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/3crus12XpspV3rYF",
+          "cachedResultName": "Youtube parser - tools"
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "command",
+              "stringValue": "=get_channel_details"
+            }
+          ]
+        },
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n \"type\": \"object\",\n \"properties\": {\n \"handle\": {\n \"type\": \"string\",\n \"description\": \"Handle/username of channel\"\n }},\n \"required\": [\"handle\"]\n}"
+      },
+      "id": "049ab578-b0f6-4c88-98c8-7020abbc779f",
+      "name": "get_channel_details",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        -1344,
+        1056
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "name": "get_video_description",
+        "description": "Fetch video details - the full description, title, and publish date of a video using its video_id.\n\nExample input:\nvideo_id:dQw4w9WgXcQ\n\nExample Output:\ntitle:Never Gonna Give You Up\ndescription: \"The official video for “Never Gonna Give You Up” by Rick Astley.\nduration:4 min\nviewCount:154\nlikeCount:6\nthumbnails: urls",
+        "workflowId": {
+          "__rl": true,
+          "value": "3crus12XpspV3rYF",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/3crus12XpspV3rYF",
+          "cachedResultName": "Youtube parser - tools"
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "command",
+              "stringValue": "video_details"
+            }
+          ]
+        },
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n \"type\": \"object\",\n \"properties\": {\n \"video_id\": {\n \"type\": \"string\",\n \"description\": \"The ID of the video to fetch details for\"\n }\n },\n \"required\": [\"video_id\"]\n}"
+      },
+      "id": "3fde68b0-f96c-4c8d-805b-0e2b3d7a87b8",
+      "name": "get_video_description",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        -1168,
+        1056
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "name": "get_list_of_videos",
+        "description": "Retrieve a list of videos from a channel using channel_id. Supports sorting by date, relevance, or view count.\n\nExample Input:\nchannel_id\": \"UCxxxxxxxxxxxxxxxx\"\nnumber_of_videos\": 5\norder: \"date\"\npublishedAfter: \"timestamp\"\n\nExample Output:\nvideo_id:abc123\ntitle:Latest Video\nshort cut description:Latest Video\npublished_at:2023-12-05T10:00:00Z",
+        "workflowId": {
+          "__rl": true,
+          "value": "3crus12XpspV3rYF",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/3crus12XpspV3rYF",
+          "cachedResultName": "Youtube parser - tools"
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "command",
+              "stringValue": "videos"
+            }
+          ]
+        },
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n \"type\": \"object\",\n \"properties\": {\n \"channel_id\": {\n \"type\": \"string\",\n \"description\": \"The ID of the channel to fetch videos from\"\n },\n \"number_of_videos\": {\n \"type\": \"integer\",\n \"description\": \"The maximum number of videos to retrieve (max 50)\"\n },\n \"order\": {\n \"type\": \"string\",\n \"enum\": [\"date\", \"relevance\", \"viewCount\"],\n \"description\": \"Order in which to fetch videos\"\n },\n \"publishedAfter\": {\n \"type\": \"string\",\n \"description\": \"Timestamp for filtering like 2023-11-03T15:28:05Z.\"\n }\n },\n \"required\": [\"channel_id\", \"number_of_videos\", \"order\"]\n}"
+      },
+      "id": "dbbe55a4-2f1b-45e9-8510-94b4fbb52aef",
+      "name": "get_list_of_videos",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        -1008,
+        1056
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "name": "get_list_of_comments",
+        "description": "Retrieve a list of comments from a video using video_id.\n\nInput:\n \"video_id\": \"dQw4w9WgXcQ\"\n\nOutput:\n \"author\": \"John Doe\",\n \"comment\": \"This is an amazing video!\",\n \"published_at\": \"2023-12-04T12:00:00Z\"",
+        "workflowId": {
+          "__rl": true,
+          "value": "3crus12XpspV3rYF",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/3crus12XpspV3rYF",
+          "cachedResultName": "Youtube parser - tools"
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "command",
+              "stringValue": "comments"
+            }
+          ]
+        },
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n \"type\": \"object\",\n \"properties\": {\n \"video_id\": {\n \"type\": \"string\",\n \"description\": \"The ID of the video to fetch comments from\"\n }\n },\n \"required\": [\"video_id\"]\n}"
+      },
+      "id": "bd37ff4a-5415-4762-9d05-b339e757cca3",
+      "name": "get_list_of_comments",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        -848,
+        1056
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "name": "search",
+        "description": "Search for videos or channels using a query. Supports filtering by type (video or channel) and sorting (date, viewCount, relevance). Use | for OR and - to exclude terms in the query.\n\nInput:\ntype: video or channel\nquery: search query\nsorting: date, viewCount, relevance\npublishedAfter: timestamp\n\nOutput:\n- id, title, short cut description, and published_at.",
+        "workflowId": {
+          "__rl": true,
+          "value": "3crus12XpspV3rYF",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/3crus12XpspV3rYF",
+          "cachedResultName": "Youtube parser - tools"
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "command",
+              "stringValue": "search"
+            }
+          ]
+        },
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n \"type\": \"object\",\n \"properties\": {\n \"type\": {\n \"type\": \"string\",\n \"enum\": [\"video\", \"channel\"],\n \"description\": \"Type of results to retrieve: video or channel\"\n },\n \"query\": {\n \"type\": \"string\",\n \"description\": \"Search query. Supports | for OR and - to exclude terms\"\n },\n \"sorting\": {\n \"type\": \"string\",\n \"enum\": [\"date\", \"viewCount\", \"relevance\"],\n \"description\": \"Sorting criteria for search results\"\n },\n \"publishedAfter\": {\n \"type\": \"string\",\n \"description\": \"Timestamp for filtering like 2025-10-19T15:28:05Z\"\n }\n },\n \"required\": [\"type\", \"query\", \"sorting\"]\n}"
+      },
+      "id": "add28fdc-75de-4622-b31d-a06ba176db1d",
+      "name": "search",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        -720,
+        1056
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "name": "analyze_thumbnail",
+        "description": "Analyze a thumbnail image based on a given prompt. The prompt can be customized for specific analysis needs, such as design critique, color scheme evaluation, or content assessment.\nUse link of maxRes thumbnail. \n\nInput:\n- url: URL of the thumbnail image.\n- prompt: Customizable instruction for the analysis.\n\nOutput:\n- Results of the analysis based on the given prompt.",
+        "workflowId": {
+          "__rl": true,
+          "value": "3crus12XpspV3rYF",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/3crus12XpspV3rYF",
+          "cachedResultName": "Youtube parser - tools"
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "command",
+              "stringValue": "analyze_thumbnail"
+            }
+          ]
+        },
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n \"type\": \"object\",\n \"properties\": {\n \"url\": {\n \"type\": \"string\",\n \"description\": \"URL of the thumbnail image to analyze\"\n },\n \"prompt\": {\n \"type\": \"string\",\n \"description\": \"Customizable instruction to guide the image analysis\"\n }\n },\n \"required\": [\"url\", \"prompt\"]\n}"
+      },
+      "id": "8a41a2a6-1563-4d4f-a54c-577981b8d337",
+      "name": "analyze_thumbnail",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        -592,
+        1056
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "name": "video_transcription",
+        "description": "Transcribe a video and retrieve its text transcription. Useful for analyzing video content or repurposing it for other formats.\n\nInput:\n- video_url: URL of the video to transcribe.\n\nOutput:\n- The text transcription of the video.",
+        "workflowId": {
+          "__rl": true,
+          "value": "3crus12XpspV3rYF",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/3crus12XpspV3rYF",
+          "cachedResultName": "Youtube parser - tools"
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "command",
+              "stringValue": "video_transcription"
+            }
+          ]
+        },
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n \"type\": \"object\",\n \"properties\": {\n \"video_url\": {\n \"type\": \"string\",\n \"description\": \"URL of the video to transcribe\"\n }\n },\n \"required\": [\"video_url\"]\n}"
+      },
+      "id": "d413163d-327d-4687-9ab7-3d480d2ea5f3",
+      "name": "video_transcription",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        -416,
+        1056
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "id": "d947c3fd-0ce1-41c5-8eb1-95381666f54f",
+      "name": "Postgres Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "position": [
+        -1488,
+        1056
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "postgres": {
+          "id": "FsAk7cVM8TfHiCb2",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "agent": "openAiFunctionsAgent",
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "You are Youtube assistant. \nYou need to process user's requests and run relevant tools for that. \n\nPlan and execute in right order runs of tools to get data for user's request.\n\nIMPORTANT Search query and list of videos for channel tools returns all videos including shorts - use Get Video description tool to identify shorts (less than minute) and filter them out if needed.\n\nFeel free to ask questions before do actions - especially if you noticed some inconcistency in user requests that might be error/misspelling. "
+        }
+      },
+      "id": "e7040a6e-817b-4744-a730-c027c3b02410",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1136,
+        752
+      ],
+      "typeVersion": 1.6
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1e291a79-2ab8-49ab-8a1a-31b05f44c05a",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -1568,
+        768
+      ],
+      "webhookId": "6e95bc27-99a6-417c-8bf7-2831d7f7a4be",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/commentThreads",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "id,snippet,replies"
+            },
+            {
+              "name": "videoId",
+              "value": "={{ $('Execute Workflow Trigger').item.json.query.video_id }}"
+            },
+            {
+              "name": "maxResults",
+              "value": "100"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e73fd4dd-1164-4759-a9ed-232edf1aa354",
+      "name": "Get Comments",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1264,
+        640
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "FLBK1Ql2ghn6snoJ",
+          "name": "Query Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "c3df6bd8-6be8-45bd-ab60-c1412af91b41",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        592,
+        688
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/channels",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "forHandle",
+              "value": "={{ $('Execute Workflow Trigger').item.json.query.handle }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7babfd2d-2f1f-4713-b89a-338b5d6f1305",
+      "name": "Get Channel Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1264,
+        432
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "FLBK1Ql2ghn6snoJ",
+          "name": "Query Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/videos",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet,contentDetails,statistics"
+            },
+            {
+              "name": "id",
+              "value": "={{ $('Execute Workflow Trigger').item.json.query.video_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "083b9330-acc7-481e-b8bf-65e6be3de9cb",
+      "name": "Get Video Description",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1552,
+        432
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "FLBK1Ql2ghn6snoJ",
+          "name": "Query Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "469d89ba-23fc-482a-b4ae-ce5d3bc13579",
+              "name": "response",
+              "type": "string",
+              "value": "={{ JSON.stringify(` Comments: ${$json.items.map(item => { const topLevelComment = `${item.snippet.topLevelComment.snippet.authorDisplayName}: ${item.snippet.topLevelComment.snippet.textOriginal}`; const replies = item.replies?.comments.map(reply => `${reply.snippet.authorDisplayName}: ${reply.snippet.textOriginal}` ).join('\\n') || ''; return [topLevelComment, replies].filter(Boolean).join('\\n'); }).join('\\n\\n')} `) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "712cc61b-0fa1-485a-abae-96c01c687048",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1552,
+        640
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "q",
+              "value": "={{ $('Execute Workflow Trigger').item.json.query.query }}"
+            },
+            {
+              "name": "order",
+              "value": "={{ $('Execute Workflow Trigger').item.json.query.order }}"
+            },
+            {
+              "name": "type",
+              "value": "={{ $('Execute Workflow Trigger').item.json.query.type }}"
+            },
+            {
+              "name": "maxResults",
+              "value": "={{ $('Execute Workflow Trigger').item.json.query.number_of_videos }}"
+            },
+            {
+              "name": "publishedAfter",
+              "value": "={{ $('Execute Workflow Trigger').item.json.query.publishedAfter }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "834af858-7023-4c63-9d0c-c0d596831f77",
+      "name": "Run Query",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1264,
+        848
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "FLBK1Ql2ghn6snoJ",
+          "name": "Query Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/youtube/v3/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "channelId",
+              "value": "={{ $('Execute Workflow Trigger').item.json.query.channel_id }}"
+            },
+            {
+              "name": "order",
+              "value": "={{ $('Execute Workflow Trigger').item.json.query.order }}"
+            },
+            {
+              "name": "maxResults",
+              "value": "={{ $('Execute Workflow Trigger').item.json.query.number_of_videos }}"
+            },
+            {
+              "name": "type",
+              "value": "video"
+            },
+            {
+              "name": "publishedAfter",
+              "value": "={{ $('Execute Workflow Trigger').item.json.query.publishedAfter }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f7bd0212-6487-4f8e-9550-a7aac2a3895e",
+      "name": "Get Videos by Channel",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1552,
+        848
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "FLBK1Ql2ghn6snoJ",
+          "name": "Query Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfdbe2f5-921e-496d-87bd-9c57fdc22a7a",
+              "name": "response",
+              "type": "object",
+              "value": "={{$json}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bca14239-e01d-4524-ae5f-350328828b07",
+      "name": "Response",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1920,
+        736
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Execute Workflow Trigger').item.json.command }}",
+                    "rightValue": "get_channel_details"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "get_channel_details"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "26a3ffe8-c8a6-4564-8d18-5494a8059372",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Execute Workflow Trigger').item.json.command }}",
+                    "rightValue": "video_details"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "video_details"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "0f51cc26-2e42-42e1-a5c2-cb1d2e384962",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Execute Workflow Trigger').item.json.command }}",
+                    "rightValue": "comments"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "comments"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "51031140-5ceb-48aa-9f33-d314131a9653",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Execute Workflow Trigger').item.json.command }}",
+                    "rightValue": "search"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "search"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "f160bf0a-423f-448d-ab80-50a0b6a177ca",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Execute Workflow Trigger').item.json.command }}",
+                    "rightValue": "videos"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "videos"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "29542ac4-7b9d-413f-aabb-a1cdabed2fa7",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Execute Workflow Trigger').item.json.command }}",
+                    "rightValue": "analyze_thumbnail"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "analyze_thumbnail"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "35fc39b8-6cf1-4ea6-9609-4a195c5526f8",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Execute Workflow Trigger').item.json.command }}",
+                    "rightValue": "video_transcription"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "video_transcription"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "75167c37-2db2-4271-a7e4-da0c8d267c43",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        896,
+        608
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/acts/topaz_sharingan~youtube-transcript-scraper-1/run-sync-get-dataset-items?token=apify_api_OGiBFqcZj9ckQJx1p3f79wBfYzH5kk1LOU69",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n \"startUrls\": [\n \"{{ $('Execute Workflow Trigger').item.json.query.video_url }}\"\n ]\n}",
+        "options": {}
+      },
+      "id": "e76fb9bf-fa67-4495-96a4-c506c53969a2",
+      "name": "Get Video Transcription",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1552,
+        1056
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "msvrt1vBTPultkzq",
+          "name": "Query Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "text": "={{ $('Execute Workflow Trigger').item.json.query.prompt }}",
+        "imageUrls": "={{ $('Execute Workflow Trigger').item.json.query.url }}",
+        "options": {}
+      },
+      "id": "7c32a197-ae75-4b64-9c10-5176efa63cca",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        1264,
+        1056
+      ],
+      "typeVersion": 1.7,
+      "credentials": {
+        "openAiApi": {
+          "id": "1fZoy5ayndkUdLNI",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1632,
+        1056
+      ],
+      "id": "976f7b68-7e9a-4a0a-8078-b0c9c8c73d67",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "1fZoy5ayndkUdLNI",
+          "name": "OpenAi account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get Channel Details",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Video Description",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Comments",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Run Query",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Videos by Channel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Video Transcription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Query": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Comments": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "analyze_thumbnail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_list_of_videos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Channel Details": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_channel_details": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "video_transcription": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_list_of_comments": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Description": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Videos by Channel": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_video_description": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Transcription": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8a04d184-1491-41ce-921c-ec16a9f9fda4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "059e1d37d6d88b9640523069b0cfc25ef547fd76775ae7a6684f25855ad837e1"
+  },
+  "id": "3crus12XpspV3rYF",
+  "tags": []
+}

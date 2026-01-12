@@ -1,0 +1,614 @@
+{
+  "name": "ULTIMATE AI Voice Multi-Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "a81af492-6e82-453e-9dc9-52184864cdd9",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        352,
+        112
+      ],
+      "id": "cb9edf13-c7f2-4036-ac49-315cc7bba217",
+      "name": "Webhook",
+      "webhookId": "a81af492-6e82-453e-9dc9-52184864cdd9"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        464
+      ],
+      "id": "f175a39f-5afd-4a15-8a68-d9a398de4654",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "eMFNLExNXylDNTIi",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "When booking calls use this to create an event in Google Calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "najmussakib.nagorik@gmail.com",
+          "mode": "list",
+          "cachedResultName": "najmussakib.nagorik@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $('Webhook').item.json.body.args.email }}"
+          ],
+          "description": "name:",
+          "summary": "=new appointment for {{ $('Webhook').item.json.body.args.name}} at {{ $('Webhook').item.json.body.args.booking_time }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        464
+      ],
+      "id": "9416eb17-eb5d-4b27-bf93-861a94f383d5",
+      "name": "book appointment",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "H0M3SOVdpV8gWstW",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "najmussakib.nagorik@gmail.com",
+          "mode": "list",
+          "cachedResultName": "najmussakib.nagorik@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Time', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End_Time', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        976,
+        464
+      ],
+      "id": "f26cdc7c-15ac-42d9-9b16-48dd2083d5a5",
+      "name": "check availability",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "H0M3SOVdpV8gWstW",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "najmussakib.nagorik@gmail.com",
+          "mode": "list",
+          "cachedResultName": "najmussakib.nagorik@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        464
+      ],
+      "id": "1f417deb-74c1-4952-aa07-eeffaf3b67b0",
+      "name": "Get appointment",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "H0M3SOVdpV8gWstW",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "najmussakib.nagorik@gmail.com",
+          "mode": "list",
+          "cachedResultName": "najmussakib.nagorik@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        544,
+        464
+      ],
+      "id": "84eaca32-4d0f-4369-96cc-78bf7fbad394",
+      "name": "cancel appointment",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "H0M3SOVdpV8gWstW",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "najmussakib.nagorik@gmail.com",
+          "mode": "list",
+          "cachedResultName": "najmussakib.nagorik@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "updateFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        464
+      ],
+      "id": "b1919f8d-79e6-4ed1-a07f-4d8a41a4fdec",
+      "name": "update appointment",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "H0M3SOVdpV8gWstW",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1456,
+        80
+      ],
+      "id": "dc0555ef-5f54-48f3-8ac1-e3db73700402",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "toolDescription": "this agent is ONLY for post booking, this agent will send confirmation emails, & store call details in a data base ",
+        "text": "=Name: {{ $('Webhook').item.json.body.args.name }}\nphone: {{ $('Webhook').item.json.body.args.phone }}\nreason: {{ $('Webhook').item.json.body.args.reason }}\nemail: {{ $('Webhook').item.json.body.args.email }}",
+        "options": {
+          "systemMessage": "#Role\nYou are a expert post call ai agent for a hair salon company.\n\nCustomer details: \n\nname: {{ $('Webhook').item.json.body.args.name }}\nemail: \nPhone: \nReason: \n\n#task\nYour job is to send confirmation emails to the customer and also enter contact information inside a database.\n\n##Tools\nYou will use the \"Send confirmation email\" tool to send the confirmation email to the customer. \n\nYou will use the \"Enter details in database\" tool to store the data in the database. \n\n##Examples \n\nFor a confirmation email. \"Hey Sarah, your appointment for a haircut and blow dry has been successfully booked for Wednesday, 25th of August 2025. We can’t wait to see you at Luxe Locks Hair Salon.\" \n\nFor text message:\n\n\"Dear Luxe Locks Hair Salon, you have a new haircut and blow dry appointment for Sarah Miller on 25th of August 2025 at 11:00 AM.\" "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        1328,
+        560
+      ],
+      "id": "ff40b68d-3395-494e-8397-488626baa48b",
+      "name": "post call agent"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.body.args.email }}",
+        "subject": "=Appointment Confirmation for {{ $('Webhook').item.json.body.args.name }} at {{ $('Webhook').item.json.body.args.booking_time }}",
+        "emailType": "text",
+        "message": "=Hey {{ $('Webhook').item.json.body.args.name }},\n\nYour appointment has been successfully booked at  {{ $('Webhook').item.json.body.args.booking_time }} for a {{ $('Webhook').item.json.body.args.reason }} we look forward to seeing you! \n\nThanks!\n\nBright smile dental",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1408,
+        752
+      ],
+      "id": "e7fbe54d-8978-4ade-a1eb-54774fa6a48a",
+      "name": "Send confirmation email",
+      "webhookId": "cb65402a-5601-41ce-94f1-fcd8820c6799",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YkQVRVbP6T5q8bfI",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "18zfUXLFxK2hPlpa6BV32m9KZdCQHH4mImpJS03R3eg8",
+          "mode": "list",
+          "cachedResultName": "Calls CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18zfUXLFxK2hPlpa6BV32m9KZdCQHH4mImpJS03R3eg8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/18zfUXLFxK2hPlpa6BV32m9KZdCQHH4mImpJS03R3eg8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $('Webhook').item.json.body.args.name }}",
+            "email": "={{ $('Webhook').item.json.body.args.email }}",
+            "number": "={{ $('Webhook').item.json.body.args.phone }}",
+            "reason": "={{ $('Webhook').item.json.body.args.reason }}",
+            "appointment time": "={{ $('Webhook').item.json.body.args.booking_time }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "number",
+              "displayName": "number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "appointment time",
+              "displayName": "appointment time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transcript",
+              "displayName": "transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1648,
+        752
+      ],
+      "id": "297478d8-0517-4b7d-ba2d-948e763466ce",
+      "name": "Enter details in database",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pZnkWXEbr5wYx1H1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        752
+      ],
+      "id": "b3b3ac75-10ac-4fb7-b53b-bde720c1cf28",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "eMFNLExNXylDNTIi",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Main Head Agent\n\nThe main purpose of this agent is to handle all booking requirements, such as:\n- Updating\n- Cancelling\n- Rescheduling\n- Booking\n- Checking availability",
+        "height": 352,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        624,
+        -144
+      ],
+      "id": "2f1e5fee-05d7-4f37-accb-6224ea173290",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Workflow trigger\n\nThis workflow is triggered when the agent from the voice platform calls the webhook. ",
+        "height": 272,
+        "width": 416,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        144,
+        16
+      ],
+      "id": "d7a9afbc-bdc5-4ef0-bd73-f445fa9be8b1",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Post Call Agent\n\nThis agent is specific for only post-call analysis and processing. This agent will go ahead and send confirmation emails to the customer that booked the appointment, put all of the data inside a Google sheet or a CRM.",
+        "height": 640,
+        "width": 640,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        304
+      ],
+      "id": "087328c2-f3db-4501-a26e-fd0ddd03484f",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 272,
+        "width": 960
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        144,
+        368
+      ],
+      "id": "e8516a81-ff21-4fc5-9d7b-84ec70152e16",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Workflow  Response\n\nThis is the response to the original webhook call from the voice agent. This will respond using the end result of the main head agent. that has been collected",
+        "height": 272,
+        "width": 416,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        -48
+      ],
+      "id": "8dd3f10a-8647-469f-acb0-276957c4f805",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Role\nYou are an AI Scheduling Assistant with access to Google Calendar. Your job is to book, reschedule, or cancel appointments according to the instructions or variables provided.\n\n\n## current time: \nhe current time is {{ $now }}\nYou must always use this time to book appointments in the future.\n\n# Tools Available\n- Book Appointment: Book a new appointment\n- Get appointment: Retrieve an appointment (find by time)\n- Update appointment: Reschedule an appointment (find by time, update to new time)\n- Cancel appointment: Cancel an appointment (find by time, cancel)\n- Check Availability: Check availability in given time frame\n\n# Variables Provided\n- action: \"booking\", \"reschedule\", \"check availability\", or \"cancel\"\n- booking_time: The time for booking, cancellation, or the original time to be rescheduled (format: ISO 8601 or standard calendar time)\n- reschedule_time: The new time to reschedule to (only present if action = \"reschedule\")\n- availability_time: The time or time range to check for availability (only present if action = \"check availability\")\n\n# Context\nThe lead's request:\n- Action: {{ $json.body.args.action }}\n- Booking Time: {{ $json.body.args.booking_time }}\n- Reschedule Time: {{ $json.body.args.reschedule_time }}\n- Availability: {{ $json.body.args.availability_time }}\n\nLead Details:\n- Name: {{ $json.body.args.name }}\n- Email: {{ $json.body.args.email }}\n- Phone Number: {{ $json.body.args.phone }}\n- reason: {{ $json.body.args.reason }}\n\n# Instructions\n1. **If `action` is \"check availability\":**\n  - Use `Check Availability` for the provided `availability_time`.\n  - Report clearly whether the slot or range is available or not. If they asked what times are available, provide two time ranges at different parts of the day, closest times possible. Eg, Monday between 10am and 1pm or Tuesday between 1pm and 4pm. You need to check a specific time range of duration is available or not. \n\n2. **If `action` is \"booking\":**\n  - Use `Check Availability` for the requested `booking_time`.\n  - If available, use `Book Appointment` to book an appointment at `booking_time`.\n  - If not available, report: \"The requested time is not available. Please choose another time.\"\n- after booking the appointment You must call the \"post agent\" tool upon successfully booking in an appointment. \nYou must only call this tool after you have successfully booked an appointment.\n\n3. **If `action` is \"cancel\":**\n  - Use `Get Appointment` to find the appointment at `booking_time`.\n  - If found, use `Cancel Appointment` to cancel that appointment.\n  - If not found, report: \"No appointment found at the specified time to cancel.\"\n\n4. **If `action` is \"reschedule\":**\n  - Use `Get Appointment` to find the appointment at `booking_time`.\n  - If found, use `Check Availability` for the desired `reschedule_time`.\n  - If the new time is available, use `Update Appointment` to move the appointment to `reschedule_time`.\n  - If not available, report: \"The requested reschedule time is not available. Please choose another time.\"\n  - If original appointment not found, report: \"No appointment found at the specified time to reschedule.\"\n\n# Output\nAlways confirm the result of your action:\n- For bookings: \"Appointment successfully booked at [time].\"\n- For cancellations: \"Appointment at [time] cancelled.\"\n- For rescheduling: \"Appointment rescheduled from [booking_time] to [reschedule_time].\"\n- For errors: \"No appointment found at [booking_time] to [action].\"\n- For availability: \"The time slot at [availability_time] is available.\" or \"The time slot at [availability_time] is not available.\"\n\n# Example Inputs & Expected Flows\n\n## Check Availability Example\n- action: \"check availability\"\n- availability_time: \"2025-05-23T10:00:00\"\n→ Check if 10:00 AM is free, report result.\n\n## Book Example\n- action: \"booking\"\n- booking_time: \"2025-05-23T10:00:00\"\n→ Check availability, if available, book at 10:00 AM, confirm.\n\n## Cancel Example\n- action: \"cancel\"\n- booking_time: \"2025-05-23T10:00:00\"\n→ Find appointment at 10:00 AM, cancel if found, confirm.\n\n## Reschedule Example\n- action: \"reschedule\"\n- booking_time: \"2025-05-23T10:00:00\"\n- reschedule_time: \"2025-05-23T11:30:00\" (if not provided, default check within next 3 days)\n→ Find appointment at 10:00 AM, check availability at 11:30 AM, if free, move to 11:30 AM, confirm.\n\n### post call analysis \n\nYou must call the \"post agent\" tool upon successfully booking in an appointment. \nYou must only call this tool after you have successfully booked an appointment. \n\n# Tone\nKeep instructions, confirmations, and error messages clear and direct.\n\n# Notes\n- All timezones provided are Bangladesh/Dhaka timezone unless otherwise stated.\n- All bookings are 30 minutes unless otherwise stated\n- When checking availability, only check for times within the next 3 days or this week, unless otherwise stated.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        80
+      ],
+      "id": "96081174-2f08-4caf-87f5-6257e1845abf",
+      "name": "Main Scheduling agent",
+      "retryOnFail": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Main Scheduling agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Main Scheduling agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "book appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "Main Scheduling agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check availability": {
+      "ai_tool": [
+        [
+          {
+            "node": "Main Scheduling agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "Main Scheduling agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cancel appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "Main Scheduling agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "Main Scheduling agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "post call agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Main Scheduling agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send confirmation email": {
+      "ai_tool": [
+        [
+          {
+            "node": "post call agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enter details in database": {
+      "ai_tool": [
+        [
+          {
+            "node": "post call agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "post call agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Main Scheduling agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "31970362-5235-4fbf-b077-c63927cef45f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "93ed6a94a482e1415c1391a4d98bec025d67c846672cce4bbbb4a9390479302a"
+  },
+  "id": "AC57GMsYeLBtzkz2",
+  "tags": []
+}

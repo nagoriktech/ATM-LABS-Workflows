@@ -1,0 +1,773 @@
+{
+  "name": "Smart Email Agent via WhatsApp",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message_type }}\n",
+        "options": {
+          "systemMessage": "=# Overview  \nYou are an AI assistant specialized in managing email-related tasks and providing direct, actionable responses in English.  \n\n## Context  \n- You are a general-purpose assistant supporting users in email communication and message automation.  \n- You operate in English, depending on the language of the input.  \n- Your tone is strategic, clear, and focused on delivering concise responses.  \n\n## Instructions  \n1. Always validate the presence of actual message content before replying.  \n2. Format all email replies using HTML for clarity and structure.  \n3. If necessary, ask strategic questions to clarify vague requests or guide toward specific actions.  \n4. Respond directly to the user's message with a final sentence. Do not explain, structure, or rephrase the request.  \n6. If the input is unclear or lacks actionable content, request clarification.  \n7. You must never justify or comment on your actions.  \n\n## Tools    \n- Create Draft  \n- Send Email  \n\n"
+        }
+      },
+      "id": "b8336031-acab-4a68-9ca2-d1dff1714e6e",
+      "name": "Email Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1552,
+        704
+      ],
+      "typeVersion": 1.6,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI(\"emailAddress\") }}",
+        "subject": "={{ $fromAI(\"subject\") }}",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "c6f03b86-9169-4fed-a70b-79ba3afe89d7",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        1600,
+        928
+      ],
+      "webhookId": "ea31e63d-e6c5-4f6d-b17f-9ecda87e11c8",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HNL7R4GOlm5XGlOf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $fromAI(\"subject\") }}",
+        "emailType": "html",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "sendTo": "={{ $fromAI(\"emailAddress\") }}"
+        }
+      },
+      "id": "90a4be29-f078-42f3-87c7-cce9df58cca9",
+      "name": "Create Draft",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        1792,
+        928
+      ],
+      "webhookId": "c40fc123-5d3d-4002-85bd-ec6603a0ad83",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HNL7R4GOlm5XGlOf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "id": "be47d4cb-de8e-49a6-b91d-046b2d7b1e84",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "position": [
+        48,
+        608
+      ],
+      "webhookId": "2eadd11a-88fa-4423-9ff4-411c12094729",
+      "typeVersion": 1,
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "UpookPG36ipUhoW7",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "b969c18d-14dd-4b34-8d08-801d8818b8d2",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('WhatsApp Trigger').item.json.messages[0].type }}",
+                    "rightValue": "audio"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "1daa0ee5-cb8b-44c4-ae74-954cae03c10d",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('WhatsApp Trigger').item.json.messages[0].type }}",
+                    "rightValue": "text"
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e8f1d56b-4dce-4976-99a3-94afcd9b40db",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        368,
+        608
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {}
+      },
+      "id": "32c6ac26-59e4-4224-8cad-e3dfd1399519",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        832,
+        464
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "whatsAppApi": {
+          "id": "9YFWwkzVtyMJ6nnA",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7453a002-ec0f-4853-a28d-5d06669cb5d0",
+              "name": "text",
+              "type": "string",
+              "value": "={{ $('WhatsApp Trigger').item.json.messages[0].text.body }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2a9714fb-5a89-4992-aefb-89feaa9c2811",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        816,
+        816
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "={{ $json.field }}",
+        "options": {}
+      },
+      "id": "5cadb66e-229e-43eb-bf34-4c894c3cd69b",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        208,
+        608
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8cbf25ac-3fc9-4892-9c6a-24c974b03362",
+              "name": "message_type",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8a1bd68b-bfe5-4f3b-9663-177023120998",
+      "name": "Edit Fields1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1280,
+        704
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "=739807829221879",
+        "recipientPhoneNumber": "+8801990854071",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "id": "fa0f2134-0ffc-49d8-ae5f-208be584a2dc",
+      "name": "WhatsApp Business Cloud1",
+      "type": "n8n-nodes-base.whatsApp",
+      "position": [
+        2560,
+        912
+      ],
+      "webhookId": "b89990f8-a463-4af2-a732-902da14bb3c2",
+      "typeVersion": 1,
+      "credentials": {
+        "whatsAppApi": {
+          "id": "9YFWwkzVtyMJ6nnA",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields1').item.json.message_type }} "
+      },
+      "id": "0fd3eb2f-6c72-4093-b1c4-7977d70a47aa",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        1392,
+        928
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $json.audio.id }}"
+      },
+      "id": "2eb4b11d-bac5-4cab-8b2a-e3b45076406a",
+      "name": "WhatsApp Business Cloud",
+      "type": "n8n-nodes-base.whatsApp",
+      "position": [
+        608,
+        464
+      ],
+      "webhookId": "a4388d29-c2c7-45c4-8977-b768eacf997b",
+      "typeVersion": 1,
+      "credentials": {
+        "whatsAppApi": {
+          "id": "9YFWwkzVtyMJ6nnA",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "input": "={{ $json.output }}",
+        "voice": "nova",
+        "options": {}
+      },
+      "id": "a8fc980b-f184-454e-893e-e5da1babdf00",
+      "name": "OpenAI1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        2432,
+        688
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "zKvVxm09NLTKxvMl",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and change the MIME type of binary data\nfor (const item of $input.all()) {\n\t// Check if the item has binary data\n\tif (item.binary) {\n\t\t// Find the binary property name (assuming there's at least one)\n\t\tconst binaryPropertyNames = Object.keys(item.binary);\n\n\t\tfor (const propName of binaryPropertyNames) {\n\t\t\t// If the MIME type is 'audio/mp3', change it to 'audio/mpeg'\n\t\t\tif (item.binary[propName].mimeType === 'audio/mp3') {\n\t\t\t\titem.binary[propName].mimeType = 'audio/mpeg';\n\t\t\t}\n\t\t}\n\t}\n}\n\nreturn $input.all();\n"
+      },
+      "id": "8c92233c-4357-4bf8-8c1f-31a33d3d1991",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2672,
+        688
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "id": "2163dc40-756e-479a-b7fd-1418ac129a61",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $('WhatsApp Trigger').item.json.messages[0].type }}",
+              "rightValue": "audio"
+            }
+          ]
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "id": "15dff66f-1e9e-497d-be5f-ac2d5da6d727",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2128,
+        704
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "phoneNumberId": "=739807829221879",
+        "additionalFields": {}
+      },
+      "id": "b09ac911-229c-449a-b898-bdd1de8ff0a0",
+      "name": "WhatsApp Business Cloud2",
+      "type": "n8n-nodes-base.whatsApp",
+      "position": [
+        2896,
+        688
+      ],
+      "webhookId": "7116ffeb-dd52-4993-a041-7ceac577b12d",
+      "typeVersion": 1,
+      "credentials": {
+        "whatsAppApi": {
+          "id": "9YFWwkzVtyMJ6nnA",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "=739807829221879",
+        "recipientPhoneNumber": "+8801990854071",
+        "messageType": "audio",
+        "mediaPath": "useMediaId",
+        "mediaId": "={{ $json.id }}",
+        "additionalFields": {}
+      },
+      "id": "98f3dafc-2c09-4ba8-977a-537fe1ad5592",
+      "name": "WhatsApp Business Cloud3",
+      "type": "n8n-nodes-base.whatsApp",
+      "position": [
+        3136,
+        688
+      ],
+      "webhookId": "1957dc07-4009-4a6e-a2a4-11ec08ec9816",
+      "typeVersion": 1,
+      "credentials": {
+        "whatsAppApi": {
+          "id": "9YFWwkzVtyMJ6nnA",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-pro",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-pro"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        464
+      ],
+      "id": "6ab771b9-b10a-4038-b8e4-bd25c23b6c9b",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cJGLKVfDzUYOXAgR",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 10,
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        2000,
+        928
+      ],
+      "id": "cf32a926-7e5f-4efb-8dd0-8746c6996098",
+      "name": "Get many messages in Gmail",
+      "webhookId": "4675c105-bf0c-4925-9feb-409b2f345b8c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HNL7R4GOlm5XGlOf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        928
+      ],
+      "id": "33faa533-c138-4664-981c-4dbeb4f6556e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cJGLKVfDzUYOXAgR",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "list",
+          "value": "app6hvrEDwB41AKAz",
+          "cachedResultUrl": "https://airtable.com/app6hvrEDwB41AKAz",
+          "cachedResultName": "[BlockA] - Contact List"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "tbldXug1pLHGc0xoI",
+          "cachedResultUrl": "https://airtable.com/app6hvrEDwB41AKAz/tbldXug1pLHGc0xoI",
+          "cachedResultName": "Auto"
+        },
+        "filterByFormula": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Filter_By_Formula', ``, 'string') }}",
+        "returnAll": false,
+        "limit": 5,
+        "options": {}
+      },
+      "id": "0f351821-3250-47a1-98d8-0a0a5b0ec1b4",
+      "name": "Get Email",
+      "type": "n8n-nodes-base.airtableTool",
+      "position": [
+        2208,
+        928
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "YnJsFIrt7Rf7spuT",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "WhatsApp Business Cloud1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Business Cloud2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Business Cloud",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Draft": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Business Cloud": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Business Cloud2": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Business Cloud3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f34a009f-db97-48d4-95e0-1a534c731aff",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "059e1d37d6d88b9640523069b0cfc25ef547fd76775ae7a6684f25855ad837e1"
+  },
+  "id": "jC5ZNosVUBOt2LlU",
+  "tags": []
+}

@@ -1,0 +1,1245 @@
+{
+  "name": "News Aggregator AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": {},
+            "leftValue": "",
+            "typeValidation": {},
+            "version": {}
+          },
+          "conditions": [
+            {
+              "id": "c1ad594a-065c-494a-910c-5db688d6f8ca",
+              "leftValue": "={{ $json.webVideoUrl }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        192
+      ],
+      "id": "e25e2645-87ae-4716-a7e6-8643b64d5ff8",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        624,
+        288
+      ],
+      "id": "00f8dadc-a0be-4c90-8ad7-8cc434998cf1",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        864,
+        80
+      ],
+      "id": "a4c6ca66-ed8f-44e3-b0c7-c7ca17d2667a",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1312,
+        208
+      ],
+      "id": "bddd9776-f900-4f0e-ab96-bfd2f1f30688",
+      "name": "Wait",
+      "webhookId": "25c84562-c787-4e4f-98ce-d0461c627958"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.result.video.playAddr[0] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+            },
+            {
+              "name": "Accept",
+              "value": "video/mp4"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1488,
+        208
+      ],
+      "id": "dfe87d54-6a33-422f-85ed-b22f3df5960d",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dc8d3a0a-15d8-4af3-87aa-9fa18b44043b",
+              "name": "content",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "68715a65-42a6-40b0-96cc-79ca5aa228c4",
+              "name": "url",
+              "value": "={{ $('Loop Over Items').item.json.result.video }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1808,
+        240
+      ],
+      "id": "6df4a606-8967-4e8a-8f4a-d5a532082735",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bb78aa4b-4d50-4ae0-80d5-6a16944922e8",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "d838796f-627b-4ad0-8278-65de25604054",
+              "name": "content",
+              "value": "={{ $json.body }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1600,
+        560
+      ],
+      "id": "6dc2f057-ec8b-4ed9-8b22-8de7e4050af7",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9b27f7e2-d929-4c4a-a28b-19e80718df1c",
+              "name": "content",
+              "value": "={{ $json.results[0].content }}",
+              "type": "string"
+            },
+            {
+              "id": "b81e7995-90fd-44a4-9962-432a9746ecb5",
+              "name": "url",
+              "value": "={{ $json.results[0].url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1600,
+        832
+      ],
+      "id": "a322baae-0e77-400d-b31d-b0b5e7d23431",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "74ec05ef-3430-4b5c-a0d1-652eb4ba6bbd",
+              "name": "content",
+              "value": "={{ $json['content:encoded'] }}",
+              "type": "string"
+            },
+            {
+              "id": "2520735f-3939-470d-a1ec-9b6ab4083df9",
+              "name": "url",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1600,
+        1088
+      ],
+      "id": "a7220819-4e98-4859-a6d3-ed27959daee5",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2176,
+        608
+      ],
+      "id": "c63ed2b9-0351-422d-9cc6-9d1435f5133f",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "959b55a5-8259-415a-bcaf-fb3f79d68d8c",
+              "name": "Article",
+              "value": "={{ $('Merge').item.json.content }}",
+              "type": "string"
+            },
+            {
+              "id": "0db58067-b14a-498f-80ae-44e587f0e368",
+              "name": "Url",
+              "value": "={{ $('Merge').item.json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "b5344d08-120d-4cec-95a3-9aa9378f17eb",
+              "name": "Verify",
+              "value": "={{ $json.message.content.verify }}",
+              "type": "string"
+            },
+            {
+              "id": "d6af0d78-47f0-4703-a12c-6e8e56ae9a53",
+              "name": "Explanation",
+              "value": "={{ $json.message.content.explanation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2928,
+        592
+      ],
+      "id": "a9eb3544-6f24-4473-9c94-2afbad1b4c36",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "18a88fba-0ae6-4e7e-a93d-299812190c43",
+              "leftValue": "={{ $json.Verify }}",
+              "rightValue": "YES",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "79a5cf0d-057a-457e-ae5c-9c28c95230f4",
+              "leftValue": "={{ $json.Article }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        3248,
+        592
+      ],
+      "id": "460d8d98-3b81-4ed9-89d9-65fb97c01b86",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "12e54050-7119-4e14-ac65-284a86777568",
+              "name": "Article",
+              "value": "={{ $('Filter').item.json.Article }}",
+              "type": "string"
+            },
+            {
+              "id": "b88bcaae-b2ad-4419-8bae-4ff58c98eeea",
+              "name": "SourceURL",
+              "value": "={{ $('Filter').item.json.Url }}",
+              "type": "string"
+            },
+            {
+              "id": "180c83f9-9f37-4baa-848b-037833f0fb5e",
+              "name": "ImageURL",
+              "value": "={{ $json.photos[0].src.large }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4064,
+        592
+      ],
+      "id": "6f618976-b1df-42f5-bb2d-c061b6466f62",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "sendTo": "najmussakib.nagorik@gmail.com",
+        "subject": "Daily News",
+        "message": "={{ $json.cleanedHTML }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3136,
+        912
+      ],
+      "id": "301ca036-f198-4dc7-90c5-202d447dbc34",
+      "name": "Gmail",
+      "webhookId": "70435fa8-a030-4ef5-ad08-1f2ee795fb77",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xUCItSN2KcMWBYcp",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "Data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2384,
+        912
+      ],
+      "id": "17db4490-f9b2-4164-b728-15f71006928b",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/clockworks~tiktok-scraper/run-sync-get-dataset-items?token=apify_api_KScg88ys5dyLroiQxSSm6t1Em98laC3CpNKD",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"excludePinnedPosts\": true,\n    \"newestPostDate\": \"{{ $today.format('yyyy-MM-dd') }}\",\n    \"oldestPostDateUnified\": \"{{ $now.minus({ days: 1 }).format('yyyy-MM-dd') }}\",\n    \"profileScrapeSections\": [\n        \"videos\"\n    ],\n    \"profileSorting\": \"latest\",\n    \"profiles\": [\n        \"cryptomasun\",\n        \"virtualbacon\",\n        \"cryptocita\"\n    ],\n    \"proxyCountryCode\": \"None\",\n    \"resultsPerPage\": 10,\n    \"scrapeRelatedVideos\": false,\n    \"shouldDownloadAvatars\": false,\n    \"shouldDownloadCovers\": false,\n    \"shouldDownloadMusicCovers\": false,\n    \"shouldDownloadSlideshowImages\": false,\n    \"shouldDownloadSubtitles\": false,\n    \"shouldDownloadVideos\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        192
+      ],
+      "id": "36822cfb-abbc-430d-831d-f909dcee5c3b",
+      "name": "Get Tiktok news"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/wilcode~fast-tiktok-downloader-without-watermark/run-sync-get-dataset-items?token=apify_api_KScg88ys5dyLroiQxSSm6t1Em98laC3CpNKD",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"url\": \"{{ $json.webVideoUrl }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        624,
+        80
+      ],
+      "id": "8e2c49c2-62c2-4b92-9eda-f4ddd7b2559e",
+      "name": "Video downloader"
+    },
+    {
+      "parameters": {
+        "content": "## Getting Tiktok News \n",
+        "height": 460,
+        "width": 1280,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "407bdf6a-f34d-402c-a91b-22e5c6e96a3e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/trudax~reddit-scraper-lite/run-sync-get-dataset-items?token=apify_api_KScg88ys5dyLroiQxSSm6t1Em98laC3CpNKD",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"debugMode\": false,\n    \"ignoreStartUrls\": false,\n    \"includeNSFW\": true,\n    \"maxComments\": 2,\n    \"maxCommunitiesCount\": 2,\n    \"maxItems\": 10,\n    \"maxPostCount\": 3,\n    \"maxUserCount\": 2,\n    \"proxy\": {\n        \"useApifyProxy\": true,\n        \"apifyProxyGroups\": [\n            \"RESIDENTIAL\"\n        ]\n    },\n    \"scrollTimeout\": 40,\n    \"searchComments\": false,\n    \"searchCommunities\": false,\n    \"searchPosts\": true,\n    \"searchUsers\": false,\n    \"searches\": [\n        \"Crypto News\"\n    ],\n    \"skipComments\": true,\n    \"skipCommunity\": false,\n    \"skipUserPosts\": false,\n    \"sort\": \"top\",\n    \"time\": \"day\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        560
+      ],
+      "id": "ba0dc32f-7f68-4003-bd88-bf2d1a0ca29d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "content": "## Getting Reddit News \n",
+        "height": 240,
+        "width": 1280,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        480
+      ],
+      "typeVersion": 1,
+      "id": "a1abf56c-15f6-4a99-a34c-1dd2ab0e81d3",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Getting Google News \n",
+        "height": 240,
+        "width": 1280,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        752
+      ],
+      "typeVersion": 1,
+      "id": "0e2dd018-35da-4a0d-a796-23788a82365f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Getting Coindesk News\n\n",
+        "height": 240,
+        "width": 1280,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        1008
+      ],
+      "typeVersion": 1,
+      "id": "995cc4a4-d0f9-4060-b900-c5a716e8c3f1",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        1088
+      ],
+      "id": "6ac3e1b4-2bc4-449d-a529-830fb5516607",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "content": "## Combining Data\n",
+        "height": 1256,
+        "width": 424
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        0
+      ],
+      "id": "5263bde8-8154-4348-bd03-1edaae8c3618",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Filtering Data\n",
+        "height": 260,
+        "width": 760,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        528
+      ],
+      "id": "84257ec3-1059-43fe-8081-5df5faf59017",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Getting Article Image\n\n\n",
+        "height": 260,
+        "width": 760,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2704,
+        528
+      ],
+      "id": "b3cef7ca-e2ad-40e7-abd1-6013dc660aa5",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Generating Report\n",
+        "height": 300,
+        "width": 1000,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        800
+      ],
+      "id": "28635285-2153-4fd3-828a-c8036fd9e726",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an AI-powered content filter designed to identify high-quality social media articles specifically about Crypto. Your task is to select only the most relevant and valuable articles while filtering out those that are misleading, low-quality, or unrelated.\n\nAn article should be selected if it is directly related to AI tools or AI news. This includes topics such as new AI tools, breakthroughs in AI research, major announcements from AI companies, government regulations on AI, and industry trends in AI adoption.\n\nArticles should be filtered out if they are not specifically about AI tools or AI news. Avoid content that is clickbait, misinformation, spam, promotional material, or only loosely related to AI. Do not select memes, exaggerated speculation, or overly basic explanations that lack real information.\n\nFor each article, analyze and determine whether it should be included or filtered out based on these criteria. If it should be included, provide a brief justification.\n\nYour response should be in JSON format, something like this:\n\njson\nKopiëren\nBewerken\n[\n  { \"verify\": \"YES\", \"explanation\": \"The explanation is because of blah blah\" },\n  { \"verify\": \"NO\", \"explanation\": \"The reason is because of blah blah\" },\n  { \"verify\": \"NO\", \"explanation\": \"It's because of blah blah\" }\n]",
+              "role": "system"
+            },
+            {
+              "content": "={{ $json.content }}\n{{ $json.url }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2656,
+        128
+      ],
+      "id": "78193bc8-31d9-4785-8eff-f3cb847ba163",
+      "name": "Relevant News Checker",
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.pexels.com/v1/search?query={{ $json.output }}&per_page=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "7puucEe7IhFn3krLWYJhUZPlpOBG9OWLVYxZioB7zshvTL1jRCeeqnxF"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3888,
+        592
+      ],
+      "id": "8a74f2c3-1a5a-4b0c-ab08-96ff663325e6",
+      "name": "Get Pexel Image"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input string\nconst input = $input.first().json.output;\n\n// Clean up the text by removing backslashes before 'n' and triple backticks\nconst cleanedString = input\n  .replace(/^```[a-z]*\\n?/, '') // Remove starting triple backticks with optional language\n  .replace(/```$/, '');         // Remove ending triple backticks\n\n// Return the cleaned text\nreturn [{ cleanedHTML: cleanedString }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2928,
+        912
+      ],
+      "id": "84c65b0e-1175-42bd-beb6-e5bba73cd2c8",
+      "name": "Clean HTML"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n    \"api_key\": \"{{ $json.api_key }}\",\n    \"query\": \"Crypto\",\n    \"topic\": \"news\",\n    \"search_depth\": \"advanced\",\n    \"include_answer\": false,\n    \"include_images\": false,\n    \"include_image_descriptions\": false,\n    \"include_raw_content\": false,\n    \"max_results\": 5,\n    \"days\": 3,\n    \"include_domains\": [],\n    \"exclude_domains\": []\n}",
+        "options": {}
+      },
+      "id": "dff44c4d-7ecc-4c73-a5cc-2fa1e92ae8f1",
+      "name": "Tavily Search Topic",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        784,
+        832
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "035660a9-bb58-4ecb-bad3-7f4d017fa69f",
+              "name": "api_key",
+              "type": "string",
+              "value": "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"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4e527497-ab62-465c-b751-fa833e01d680",
+      "name": "Tavily API Key",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        544,
+        832
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        640
+      ],
+      "id": "b77207ed-b9d2-4335-8534-96a70aa7d771",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n// Keep only the first 5 items\nreturn items.slice(0, 3);\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        1088
+      ],
+      "id": "a217b6cd-4715-4cea-bab3-06474d58feaf",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2432,
+        128
+      ],
+      "id": "151609bb-7967-453c-8f55-0d6cc8fa4f42",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3008,
+        128
+      ],
+      "id": "3c9708fa-0917-4504-b5c2-b25fa9a2078e",
+      "name": "Wait1",
+      "webhookId": "d2d3fc1e-abae-40e4-a525-1933a7c066a2"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-1.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-1.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        48
+      ],
+      "id": "e796284e-de80-45f2-b323-ea4f41f8d0e1",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zyG98t4KMY2vctV9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Article }}",
+        "options": {
+          "systemMessage": "You will read a news article and create a one-word keyword that best represents it, this keyword will later be used to search for an image for its thumbnail.\n\nThe keyword should represent the main topic that the article talks about.\n\nBy the way, you cannot use Crypto as a keyword.\n\nOnly reply with the keyword, nothing else.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        3552,
+        592
+      ],
+      "id": "c87bf099-56e6-4514-8b8e-7e315f7f700a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3552,
+        816
+      ],
+      "id": "a3dae63a-6143-4456-8c04-03f883970238",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zyG98t4KMY2vctV9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2528,
+        1104
+      ],
+      "id": "6df543f2-20b1-4205-acd2-80d8c7a82576",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zyG98t4KMY2vctV9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json.Data) }}",
+        "options": {
+          "systemMessage": "You are a professional at creating HTML newsletters.\n\nYou will receive a list of Crypto related articles with:\n\nDescription\n\nThumbnail image URL\n\nSource URL\n\nYour task is to generate a well-formatted HTML email newsletter based on that content.\n\nINSTRUCTIONS:\nThe title of each article should be bold and clickable (linked to the source URL).\n\nUse the thumbnail image as a preview.\n\nThe description of each article should be a shortened version, but a complete sentence, so it CANNOT end in '...'.\n\nMaintain a clean and cohesive layout, with modern fonts.\n\nAuthor name:\nn8n Dev\n\nTop banner image:\nhttps://img.freepik.com/free-vector/wavy-background-concept_23-2148497712.jpg?semt=ais_hybrid&w=740\n\nMain title:\nLATEST CRYPTO NEWS\n\nOnly reply with the HTML code. Please include all of the articles. Do your best. Modify the HTML structure so there is enough gap always between columns. (Text and images) This is high priority no matter what the HTML structure is.\n\n💻 Example HTML Structure\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Crypto Newsletter</title>\n  <style>\n    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');\n\n    body {\n      margin: 0;\n      font-family: 'Inter', sans-serif;\n      background: #f0f3f8;\n      color: #1f1f2e;\n      line-height: 1.5;\n    }\n\n    .wrapper {\n      max-width: 800px;\n      margin: 60px auto;\n      padding: 0 24px;\n    }\n\n    .header {\n      text-align: center;\n      margin-bottom: 60px;\n    }\n\n    .header h1 {\n      font-size: 2.2rem;\n      font-weight: 700;\n      color: #1a1a40;\n      margin-bottom: 8px;\n    }\n\n    .header .author {\n      font-size: 0.95rem;\n      color: #6b7280;\n    }\n\n    .articles {\n      display: grid;\n      gap: 36px;\n    }\n\n    .article-card {\n      display: flex;\n      flex-direction: column;\n      background: linear-gradient(145deg, #ffffff, #f9fbff);\n      border-radius: 20px;\n      box-shadow: 0 12px 36px rgba(0,0,0,0.08);\n      overflow: hidden;\n      transition: transform 0.3s, box-shadow 0.3s;\n      padding: 16px 0;\n    }\n\n    .article-card:hover {\n      transform: translateY(-6px);\n      box-shadow: 0 20px 50px rgba(0,0,0,0.12);\n    }\n\n    .article-image {\n      width: 100%;\n      height: 180px;\n      object-fit: cover;\n      border-bottom: 1px solid #e0e6f1;\n    }\n\n    .article-content {\n      padding: 20px 24px;\n    }\n\n    .article-title {\n      font-size: 1.15rem;\n      font-weight: 600;\n      margin-bottom: 10px;\n      line-height: 1.35;\n    }\n\n    .article-title a {\n      text-decoration: none;\n      color: #2563eb;\n      transition: color 0.3s;\n    }\n\n    .article-title a:hover {\n      color: #1e3a8a;\n      text-decoration: underline;\n    }\n\n    .article-text {\n      font-size: 0.95rem;\n      color: #4b4f60;\n      line-height: 1.55;\n    }\n\n    /* Desktop row layout */\n    @media (min-width: 680px) {\n      .article-card {\n        flex-direction: row;\n        height: 180px;\n      }\n\n      .article-image {\n        width: 250px;\n        height: 100%;\n        border-bottom: none;\n        border-right: 1px solid #e0e6f1;\n      }\n\n      .article-content {\n        padding: 24px 32px;\n      }\n    }\n\n  </style>\n</head>\n<body>\n  <div class=\"wrapper\">\n    <div class=\"header\">\n      <h1>LATEST CRYPTO NEWS</h1>\n      <div class=\"author\">✍️ n8n Dev</div>\n    </div>\n\n    <div class=\"articles\">\n      <!-- Article Example -->\n      <div class=\"article-card\">\n        <img class=\"article-image\" src=\"https://images.pexels.com/photos/5475752/pexels-photo-5475752.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940\" alt=\"Article image\">\n        <div class=\"article-content\">\n          <div class=\"article-title\">\n            <a href=\"https://www.coindesk.com/tech/2025/06/20/north-korean-hackers-are-targeting-top-crypto-firms-with-malware-hidden-in-job-applications\" target=\"_blank\">\n              North Korean Hackers Target Crypto Firms With Malware Hidden in Job Applications\n            </a>\n          </div>\n          <div class=\"article-text\">\n            Cisco Talos reports a North Korean hacking group targeting crypto workers in India with Python-based malware disguised as job applications. The goal is to infiltrate companies these workers may join.\n          </div>\n        </div>\n      </div>\n\n      <!-- Add more article cards here -->\n\n    </div>\n  </div>\n</body>\n</html>\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2576,
+        912
+      ],
+      "id": "71fb14fc-57b0-471d-9411-c2c0496e1522",
+      "name": "HTML"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Video downloader",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Tiktok news": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video downloader": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Relevant News Checker": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Pexel Image": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean HTML": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily Search Topic": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily API Key": {
+      "main": [
+        [
+          {
+            "node": "Tavily Search Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Tiktok news",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Tavily API Key",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Relevant News Checker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Get Pexel Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "HTML",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Clean HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3d9f5479-daa7-4566-b9a3-38985a7d1fce",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "edb67d3a7f9d12c7abb88f04023272f13c5753dec2ada987b4428826f48ef7ab"
+  },
+  "id": "7UcERsb0EV1uSzTB",
+  "tags": []
+}

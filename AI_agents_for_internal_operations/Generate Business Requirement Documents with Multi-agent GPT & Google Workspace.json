@@ -1,0 +1,1457 @@
+{
+  "name": "Generate Business Requirement Documents with Multi-agent GPT & Google Workspace",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Business Requirements Document Request Form",
+        "formDescription": "Please provide your basic contact details, project overview, and upload all relevant documents containing the background, objectives, scope, constraints, and any other supporting information.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Project ID",
+              "placeholder": "Project Identification String",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Project Title",
+              "placeholder": "Short, descriptive title for the project",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Business Domain",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Education"
+                  },
+                  {
+                    "option": "E-commerce"
+                  },
+                  {
+                    "option": "Healthcare"
+                  },
+                  {
+                    "option": "Finance & Banking"
+                  },
+                  {
+                    "option": "Manufacturing"
+                  },
+                  {
+                    "option": "Logistics"
+                  },
+                  {
+                    "option": "Real Estate"
+                  },
+                  {
+                    "option": "Retail"
+                  },
+                  {
+                    "option": "Travel & Hospitality"
+                  },
+                  {
+                    "option": "Government"
+                  },
+                  {
+                    "option": "Energy"
+                  },
+                  {
+                    "option": "Media & Entertainment"
+                  },
+                  {
+                    "option": "IT & Software"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Supporting Documents",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Notes",
+              "fieldType": "textarea",
+              "placeholder": "Any quick context or remarks for the BRD team",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "Email to receive draft BRD",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5ccc3436-3976-4051-8083-f623af44b2da",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        640,
+        544
+      ],
+      "webhookId": "14d1da84-e103-4cb4-bbc1-e50f6403f649",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "07479f8f-cea2-4bd3-b2cc-964da98aca77",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "position": [
+        1232,
+        784
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.item.json;\nconst binaryData = $input.item.binary;\n\nlet output = [];\n\nObject.keys(binaryData)\n  .filter(label => label.startsWith(\"Supporting_Documents\"))\n  .forEach(label => {\n    output.push({\n      json: data,\n      binary: { data: binaryData[label] }\n    });\n  });\n\nreturn output;"
+      },
+      "id": "ac769539-6beb-4417-9a01-67d449047f8c",
+      "name": "Handle multiple files",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        864,
+        624
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const requestForm = $('On form submission').first().json;\n\nreturn {\n      ProjectID: requestForm[\"Project ID\"],\n      ProjectTitle: requestForm[\"Project Title\"],\n      BusinessDomain: requestForm[\"Business Domain\"],\n      Notes: requestForm[\"Notes\"],\n      Email: requestForm[\"Email\"],\n      Status: 'Submitted',\n      SubmittedAt: requestForm[\"submittedAt\"]\n    }"
+      },
+      "id": "1c8ab840-116a-467a-ace5-df10cf9265be",
+      "name": "Create BRD request record",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        864,
+        288
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key",
+          "cachedResultName": "vector_store_key"
+        }
+      },
+      "id": "f2feaed2-b769-4eb0-a3bf-f1a3916c5c90",
+      "name": "Insert Data to Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "position": [
+        1616,
+        784
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "b7d11f7e-2085-4d21-98d7-053ea8db5a26",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        1776,
+        1008
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "knowledge_base",
+        "toolDescription": "Use this knowledge base to answer questions from the user",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "id": "24a64dca-57bb-48ec-a877-088fce9d6bc9",
+      "name": "Query Data Tool",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "position": [
+        1216,
+        1200
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "58891f41-37b6-453e-99d6-52a5de013dd9",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1088,
+        1200
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "Hb8scaDn3DEbAoqO",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1xY9cRtuL-T_0TsOHp9x4Do5A2gtnl5IuvCFVRVKAqH8",
+          "mode": "list",
+          "cachedResultName": "BRD",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xY9cRtuL-T_0TsOHp9x4Do5A2gtnl5IuvCFVRVKAqH8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1390509336,
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xY9cRtuL-T_0TsOHp9x4Do5A2gtnl5IuvCFVRVKAqH8/edit#gid=1390509336"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Project_ID": "={{ $('Merge content').item.json.Request.Project_ID }}",
+            "Project_title": "={{ $('Merge content').item.json.Request.Project_title }}",
+            "businessDomain": "={{ $('Merge content').item.json.Request.businessDomain }}",
+            "Notes": "={{ $json.Notes }}",
+            "Email": "={{ $json.Email }}",
+            "Status": "={{ $json.Status }}",
+            "SubmittedAt": "={{ $json.SubmittedAt }}"
+          },
+          "matchingColumns": [
+            "Project_ID"
+          ],
+          "schema": [
+            {
+              "id": "Project_ID",
+              "displayName": "Project_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Project_title",
+              "displayName": "Project_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "businessDomain",
+              "displayName": "businessDomain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "SubmittedAt",
+              "displayName": "SubmittedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a772afc9-ce32-4688-b866-fae9f642fbdc",
+      "name": "Mark request as completed",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        3568,
+        1376
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "agnITpQnUDcFMt5T",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const request = $('Merge content').item.json.Request;\nreturn {\n  ProjectID:request.ProjectID,\n  ProjectTitle:request.ProjectTitle,\n  BusinessDomain:request.BusinessDomain,\n  Notes:request.Notes,\n  Email:request.Email,\n  SubmittedAt:request.SubmittedAt,\n  Status:'Completed'\n};"
+      },
+      "id": "9f065299-0205-4587-a357-db0751f90ea0",
+      "name": "Create record to update Google Sheet row",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        3344,
+        1376
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "5ea39d89-d6bb-47be-9aa8-34f6d18cacd9",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              },
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "Completed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3042d5d9-98ab-489c-899b-b28ddd6b73b5",
+      "name": "Request completed?",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        864,
+        1280
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1xY9cRtuL-T_0TsOHp9x4Do5A2gtnl5IuvCFVRVKAqH8",
+          "mode": "list",
+          "cachedResultName": "BRD",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xY9cRtuL-T_0TsOHp9x4Do5A2gtnl5IuvCFVRVKAqH8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1390509336,
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xY9cRtuL-T_0TsOHp9x4Do5A2gtnl5IuvCFVRVKAqH8/edit#gid=1390509336"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "id": "70b8797e-d85c-49b7-b09a-775960cbd19c",
+      "name": "New request added to tracking sheet",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "position": [
+        640,
+        1280
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "Zph2FLY7ea1xjv6c",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "={{ $json.name }}.pdf",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1wULhkoxfSxH08xevjPpApVFjyimGW0pN",
+          "mode": "list",
+          "cachedResultName": "test_n8n_image",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1wULhkoxfSxH08xevjPpApVFjyimGW0pN"
+        },
+        "options": {}
+      },
+      "id": "0e0a8068-015f-42dd-ac3c-bb3a7238d025",
+      "name": "Archiving PDF File",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        3120,
+        1184
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "uploadType",
+              "value": "multipart"
+            },
+            {
+              "name": "supportsAllDrives",
+              "value": "true"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "boundary",
+              "value": "foo_bar_baz"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "multipart/related; boundary=foo_bar_baz",
+        "body": "=--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n{\n  \"name\": \"{{ $('Merge content').item.json.Request.Project_ID }} {{ $('Merge content').item.json.Request.Project_title }}\",\n  \"mimeType\": \"application/vnd.google-apps.document\",\n  \"parents\": [\"{{ $json['Drive Folder ID'] }}\"]\n}\n\n--foo_bar_baz\nContent-Type: text/markdown; charset=UTF-8\n\n{{ $('Merge content').item.json.mergedOutput }}\n--foo_bar_baz--",
+        "options": {}
+      },
+      "id": "65382bd7-0fc7-411b-bfc5-2b2dd4bb9dd9",
+      "name": "Create document file",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2464,
+        1280
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "11f9f16d-7c23-49e7-983f-56aa974228fe",
+              "name": "Document Content",
+              "type": "string",
+              "value": "={{ $json.mergedOutput }}"
+            },
+            {
+              "id": "0294bc20-ef9c-4504-aff9-a370f1f89eb5",
+              "name": "Project ID",
+              "type": "string",
+              "value": "={{ $json.Request.Project_ID }}"
+            },
+            {
+              "id": "b1b76e83-200b-4e7d-946a-29c5a89b209e",
+              "name": "Project Title",
+              "type": "string",
+              "value": "={{ $json.Request.Project_title }}"
+            },
+            {
+              "id": "6edc071a-a66e-4b5a-a958-26389543d00f",
+              "name": "Drive Folder ID",
+              "value": "1wULhkoxfSxH08xevjPpApVFjyimGW0pN",
+              "type": "string"
+            },
+            {
+              "id": "77cde18d-dd57-44b8-8757-c8dd617eade9",
+              "name": "senderEmail",
+              "value": "nstamanna19@gmail.com",
+              "type": "string"
+            },
+            {
+              "id": "55c9efeb-45ab-4e9a-984d-52992858dbbb",
+              "name": "SenderName",
+              "value": "R&D department",
+              "type": "string"
+            },
+            {
+              "id": "10e50238-2503-4a30-8b99-478772b99666",
+              "name": "CompanyName",
+              "value": "GhutuCo",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e458365a-2c3e-445b-9de7-1bce21bba8b4",
+      "name": "Configure metadata ",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2240,
+        1280
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "application/pdf"
+            }
+          }
+        }
+      },
+      "id": "7748eb50-0930-4fa2-a43c-c7170e2fc4b3",
+      "name": "Convert document to PDF",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        2688,
+        1280
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1xY9cRtuL-T_0TsOHp9x4Do5A2gtnl5IuvCFVRVKAqH8",
+          "mode": "list",
+          "cachedResultName": "BRD",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xY9cRtuL-T_0TsOHp9x4Do5A2gtnl5IuvCFVRVKAqH8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1390509336,
+          "mode": "list",
+          "cachedResultName": "Requests",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xY9cRtuL-T_0TsOHp9x4Do5A2gtnl5IuvCFVRVKAqH8/edit#gid=1390509336"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Project_ID": "={{ $json.ProjectID }}",
+            "Project_title": "={{ $json.ProjectTitle }}",
+            "businessDomain": "={{ $json.BusinessDomain }}",
+            "Notes": "={{ $json.Notes }}",
+            "Email": "={{ $json.Email }}",
+            "Status": "={{ $json.Status }}",
+            "SubmittedAt": "={{ $json.SubmittedAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Project_ID",
+              "displayName": "Project_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Project_title",
+              "displayName": "Project_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "businessDomain",
+              "displayName": "businessDomain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "SubmittedAt",
+              "displayName": "SubmittedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "db15cf53-eaf1-41b7-898e-fb8a44c092ea",
+      "name": "Add BRD record to tracking ",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1232,
+        288
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "agnITpQnUDcFMt5T",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "=document-{{ $now.toFormat(\"yyyyLLdd-HHmmss\") }}-{{$binary.data.fileName}}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1wULhkoxfSxH08xevjPpApVFjyimGW0pN",
+          "mode": "list",
+          "cachedResultName": "test_n8n_image",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1wULhkoxfSxH08xevjPpApVFjyimGW0pN"
+        },
+        "options": {}
+      },
+      "id": "5b27ef45-e03e-4169-abc3-e8828bae31c1",
+      "name": "Upload supporting ",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        1232,
+        480
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Bpak8YLYgfBqBbu6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1xY9cRtuL-T_0TsOHp9x4Do5A2gtnl5IuvCFVRVKAqH8",
+          "mode": "list",
+          "cachedResultName": "BRD",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xY9cRtuL-T_0TsOHp9x4Do5A2gtnl5IuvCFVRVKAqH8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Document",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xY9cRtuL-T_0TsOHp9x4Do5A2gtnl5IuvCFVRVKAqH8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Project_ID": "={{ $json.ProjectID }}",
+            "Document_ID": "={{ $json.DocumentId }}",
+            "Document_Name": "={{ $json.DocumentName }}",
+            "URL": "={{ $json.URL }}",
+            "CreatedTime": "={{ $json.CreatedTime }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Project_ID",
+              "displayName": "Project_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Document_ID",
+              "displayName": "Document_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Document_Name",
+              "displayName": "Document_Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CreatedTime",
+              "displayName": "CreatedTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "e46b8ec9-1547-42bc-9078-71cebcab9de3",
+      "name": "Add supporting document record(s)",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2016,
+        480
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "agnITpQnUDcFMt5T",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n      ProjectID: $('On form submission').item.json['Project ID'],\n      DocumentId: $json.id,\n      DocumentName: $json.name,\n      URL: $json.webContentLink,\n      CreatedTime: $json.createdTime\n    }"
+      },
+      "id": "e113a5f9-868e-4e3c-9ef6-7a49220cdc45",
+      "name": "Create supporting document record(s)",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1696,
+        480
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "e1184cfd-b8e4-49f7-8a15-5291a5db9492",
+      "name": "Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "position": [
+        1664,
+        1072
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "Hb8scaDn3DEbAoqO",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "knowledge_base",
+        "toolDescription": "Use this knowledge base to answer questions from the user",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "id": "15db3d2b-4c3e-4393-9cc5-39ae7aa330ac",
+      "name": "Query Data Tool1",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "position": [
+        1328,
+        1680
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a complete Business Requirements Document (BRD) for the following project:\nProject ID: {{ $json.Project_ID }}\nProject Title:  {{ $json.Project_title }}\nBusiness Domain: {{ $json.businessDomain }}\nAdditional Notes: {{ $json.Notes }}\n\nAll supporting details are available in the embedded documents uploaded by the requester.  \nQuery the embedded data to complete each section of the BRD according to the standard structure.",
+        "options": {
+          "systemMessage": "You are an expert Business Analyst specializing in creating professional, detailed Business Requirements Documents (BRDs) for software projects.\n\nYour responsibilities:\n1. Write informative BRD strictly in markdown format.\n2. Only create the BRD. Do not ask any follow-up questions or request clarification.\n3. Always follow the standard BRD structure provided below.\n4. Use the query data tool to retrieve relevant details from embedded supporting documents before writing.\n5. Keep writing clear, concise, and professional.\n6. If any required information is missing, mark it as **[Information Not Provided]**.\n7. For domain-specific requirements, include \"Industry Best Practice Recommendations\" if relevant and not covered in the provided documents.\n8. Business requirements & functional requirements are most important sections, ensure all business requirements are included\n\n**Standard BRD Structure:**\n\n# Executive Summary\n- Purpose\n- Background / Context\n- Objectives\n\n# Project Overview\n- Project Scope (In-Scope, Out-of-Scope)\n- Assumptions\n- Constraints\n- Stakeholders & Roles (table if possible)\n\n# Non-Functional Requirements\n- Performance\n- Security & Compliance\n- Usability & Accessibility\n- Availability & Reliability\n- Maintainability\n\n# Implementation Considerations\n- Technology Stack\n- Integration Points\n- Training Needs\n- Change Management"
+        }
+      },
+      "id": "78a313d3-f4b2-4b19-99aa-60ce84de9f06",
+      "name": "General BRD Writer Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1104,
+        976
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {},
+      "id": "e05e5be8-7f91-42bb-83df-8dafeafbf290",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1696,
+        1280
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a complete Business Requirements Document (BRD) for the following project:\nProject ID:  {{ $json.ProjectID }}\nProject Title:  {{ $json.ProjectTitle }}\nBusiness Domain: {{ $json.BusinessDomain }}\nAdditional Notes: {{ $json.Notes }}\n\nAll supporting details are available in the embedded documents uploaded by the requester.  \nQuery the embedded data to complete each section of the BRD according to the standard structure.",
+        "options": {
+          "systemMessage": "You are an expert Business Analyst specializing in creating professional, detailed Business Requirements Documents (BRDs) for software projects.\n\nYour responsibilities:\n1. Write informative BRD strictly in markdown format.\n2. Only create the BRD. Do not ask any follow-up questions or request clarification.\n3. Always follow the standard BRD structure provided below.\n4. Use the query data tool to retrieve relevant details from embedded supporting documents before writing.\n5. Keep writing clear, concise, and professional.\n6. If any required information is missing, mark it as **[Information Not Provided]**.\n7. For domain-specific requirements, include \"Industry Best Practice Recommendations\" if relevant and not covered in the provided documents.\n8. Business requirements & functional requirements are most important sections, ensure all business requirements are included\n\n**Standard BRD Structure:**\n\n### **# Business Requirements**\n- List **every distinct business requirement** with:\n  - **Requirement ID** (e.g., BR-01, BR-02…)\n  - **Clear, measurable description**.\n  - **Acceptance Criteria** — must be specific, measurable, and testable.\n  - **Sub-requirements** where applicable, to show variations or dependencies.\n  - **Rationale** for each High priority requirement (why it’s critical to the business).\n  - **Link to related Functional Requirements** for traceability.\n\n### **# Functional Requirements**\n- Expand **Use Cases/User Stories** into **detailed templates** with:\n  - **FR ID**\n  - **Title**\n  - **Actors**\n  - **Preconditions**\n  - **Main Flow** (step-by-step)\n  - **Alternate / Exception Flows**\n  - **Postconditions**\n  - **Related Business Requirements**\n- Include **Process Flow descriptions** in step-by-step form; if diagrams are needed, indicate `[To be designed]`.\n- Clearly define **Data Requirements**:\n  - Field names\n  - Data types/formats\n  - Validation rules\n  - Data sources\n- Document **system rules** and **business logic** for each process.\n- Indicate whether each functional requirement is:\n  - **Mandatory for MVP**\n  - **Planned for future phase**\n- Where applicable, specify:\n  - **Integration behavior**\n  - **Expected API interactions**\n  - **Error handling logic**"
+        }
+      },
+      "id": "a359dd52-182e-40c2-84f3-24cda70c9509",
+      "name": "Business Requirement Writer Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1104,
+        1472
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the array of items from previous node\nconst items = $input.all(); \n\n// Merge \"output\" fields into one string\nconst mergedOutput = items\n  .map(item => item.json.output) // get each output value\n  .filter(Boolean)               // remove null/empty\n  .join(' ');                     // join with space (or '\\n' for newline)\n\n// Return as single item\nreturn [\n  {\n    json: {\n      mergedOutput,\n      Request: $('Request completed?').first().json\n    }\n  }\n];"
+      },
+      "id": "ac6b71ee-671c-44c5-8293-726bdd19418a",
+      "name": "Merge content",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2016,
+        1280
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "# Multi-agent RAG system for smarter BRD (Business Requirement Document) writing\n\n## **Who’s it for**\nThis workflow is designed for Business Analysts, Project Managers, and Operations Teams who need to automate the creation, tracking, and delivery of Business Requirements Documents (BRDs) from submitted forms and supporting materials. It’s ideal for organizations handling multiple BRD requests and looking to streamline document generation, archiving, and communication.\n\n## **How it works / What it does**\n1. **Trigger**: The process begins when a BRD request form is submitted along with any supporting files.\nSample supporting document PDF: [Download URL](https://wisestackai.s3.ap-southeast-1.amazonaws.com/Customer+Feedback+Analysis+%26+Automation+Platform.pdf)\n2. **Data Recording**:\n   - Creates a BRD request record and appends it to a tracking Google Sheet.\n   - Handles multiple uploaded files, saving them to Google Drive.\n   - Creates supporting document records and updates the supporting documents tracking sheet.\n3. **Content Extraction & Storage**:\n   - Extracts text from uploaded PDF files.\n   - Inserts extracted content into a vector store for contextual retrieval by AI agents.\n4. **Document Generation**:\n   - Uses two specialized AI agents:\n     - **General BRD Writer Agent** for the overall document structure.\n     - **Business Requirement Writer Agent** for detailed business requirement sections.\n   - Both agents query the stored data and produce content, which is then merged.\n5. **Metadata & File Creation**:\n   - Configures metadata for the document.\n   - Creates a final document file (Google Docs).\n6. **Finalization**:\n   - Converts the document to PDF [Sample output](https://wisestackai.s3.ap-southeast-1.amazonaws.com/BRD-2025-001+Customer+Feedback+Analysis+%26+Automation+Platform.pdf)\n   - Archives the PDF in Google Drive.\n   - Sends a BRD response email to the requester with the completed document.\n   - Updates the request status in the Google Sheet as completed.\n\n## **How to set up**\n1. **Prepare Google Sheets**:\n   - Create a BRD tracking sheet.\n   - Create a supporting document tracking sheet.\n2. **Configure Google Drive**:\n   - Set up folders for supporting documents and archived PDFs.\n   - Ensure the workflow has API access to upload and retrieve files.\n3. **Form Integration**:\n   - Connect your BRD request form to trigger the workflow.\n4. **Vector Store**:\n   - Configure a vector database or embedding store for extracted document text.\n5. **AI Agents**:\n   - Configure the **General BRD Writer Agent** and **Business Requirement Writer Agent** with your preferred OpenAI model.\n   - Link both agents to the Query Data Tool for retrieving embedded content.\n6. **Email Setup**:\n   - Configure email sending credentials to deliver final BRDs to requesters.\n\n## **Requirements**\n- Google Sheets API credentials.\n- Google Drive API credentials.\n- An OpenAI API key with access to the desired models.\n- A form submission trigger (e.g., Google Forms, Typeform).\n- Vector store or embedding database for contextual AI queries.\n- Permissions for file uploads, downloads, and updates in Google Drive.\n\n## **How to customize the workflow**\n- **Custom Templates**: Modify the AI agents’ system prompts to match your organization’s BRD format and tone.\n- **Metadata Fields**: Add custom fields (e.g., department, priority level) during metadata configuration.\n- **File Storage Paths**: Adjust Google Drive folder structure for project-specific storage.\n- **Approval Steps**: Insert an approval workflow between draft document creation and final archiving.\n- **Notification Channels**: Add Slack, Microsoft Teams, or other notification integrations in addition to email.\n- **AI Model Selection**: Swap the OpenAI model for another LLM or fine-tuned variant to improve BRD quality for your domain.",
+        "height": 1632,
+        "width": 976
+      },
+      "id": "15e7641b-1a6c-4ffb-aa5d-186765e73392",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1040,
+        256
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 1. Capture BRD Request & Supporting Files\nWhen a user submits the BRD request form, the workflow logs the request into a tracking sheet and uploads all supporting documents to Google Drive for reference.",
+        "height": 96,
+        "width": 768
+      },
+      "id": "2711bb15-9af8-4816-bd52-349365f496f0",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        592,
+        160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 2. Process & Extract Key Information\nAll uploaded files are parsed (e.g., PDF text extraction) and relevant content is stored in a vector database for semantic search and retrieval.\n",
+        "height": 112,
+        "width": 624
+      },
+      "id": "ec185490-114f-4f65-aaf3-aac1489ba9e6",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1328,
+        640
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 3. Multi-Agent BRD Draft Generation\nTwo specialized AI agents work collaboratively:\n- **General BRD Writer Agent** – Creates the overall document structure and executive summary.\n- **Business Requirement Writer Agent** – Focuses on detailed business and functional requirements.\nBoth agents leverage RAG (Retrieval-Augmented Generation) to pull accurate details from the stored supporting documents.",
+        "width": 704
+      },
+      "id": "8d727309-63fb-486f-b455-b72be0c6b3d5",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        304,
+        1056
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 4. Merge & Enrich Content\nContent from both agents is merged, metadata is applied, and a complete draft document is generated in Google Docs.",
+        "height": 112,
+        "width": 608
+      },
+      "id": "2c1e4f97-38f4-4b83-ace8-ff3f23d456c9",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1952,
+        1120
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 5. Convert & Archive Final BRD\nThe Google Doc is converted into a PDF, archived in a dedicated Google Drive folder, and linked back to the original request record.",
+        "height": 112,
+        "width": 560
+      },
+      "id": "6b58e614-d169-43da-9498-2ba71c8618c9",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2624,
+        1024
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### 6. Deliver & Update Status\nThe requester automatically receives the final BRD via email. The tracking sheet is updated to mark the request as completed.",
+        "height": 112,
+        "width": 784
+      },
+      "id": "81ebe123-b497-43ab-a76e-5908d3610b11",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2640,
+        1584
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "![Alt text](https://wisestackai.s3.ap-southeast-1.amazonaws.com/Screenshot+2025-08-14+at+8.47.52%E2%80%AFPM.png \"Optional title text\")\n",
+        "height": 1012,
+        "width": 540,
+        "color": 4
+      },
+      "id": "84f7f34c-6432-435f-b0af-f65f622042a2",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "![Alt text](https://wisestackai.s3.ap-southeast-1.amazonaws.com/Screenshot+2025-08-14+at+8.56.11%E2%80%AFPM.png \"Optional title text\")\n",
+        "height": 564,
+        "width": 1068,
+        "color": 4
+      },
+      "id": "51a7b187-e1bb-4900-b294-bdd9bd5a7f0e",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3664,
+        1120
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Generate Business Requirement Documents with Multi-agent GPT & Google Workspace\n",
+        "height": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1312,
+        400
+      ],
+      "id": "8fb75130-c6b1-4b52-a6a0-586eb0d7d4f6",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Merge content').item.json.Request.Email }} ",
+        "subject": "=Feedback on {{ $('Merge content').item.json.Request.Project_ID }}",
+        "message": "=<!doctype html> <html lang=\"en\" xmlns=\"http://www.w3.org/1999/xhtml\">  <head>   <meta charset=\"utf-8\">   <meta name=\"viewport\" content=\"width=device-width\">   <meta http-equiv=\"x-ua-compatible\" content=\"ie=edge\">   <title>BRD Delivery</title>   <style>     /* Clients ignore embedded CSS often—kept minimal. Most styles are inline. */     @media screen and (max-width:980px) {       .container {         width: 100% !important;       }        .stack {         display: block !important;         width: 100% !important;       }        .px-24 {         padding-left: 16px !important;         padding-right: 16px !important;       }     }   </style> </head>  <body style=\"margin:0;padding:0;background:#f5f7fb;color:#0f172a;\"> <!-- Preheader (hidden in most clients) -->   <div style=\"display:none;max-height:0;overflow:hidden;mso-hide:all;\"> BRD for {{ $('Merge content').item.json.Request.Project_title }} ({{ $('Merge content').item.json.Request.Project_title }}) is attached     as PDF. Please review and share feedback. </div>   <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\" style=\"background:#f5f7fb;\">     <tr>       <td align=\"center\" style=\"padding:24px;\">         <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"980\" class=\"container\"           style=\"width:980px;max-width:980px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;\">           <!-- Header -->           <tr>             <td style=\"background:#0ea5e9;padding:20px 24px;color:#ffffff;font-family:Arial,Helvetica,sans-serif;\">               <div style=\"font-size:18px;font-weight:700;line-height:1.2;\">Business Requirements Document (BRD)</div>               <div style=\"font-size:13px;opacity:.95;margin-top:4px;\">Project: {{ $('Merge content').item.json.Request.Project_title }} · ID: {{ $('Merge content').item.json.Request.Project_ID }}</div>             </td>           </tr> <!-- Greeting -->           <tr>             <td class=\"px-24\" style=\"padding:24px;font-family:Arial,Helvetica,sans-serif;color:#0f172a;\">               <p style=\"margin:0 0 12px 0;\">Hi requester,</p>               <p style=\"margin:0 0 12px 0;\"> Please find attached the <strong>Business Requirements Document                   (BRD)</strong> for <strong>{{ $('Merge content').item.json.Request.Project_title }}</strong> ({{ $('Merge content').item.json.Request.Project_ID }}) in the <strong>{{ $('Merge content').item.json.Request.businessDomain }}</strong> domain. It consolidates                 the scope, requirements, and considerations based on the materials you provided. </p>               <p style=\"margin:0 0 16px 0;\"> Kindly review and share any comments or requested changes. </p>             </td>           </tr> <!-- Project summary -->           <tr>             <td class=\"px-24\" style=\"padding:0 24px 8px 24px;font-family:Arial,Helvetica,sans-serif;\">               <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\"                 style=\"border:1px solid #e5e7eb;border-radius:8px;\">                 <tr>                   <td                     style=\"background:#f8fafc;font-weight:bold;padding:10px 12px;font-size:13px;border-bottom:1px solid #e5e7eb;\">                     Project Summary</td>                 </tr>                 <tr>                   <td style=\"padding:12px;\">                     <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\"                       style=\"font-size:13px;color:#0f172a;\">                       <tr>                         <td class=\"stack\" width=\"35%\" style=\"padding:6px 0;font-weight:bold;\">Project Title</td>                         <td class=\"stack\" style=\"padding:6px 0;\">{{ $('Merge content').item.json.Request.Project_title }}</td>                       </tr>                       <tr>                         <td style=\"padding:6px 0;font-weight:bold;\">Project ID</td>                         <td style=\"padding:6px 0;\">{{ $('Merge content').item.json.Request.Project_ID }}                        </td>                       </tr>                       <tr>                         <td style=\"padding:6px 0;font-weight:bold;\">Business Domain</td>                         <td style=\"padding:6px 0;\">{{ $('Merge content').item.json.Request.businessDomain }}</td>                       </tr>                       <tr>                         <td style=\"padding:6px 0;font-weight:bold;\">Notes</td>                         <td style=\"padding:6px 0;\">{{ $('Merge content').item.json.Request.Notes }}</td>                       </tr>                     </table>                   </td>                 </tr>               </table>             </td>           </tr> <!-- CTA buttons (optional links) -->           <tr>             <td align=\"center\" class=\"px-24\" style=\"padding:16px 24px 8px 24px;font-family:Arial,Helvetica,sans-serif;\">               <!-- Primary button --> <a href=\"{{ $json.webViewLink }}\" target=\"_blank\"                 style=\"display:inline-block;background:#0ea5e9;color:#ffffff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:bold;font-size:14px;\">                 View in Google Docs </a> <!-- Spacing --> <span style=\"display:inline-block;width:8px;\"></span>               <!-- Secondary button --> <a                 href=\"mailto:business@yourcompany.com?subject=Feedback%20on%20BRD%20{{ $('Merge content').item.json.Request.Project_ID }}\"                 style=\"display:inline-block;background:#e2e8f0;color:#0f172a;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:bold;font-size:14px;\">                 Send Feedback </a> </td>           </tr> <!-- Footer -->           <tr>             <td class=\"px-24\"               style=\"padding:16px 24px 24px 24px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#334155;\">               <p style=\"margin:0 0 10px 0;\">Best regards,<br> <strong></strong><br> <a href=\"mailto:{{ $('Configure metadata ').item.json.senderEmail }}\"                   style=\"color:#0ea5e9;text-decoration:none;\">{{ $('Configure metadata ').item.json.senderEmail }}</a></p>               <p style=\"margin:0;font-size:12px;color:#64748b;\">If you have trouble opening the attachment, use the                 “View in Google Docs” button above.</p>             </td>           </tr>         </table> <!-- Tiny footer -->         <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"980\" class=\"container\"           style=\"width:980px;max-width:980px;margin-top:12px;\">           <tr>             <td align=\"center\" style=\"font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#94a3b8;\"> © {{               $now.format('yyyy') }} {{ $('Configure metadata ').item.json.CompanyName }}. All rights reserved. </td>           </tr>         </table>       </td>     </tr>   </table> </body>  </html>    Business Requirements Document – {{ $('Merge content').item.json.Request.Project_title }} ({{ $('Merge content').item.json.Request.Project_ID }})",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        3360,
+        1200
+      ],
+      "id": "2a93f248-802b-450f-9eec-3dad881011f3",
+      "name": "Send a message",
+      "webhookId": "c6b5a61d-d567-4c93-a66f-064e73ea6fd2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BAVHNoH0U8sqXr9X",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        976,
+        1680
+      ],
+      "id": "9c8056c7-7f14-4a1e-a194-b8914c39c1a2",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "Hb8scaDn3DEbAoqO",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Merge content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Insert Data to Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Query Data Tool",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Query Data Tool1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge content": {
+      "main": [
+        [
+          {
+            "node": "Configure metadata ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Data Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "General BRD Writer Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Data Tool1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Business Requirement Writer Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Insert Data to Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "General BRD Writer Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Handle multiple files",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create BRD request record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request completed?": {
+      "main": [
+        [
+          {
+            "node": "General BRD Writer Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Business Requirement Writer Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload supporting ": {
+      "main": [
+        [
+          {
+            "node": "Create supporting document record(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configure metadata ": {
+      "main": [
+        [
+          {
+            "node": "Create document file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert Data to Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create document file": {
+      "main": [
+        [
+          {
+            "node": "Convert document to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle multiple files": {
+      "main": [
+        [
+          {
+            "node": "Upload supporting ",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert document to PDF": {
+      "main": [
+        [
+          {
+            "node": "Archiving PDF File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create record to update Google Sheet row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "General BRD Writer Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create BRD request record": {
+      "main": [
+        [
+          {
+            "node": "Add BRD record to tracking ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Business Requirement Writer Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "New request added to tracking sheet": {
+      "main": [
+        [
+          {
+            "node": "Request completed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create supporting document record(s)": {
+      "main": [
+        [
+          {
+            "node": "Add supporting document record(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create record to update Google Sheet row": {
+      "main": [
+        [
+          {
+            "node": "Mark request as completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Business Requirement Writer Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Archiving PDF File": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f27b1436-87b9-49f5-8839-9a4909e01de0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "98b510ca4dbbabb609e24c83189c67f6ae0083179272377aca703df4038b384f"
+  },
+  "id": "lNtiNpLBNuueCHUc",
+  "tags": []
+}

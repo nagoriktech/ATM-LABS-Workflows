@@ -1,0 +1,660 @@
+{
+  "name": "Vapi AI Phone Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=details: {{ $json.output }}",
+        "options": {
+          "systemMessage": "=You are a smart and reliable calendar assistant. Manage the user's calendar: book, check, update, cancel appointments, send confirmation emails, and log appointment details to Google Sheets. Always follow the category logic and confirm availability before any action.\n\nCategories and actions:\n\ncheck_availability: Use Get Appointments only. Do not book.\nnew_booking: Check availability, book if free, send email, log to Google Sheets.\ncancel_appointment: Retrieve appointment ID, cancel, send email, log to Google Sheets.\nupdate_appointment: Retrieve appointment ID, update, send email, log to Google Sheets.\nsend_email: Send confirmation email.\nlog_to_google_sheet: Log appointment details.\n\nRules:\n\nOnly one appointment per hour.\nDuration defaults to 1 hour if unspecified.\nAlways use summary: \"Consultation Appointment\".\nConfirm availability first. If unavailable, respond: \"Not Available\" and suggest two alternative one-hour slots on the same day.\nConvert vague times (e.g., \"tomorrow at 4 PM\") to precise ISO 8601 timestamps using {{ $now }}.\n\nAppointments involve one participant.\nNever assume availability or skip steps.\n\nExample flow for new_booking:\nCheck availability with Get Appointments.\nIf free, book appointment, send email, log to Google Sheets.\nIf booked, respond: \"Not Available\" and suggest two alternatives."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        688,
+        0
+      ],
+      "id": "b9612460-6070-40dd-a604-30a00379e58e",
+      "name": "Calendar Agent"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "najmussakib.nagorik@gmail.com",
+          "mode": "list",
+          "cachedResultName": "najmussakib.nagorik@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Attendees', ``, 'string') }}"
+          ],
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1200,
+        272
+      ],
+      "id": "f05617dc-bdf5-4452-84f8-2017fda4465b",
+      "name": "Book Appointment",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "YjNc22IOD0GR55tP",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "najmussakib.nagorik@gmail.com",
+          "mode": "list",
+          "cachedResultName": "najmussakib.nagorik@gmail.com"
+        },
+        "returnAll": true,
+        "timeMax": "={{ $now.plus({ week: 24 }) }}",
+        "options": {
+          "fields": "items(id,summary,start,end,attendees)"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1040,
+        272
+      ],
+      "id": "35735a92-1d51-471a-b79b-15d15fdcc3cd",
+      "name": "Get Appointments",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "YjNc22IOD0GR55tP",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "najmussakib.nagorik@gmail.com",
+          "mode": "list",
+          "cachedResultName": "najmussakib.nagorik@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1360,
+        272
+      ],
+      "id": "02f923ca-486a-432a-b273-eb2bd3c30687",
+      "name": "Cancel Appointment",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "YjNc22IOD0GR55tP",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "smartpulse-agency-receptionist",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e9341e3f-0a45-417a-87a2-995b4dd029fc",
+      "name": "Webhook",
+      "webhookId": "f64b04bd-c249-4a2b-bd8c-5c4be9c9171d"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=details: {{ JSON.stringify($json.body.message.toolCalls[0].function.arguments) }}",
+        "options": {
+          "systemMessage": "=You are a data-cleaning assistant for an AI scheduling agent.\n\nYour task is to process incoming JSON objects and return a cleaned version with the following:\n\n### ✅ Requirements\n\n1. **Correct the email**:\n   - Replace words like \"at\" with \"@\", and \"dot\" with \".\"\n   - Remove any extra spaces\n   - Lowercase the entire email\n   - Example: \"J C CatCliff at Gmail dot com\" → \"jccatliff@gmail.com\"\n\n2. **Convert day and time to ISO 8601 dateTime**:\n   - Combine the natural language day and time fields into a full ISO 8601 datetime string\n   - Output should use **local time in Asia/Bangladesh (GMT+6), not UTC\n   - Format: YYYY-MM-DDTHH:MM:SS-04:00\n   - Use the current date/time: {{ $now }} and the **Calculator Tool** to compute the correct date and time\n   - Interpret common expressions like \"today\", \"tomorrow\", \"Monday\", etc.\n   - Convert time expressions like \"4 PM\", \"2:30pm\", \"noon\", etc. to 24-hour format\n\n3. **Output the cleaned object**:\n   - Include: category, name, cleaned email, and combined dateTime\n   - Preserve other fields unless they are explicitly replaced\n\n---\n\n### Example Input\n\n{\n  \"category\": \"new_booking\",\n  \"name\": \"Jono Catliff\",\n  \"email\": \"J C CatCliff at Gmail dot com\",\n  \"day\": \"Tomorrow\",\n  \"time\": \"4 PM\"\n}\n\n\n### Example Output\n{\n  \"category\": \"new_booking\",\n  \"name\": \"Jono Catliff\",\n  \"email\": \"jccatliff@gmail.com\",\n  \"dateTime\": \"2024-05-10T16:00:00Z\"\n}\n\n\n## Final Notes\n- Here is the current date/time: {{ $now }}\n\n- Only output the required results in a json, No intros or outros. Nothing extra\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        224,
+        0
+      ],
+      "id": "e6937f73-18fa-4abe-a20e-fad47f1c4f78",
+      "name": "Helper Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        384,
+        224
+      ],
+      "id": "1492e20f-301d-4b18-9833-64d1b695eea7",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"results\": [\n    {\n      \"toolCallId\": \"{{ $('Webhook').item.json.body.message.toolCalls[0].id }}\",\n      \"result\": \"Invoice has been successfully sent\"\n    }\n  ]\n}\n ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "5c30cdb7-4de8-4eb6-b0f4-756a59d828e8",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        224
+      ],
+      "id": "42523e8b-1fb7-490f-b521-5b8fb70183ff",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "URRbsC3VkaNt4l8s",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        224
+      ],
+      "id": "cfd009f8-a989-43d8-b88d-3a37fe9c2ef5",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "URRbsC3VkaNt4l8s",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1npgnz2c3sQMSOygkeNtoC0a3lp6DNCJFJYnvhH_Xvw8",
+          "mode": "list",
+          "cachedResultName": "Call Info",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1npgnz2c3sQMSOygkeNtoC0a3lp6DNCJFJYnvhH_Xvw8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1npgnz2c3sQMSOygkeNtoC0a3lp6DNCJFJYnvhH_Xvw8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Name', ``, 'string') }}",
+            "Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email', ``, 'string') }}",
+            "Reason": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Reason', ``, 'string') }}",
+            "Time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Time', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        512
+      ],
+      "id": "09598afb-2f5b-4488-96de-0d1ad7f6ab4b",
+      "name": "Append row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hishLMrcsGcnQbN9",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1216,
+        768
+      ],
+      "id": "8a046806-80c3-4eab-80d5-f57679d30964",
+      "name": "Send a message in Gmail",
+      "webhookId": "eee0740d-7534-4b19-9f84-16d17cdb36c8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rjH2F2E8H3JHoPYT",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1npgnz2c3sQMSOygkeNtoC0a3lp6DNCJFJYnvhH_Xvw8",
+          "mode": "list",
+          "cachedResultName": "Call Info",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1npgnz2c3sQMSOygkeNtoC0a3lp6DNCJFJYnvhH_Xvw8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1npgnz2c3sQMSOygkeNtoC0a3lp6DNCJFJYnvhH_Xvw8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Name', ``, 'string') }}",
+            "Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email', ``, 'string') }}",
+            "Reason": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Reason', ``, 'string') }}",
+            "Time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Time', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Time",
+              "displayName": "Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1216,
+        512
+      ],
+      "id": "ae379ffc-6fc6-4bf1-9b11-661d676c722d",
+      "name": "Update row in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hishLMrcsGcnQbN9",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "1npgnz2c3sQMSOygkeNtoC0a3lp6DNCJFJYnvhH_Xvw8",
+          "mode": "list",
+          "cachedResultName": "Call Info",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1npgnz2c3sQMSOygkeNtoC0a3lp6DNCJFJYnvhH_Xvw8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1npgnz2c3sQMSOygkeNtoC0a3lp6DNCJFJYnvhH_Xvw8/edit#gid=0"
+        },
+        "startIndex": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Row_Number', ``, 'number') }}",
+        "numberToDelete": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Number_of_Rows_to_Delete', ``, 'number') }}"
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1392,
+        512
+      ],
+      "id": "9bbce096-46b0-412d-ad3e-53dc39d8a217",
+      "name": "Delete rows or columns from sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hishLMrcsGcnQbN9",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Set Appointment",
+        "height": 192,
+        "width": 624,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        896,
+        208
+      ],
+      "id": "fe3eb426-5764-488b-a97c-df56144c4232",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Entry Info",
+        "height": 208,
+        "width": 624,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        896,
+        464
+      ],
+      "id": "c5b79405-7015-4932-ad78-b3f8ef96370d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Send Confirmation",
+        "height": 208,
+        "width": 624,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        896,
+        736
+      ],
+      "id": "6884f00d-b543-4ea7-b5c3-ffe4e1e0d193",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Book Appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Appointments": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancel Appointment": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Helper Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Helper Agent": {
+      "main": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Helper Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Helper Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete rows or columns from sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a9f880f9-f757-4af7-83ad-f7e442213472",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "83a0bd2cd089bcc720c463ad29ce167c02c8874e936d90c332f0cf86f0da3076"
+  },
+  "id": "CwFzpuhJiiMt03wU",
+  "tags": []
+}

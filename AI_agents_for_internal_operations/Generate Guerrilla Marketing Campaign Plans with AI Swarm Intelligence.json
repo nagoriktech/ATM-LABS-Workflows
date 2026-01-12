@@ -1,0 +1,1154 @@
+{
+  "name": "Generate Guerrilla Marketing Campaign Plans with AI Swarm Intelligence",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "902c6ac2-271c-4ce9-be7c-84d5b4d025e4",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -10576,
+        1856
+      ],
+      "webhookId": "65b565d7-5beb-4818-b920-1ad9e9308695",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the project description: \n{{ $json.output }}",
+        "options": {
+          "systemMessage": "You are an elite marketing strategist with decades of global experience. Your task is to create the \"Introduction\" section of a guerrilla marketing campaign master document.\n\nInstructions:\n- Explain the purpose of having a detailed plan in guerrilla marketing.\n- Highlight the strategic importance of creativity, precision, and adaptability.\n- Set an inspiring, motivational, and professional tone.\n- Your writing must reflect deep expertise, as if coaching a world-class marketing team.\n- Analyze the emotional and practical importance of structured preparation.\n\nBe sure to:\n- Research the core reasons why guerrilla marketing needs planning.\n- Think about successful examples globally and summarize underlying principles.\n- Avoid generic advice; write sharp, specific, and high-level insight.\n- Maintain logical structure without deviation.\n\nFormat:\n- Output must be clear and simple paragraphs.\n\n- Only output the main paragraph ready for direct copy-paste.\n- If specific information is not available, leave blank without guessing.\n\n\nthe output should only contain the result, not any pre or post result note"
+        }
+      },
+      "id": "0dfd7355-a01a-4c1b-9aa4-489c18eb79bf",
+      "name": "Introduction Writer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        32
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a creative campaign architect with vast global experience. Your task is to create the \"Campaign Definition\" section for a guerrilla marketing strategy.\n\nInstructions:\n- Define the name of the campaign clearly and creatively.\n- Write a precise mission statement (maximum 2 lines).\n- Describe the core problem or opportunity the campaign addresses.\n- Ensure the tone is innovative yet clear.\n\nYou must:\n- Analyze the target market briefly before writing.\n- Ensure that the name and mission resonate with guerrilla marketing spirit.\n- Validate that the problem statement is realistic and solvable.\n- Stay tightly focused on practicality and creativity.\n\nFormat:\n- Output must be clear and simple paragraphs.\n- Only the paragraph content.\n- Leave blank any section that cannot be precisely completed based on available data.\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "1c816d39-ffa1-4442-9587-5344d4bc8e4c",
+      "name": "Campaign Definition Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        288
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a goal-setting expert and strategic planner. Your task is to create the \"Campaign Objectives\" section for a guerrilla marketing strategy.\n\nInstructions:\n- Define 2-3 short-term objectives that are measurable and concrete.\n- Define 2-3 long-term strategic objectives aligned with brand growth.\n- Ensure that objectives are written following the SMART criteria.\n- Focus on achievable, logical, and highly strategic goals.\n\nYou must:\n- Carefully assess the project description.\n- Ensure the objectives can realistically be measured and achieved.\n- Avoid vague language or generic goal setting.\n- Maintain a strategic yet inspiring tone.\n\nFormat:\n- Output must be clear and simple paragraphs.\n- Leave blank sections where information is insufficient without guessing.\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "b7c53181-d4ca-4a28-8622-7d3d3632a52d",
+      "name": "Campaign Objectives Specialist",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        544
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an advanced market and competition analyst. Your task is to build the \"Current Situation Analysis\" section.\n\nInstructions:\n- Perform a SWOT analysis (Strengths, Weaknesses, Opportunities, Threats).\n- Summarize the current competitor landscape (main competitors, market dynamics).\n- Identify key consumer trends relevant to the campaign.\n\nYou must:\n- Research thoroughly based on the project context.\n- Cross-reference assumptions to ensure practical validity.\n- Critically assess possible gaps or challenges.\n- Maintain a strategic, executive-level analytical tone.\n\nFormat:\n- Output must be clear and simple paragraphs.\n- If data is missing, leave blank without fabricating information.\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "95551719-e383-42fb-93c2-8a3a5aefba50",
+      "name": "Current Situation Analyst",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        816
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the project description: \n{{ $json.output }}",
+        "options": {
+          "systemMessage": "You are a deep customer insight researcher with specialization in behavioral psychology. Your task is to create the \"Target Audience Persona\" section create 5 different persona with detailed info as described below,and name them depend on the persona to a famous character (celebrity, movie, game, someone who has been famous) that has those persona (or similar).\n\nInstructions:\n- Describe the demographic profile: age, gender, occupation, income level.\n- Describe the psychographic profile: values, motivations, fears, lifestyles.\n- Explain expected buying behaviors and key emotional triggers.\n\nYou must:\n- Research potential customer segments carefully.\n- Prioritize accuracy, depth, and practical segmentation.\n- Validate assumptions against realistic market behaviors.\n- Ensure persona matches guerrilla marketing style (open to surprise, risk-takers, trend adopters).\n\nFormat:\n- Output must be clear and simple paragraphs.\n- If some details cannot be inferred reasonably, leave blank.\n\nthe output should only contain the result, not any pre or post result note\n"
+        }
+      },
+      "id": "c4106db3-ad2a-4858-9781-77ad53fdee47",
+      "name": "Target Persona Researcher",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        1072
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a brand messaging expert specializing in guerrilla marketing campaigns. Your task is to create the \"Key Messaging\" section.\n\nInstructions:\n- Define the primary message the campaign must deliver.\n- Write a memorable slogan or core phrase.\n- Define the tone of voice (e.g., bold, rebellious, humorous).\n- Ensure the message is aligned with the emotions of the target audience.\n\nYou must:\n- Research psychological triggers related to guerrilla marketing success.\n- Focus on clear, emotional, and provocative messaging.\n- Validate that the messaging style fits guerrilla marketing culture (unexpected, unforgettable, shareable).\n\nFormat:\n- Output must be clear and simple paragraphs.\n- Leave blank if information cannot be completed without strong basis.\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "fa85a4bc-235d-4462-80e4-e61c63776119",
+      "name": "Key Messaging Specialist",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        1328
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a chief strategy architect for disruptive marketing campaigns. Your task is to write the \"Main Marketing Strategy\" section.\n\nInstructions:\n- Define the strategic direction (penetration, emotional stimulation, interaction-driven).\n- Outline how to leverage guerrilla tactics for maximum impact.\n- Ensure the plan is realistic, creative, and shock-driven.\n\nYou must:\n- Analyze competitive patterns.\n- Validate the feasibility of tactics.\n- Emphasize high surprise factor, emotional involvement, and viral potential.\n- Ensure strategy feels bold but executable.\n\nFormat:\n- Output must be clear and simple paragraphs.\n- Leave blank parts if strong information is missing.\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "59c30e3d-b73a-454a-be86-db7547948848",
+      "name": "Main Strategy Architect",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        1584
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a guerrilla marketing tactics designer with expertise in low-cost, high-impact strategies. Your task is to develop the \"guerrilla Marketing Tactics\" section.\n\nInstructions:\n- Propose specific unconventional tactics: street marketing, ambient marketing, flash mobs, PR stunts.\n- Each tactic must be realistic, cost-effective, and viral-friendly.\n- Prioritize tactics that maximize shock, surprise, and memorability.\n\nYou must:\n- Evaluate feasibility and ease of execution.\n- Ensure tactics have natural potential for virality.\n- Only propose ideas that could realistically be implemented with limited budget.\n- Maintain creativity at the highest level.\n\nFormat:\n- Output must be paragraphs.\n- Leave blank if insufficient information.\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "d973187e-f9ea-4c7f-990b-23dac3caf475",
+      "name": "guerrilla Tactics Designer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        1856
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a distribution and media strategist. Your task is to complete the \"Channels & Distribution\" section.\n\nInstructions:\n- Identify the best channels for campaign exposure (social media, public places, PR, collaborations).\n- Explain briefly how each channel would maximize visibility.\n- Ensure chosen channels fit guerrilla marketing principles: unexpectedness, low cost, mass attention.\n\nYou must:\n- Research effectiveness of each potential channel for guerrilla marketing.\n- Validate reach potential against campaign goals.\n- Focus on creativity and strategic leverage.\n\nFormat:\n- Output must be clean paragraphs.\n- If necessary information is missing, leave the area blank.\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "c1532851-0d21-4447-8471-d993750bb19b",
+      "name": "Channel Strategy Expert",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        2112
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an operational execution master. Your task is to complete the \"Execution Plan\" section.\n\nInstructions:\n- Define clear phases of the campaign.\n- Specify timelines, responsibilities, and resources needed.\n- Ensure the plan is step-by-step and execution-ready.\n- Plan should reflect maximum agility and quick reaction options.\n\nYou must:\n- Validate feasibility at each step.\n- Ensure no unnecessary dependency between steps.\n- Maintain practical, fast-paced planning style suited for guerrilla marketing.\n\nFormat:\n- Output must be clean paragraphs.\n- If strong data missing, leave blank without assuming.\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "aea2b725-0043-4f9e-b97e-e9781a620307",
+      "name": "Execution Planner",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        2368
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a financial strategist for guerrilla marketing campaigns. Your task is to create the \"Budget Planning\" section.\n\nInstructions:\n- Estimate the necessary costs for all campaign activities.\n- Prioritize low-cost, high-impact solutions.\n- Identify critical areas where budget must be allocated (content creation, materials, permits, logistics).\n- Recommend contingency reserve for unexpected expenses.\n\nYou must:\n- Research reasonable cost ranges for guerrilla tactics.\n- Ensure all planned costs are realistic and aligned with project scale.\n- Avoid overestimations or underestimations.\n- Focus on maximum ROI (Return on Investment).\n\nFormat:\n- Output must be clean paragraphs.\n- If strong data missing, leave blank without assuming.\n- 300 words max\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "44175e8b-6a02-494b-b230-79f46283ca16",
+      "name": "Budget Planning Specialist",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        2624
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a performance measurement expert. Your task is to complete the \"Monitoring & KPIs\" section.\n\nInstructions:\n- Define clear KPIs (Key Performance Indicators) for campaign success.\n- Focus on awareness, engagement, and conversion metrics.\n- Suggest tools and methods for measuring campaign performance.\n\nYou must:\n- Research standard practices for guerrilla campaign measurement.\n- Validate that KPIs are realistic, meaningful, and measurable.\n- Avoid vague KPIs or overcomplicated metrics.\n\nFormat:\n- Output must be clean paragraphs.\n- If strong data missing, leave blank without assuming.\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "1ff299da-17ee-4ba1-bdef-8623889b63ff",
+      "name": "Monitoring and KPIs Expert",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        2896
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a risk strategist specialized in marketing campaigns. Your task is to complete the \"Risk Management\" section.\n\nInstructions:\n- Identify key risks: legal, operational, branding.\n- Propose realistic mitigation strategies for each risk.\n- Focus on minimizing negative public impact and legal exposure.\n\nYou must:\n- Analyze real-world case studies of guerrilla marketing risks.\n- Validate the practicality of suggested risk mitigation strategies.\n- Ensure risk management approaches are lightweight but effective.\n\nFormat:\n- Output must be clean paragraphs.\n- If strong data missing, leave blank without assuming.\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "fb6fb829-9efa-4a56-9b43-7d6ad1b4c8e2",
+      "name": "Risk Management Expert",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        3152
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an advisor in guerrilla marketing best practices. Your task is to complete the \"Do’s and Don’ts\" section.\n\nInstructions:\n- Highlight critical actions that must be done to ensure campaign success.\n- Highlight critical actions that must be avoided to prevent failure.\n- Emphasize creativity, legality, and ethical practices.\n\nYou must:\n- Base advice on real-world guerrilla marketing successes and failures.\n- Ensure points are practical, sharp, and directly actionable.\n- Focus on lessons specifically tied to nontraditional, shock-driven marketing.\n\nFormat:\n- Output must be clean paragraphs and bullet points.\n- If strong data missing, leave blank without assuming.\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "7fd3b4bc-b2c3-4020-95fc-fc400790a066",
+      "name": "Do's and Don'ts Advisor",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        3408
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an operations and action planning specialist. Your task is to complete the \"Final To-Do List\" section.\n\nInstructions:\n- Summarize essential actionable steps from all previous sections.\n- Organize logically from preparation to execution.\n- Keep list concise but comprehensive.\n\nYou must:\n- Cross-reference all campaign elements carefully.\n- Avoid missing any critical step.\n- Prioritize actions critical for campaign success.\n\nFormat:\n- Output must be clean paragraphs and bullet points.\n- If strong data missing, leave blank without assuming.\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "90a73c28-f2a2-4f9c-8888-ce8be71e5eeb",
+      "name": "Final To-Do List Creator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        3664
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a post-campaign analyst with expertise in learning optimization. Your task is to complete the \"Post-Campaign Activities\" section.\n\nInstructions:\n- Define how to evaluate the campaign's success versus goals.\n- Outline the feedback collection process.\n- Summarize key learnings and improvement opportunities.\n\nYou must:\n- Base analysis on real post-campaign industry practices.\n- Ensure the learning loop is practical, quick, and meaningful.\n- Focus on building reusability for future campaigns.\n\nFormat:\n- Output must be clean paragraphs.\n- If strong data missing, leave blank without assuming.\n\nthe output should only contain the result, not any pre or post result note\n\nHere is the project description: \n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "ace05dfd-59bb-4f72-897e-1d5aff54dea3",
+      "name": "Post-Campaign Analyst",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6336,
+        3936
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}",
+        "contextWindowLength": 15
+      },
+      "id": "e2d17ee1-9c78-48dc-ab61-d7c01a775ece",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -7648,
+        4608
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an Gurilla Marketing Idea Creator wich think different and out of box (but feasiable to do) and cheap. Your task is to complete the section \\\"Idea Proposal\\\".\\n\\nBased on the provided project description, conduct the necessary brainstorming and generate creative amazing guerrilla marketing ideas that are feasable. Then elaborate briefly on the idea, explaining what problem it solves and why it could succeed.\\n\\nFocus on:\\n- Invent a fresh, relevant idea\\n- Provide a short but clear elaboration\\n- Ensure the idea is practical, not purely fantasy\\n\\nFormat the answer as a clean paragraph. No titles, headers, numbering, or extra notes. Only the main paragraph, ready to copy-paste.\\n\\nIf you cannot create a valid idea, and everytime only generate one idea (whether imrpove previous idea by considering all given feedbacks, or weather completely write new one) leave it blank.\\n\\nHere is the provided project description:\\n{{ $json.output }}",
+        "options": {}
+      },
+      "id": "abc5b4d3-ac74-4568-89c5-70dcfb8b198f",
+      "name": "Idea Generator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -9856,
+        1856
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "jsCode": "const workflowStaticData = $getWorkflowStaticData('global');\n\n// get new access token\nworkflowStaticData.originalIdea = $input.first().json.chatInput;\nreturn {\"output\":$input.first().json.chatInput};"
+      },
+      "id": "7ffb6d67-0116-46f3-9931-bf5e5e9d2bca",
+      "name": "Input Parser",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -10352,
+        1856
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the global workflow static data\nconst workflowStaticData = $getWorkflowStaticData('global');\n\n// Access its data\nconst originalIdea = workflowStaticData.originalIdea;\n\nreturn {\n  \"output\": `This is business description: '${$('When chat message received').first().json.chatInput}', And this is generated idea:${$input.first().json.output}`\n}"
+      },
+      "id": "d7442e64-c5f2-43a4-a6ff-b58bccf19088",
+      "name": "Combine outputs",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -7840,
+        1872
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "numberInputs": 10
+      },
+      "id": "bfd5b40d-0633-45ed-ade4-2aecb04ddfad",
+      "name": "Merge results 1/2",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -4960,
+        1072
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "numberInputs": 6
+      },
+      "id": "624e4c23-5a72-4003-88c1-6485cb86f3e4",
+      "name": "Merge results 2/2",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -4960,
+        3088
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {},
+      "id": "3ec7b2c8-7ff0-4714-9eae-38d22ce24604",
+      "name": "Merge results",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -4336,
+        2128
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "jsCode": "// const input = $input.all()\n// // Simple merge\n// const output = {\n//   introduction: input[0].json.output,\n//   campaign_definition: input[1].json.output,\n//   campaign_objectives: input[2].json.output, // combining both\n//   current_situation_analysis: input[3].json.output,\n//   target_audience_persona: input[4].json.output,\n//   key_messaging: input[5].json.output,\n//   main_marketing_strategy: input[6].json.output,\n//   guerrilla_marketing_tactics: input[7].json.output,\n//   channels_and_distribution : input[8].json.output,\n//   execution_plan: input[9].json.output,\n//   budget_planning: input[10].json.output,\n//   monitoring_and_kpis: input[11].json.output,\n//   risk_management: input[12].json.output,\n//   dos_and_donts: input[13].json.output,\n//   fina_todo_list: input[14].json.output,\n//   post_campaign_activities: input[15].json.output,\n// };\n\n// return {\n//   \"raw_output\": output,\n//     \"text\" : `# Introduction\\n${output.introduction}\\n\\n\n// # Campaign Definition\\n${output.campaign_definition}\\n\\n\n// # Campaign Objectives\\n${output.campaign_objectives}\\n\\n\n// # Current Situation Analysis\\n${output.current_situation_analysis}\\n\\n\n// # Target Audience Persona\\n${output.target_audience_persona}\\n\\n\n// # Key Messaging\\n${output.key_messaging}\\n\\n\n// # Main Marketing Strategy\\n${output.main_marketing_strategy}\\n\\n\n// # guerrilla Marketing Tactics\\n${output.guerrilla_marketing_tactics}\\n\\n\n// # Channels and Distribution\\n${output.channels_and_distribution}\\n\\n\n// # Execution Plan\\n${output.execution_plan}\\n\\n\n// # Budget Planning\\n${output.budget_planning}\\n\\n\n// # Monitoring and KPIs\\n${output.monitoring_and_kpis}\\n\\n\n// # Risk Management\\n${output.risk_management}\\n\\n\n// # Dos and Don'ts\\n${output.dos_and_donts}\\n\\n\n// # Final To-Do List\\n${output.fina_todo_list}\\n\\n\n// # Post Campaign Activities\\n${output.post_campaign_activities}\\n\\n`\n// }\n\n\n\n\n\nconst input = $input.all();\n\nfunction decode(str) {\n  try {\n    return JSON.parse(`\"${str}\"`);\n  } catch (e) {\n    return str;\n  }\n}\n\nfunction fixNewLines(str) {\n  return decode(str).replace(/\\\\n/g, `\n  `);\n}\n\nconst sections = [\n  { title: \"Introduction\", content: fixNewLines(input[0].json.output) },\n  { title: \"Campaign Definition\", content: fixNewLines(input[1].json.output) },\n  { title: \"Campaign Objectives\", content: fixNewLines(input[2].json.output) },\n  { title: \"Current Situation Analysis\", content: fixNewLines(input[3].json.output) },\n  { title: \"Target Audience Persona\", content: fixNewLines(input[4].json.output) },\n  { title: \"Key Messaging\", content: fixNewLines(input[5].json.output) },\n  { title: \"Main Marketing Strategy\", content: fixNewLines(input[6].json.output) },\n  { title: \"guerrilla Marketing Tactics\", content: fixNewLines(input[7].json.output) },\n  { title: \"Channels and Distribution\", content: fixNewLines(input[8].json.output) },\n  { title: \"Execution Plan\", content: fixNewLines(input[9].json.output) },\n  { title: \"Budget Planning\", content: fixNewLines(input[10].json.output) },\n  { title: \"Monitoring and KPIs\", content: fixNewLines(input[11].json.output) },\n  { title: \"Risk Management\", content: fixNewLines(input[12].json.output) },\n  { title: \"Dos and Don'ts\", content: fixNewLines(input[13].json.output) },\n  { title: \"Final To-Do List\", content: fixNewLines(input[14].json.output) },\n  { title: \"Post Campaign Activities\", content: fixNewLines(input[15].json.output) }\n];\n\nlet text = \"\";\n\nsections.forEach(section => {\n  text += `# ${section.title}\n${section.content}\n\n`;\n});\n\nreturn {\n  raw_output: sections,\n  text: text\n};"
+      },
+      "id": "d4d738e0-19c3-4e40-9409-eabe5b3b8e2a",
+      "name": "Result organizer",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -4128,
+        2128
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "## Swarm Intelligence (Mission : Critical campaign generator)\n\nThis part includes two AI agents: one generates an idea, and the other critiques it and provides an opinion. If the idea isn’t suitable, instead of initiating a feedback loop for improvement, the second agent asks for a new idea.",
+        "height": 2180,
+        "width": 2400
+      },
+      "id": "56b11bb6-956b-479a-a082-c286deaeaa89",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -9712,
+        2112
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## How to Use It\n\nTo get started, open the chat and describe your business.  \nThe more specific you are, the better the guerrilla marketing campaign plan will be.\n\nIt’s a good idea to include details like your **available budget** and any other relevant information.\n\nThis template introduces a new feature called **Swarm Intelligence**, where multiple agents collaborate in a loop to generate the most effective response.\n\nIf you already have a specific idea and don’t need brainstorming, you can **disable the Swarm Intelligence** part and use only the remaining nodes.\n\nIf you have any questions, feel free to email me at:  \n**sinamirshafiee@gmail.com**\n\n\n**Note:**  \nThis is version **0.1.0**, so please keep in mind that there may still be some bugs.  \nI'd love to hear your feedback, just drop me a message at **sinamirshafiee@gmail.com**!",
+        "height": 520,
+        "width": 840,
+        "color": 4
+      },
+      "id": "fda8e173-c253-4edf-8398-058ff8a25613",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -11280,
+        1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## LLM is changeable\nYou can change the LLM to others like Ollama, it is better to use Reasonable models if you keep **Swarm Intelligence** active.",
+        "height": 140,
+        "width": 1100,
+        "color": 7
+      },
+      "id": "dc69b9aa-b993-4d24-8b1b-2aec8e9206f1",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -8864,
+        4560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Merging all outputs\n",
+        "height": 2600,
+        "width": 940,
+        "color": 7
+      },
+      "id": "a646125e-bd70-4359-868c-babb71d98acb",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -5136,
+        912
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Writing Individual Chapters\n\nEach node represents an agent that is highly skilled in its specific area of expertise.  \nIt generates the content for its assigned section based on the provided idea.",
+        "height": 4460,
+        "width": 760,
+        "color": 5
+      },
+      "id": "40a5d508-4054-4b33-a065-85947ff674a5",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -6592,
+        -304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## End of Process\n\nAfter completing all the steps, click on this node to download the final result file.\n\nIf you have any further questions, feel free to contact me:  \n📧 **sinamirshafiee@gmail.com**",
+        "height": 720,
+        "width": 560
+      },
+      "id": "5b6b6375-fc16-436e-b6bb-160b96a1969f",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3968,
+        1616
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "text",
+        "options": {
+          "fileName": "marketing_plan.txt"
+        }
+      },
+      "id": "2117cea5-c62e-4c73-89ce-8e28a18091c3",
+      "name": "Final result",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        -3920,
+        2128
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -7840,
+        3440
+      ],
+      "id": "5cfd74df-3b1e-41de-8885-5086935aea62",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "3O5xk1QWB1j8V1rQ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Introduction Writer": [
+      {
+        "json": {
+          "output": "Enhance \"The Roaming Brew Lab\" by transforming the sampling experience into an interactive \"Brew Blind Taste Test Challenge.\" The mobile station will offer small, complimentary sips of two distinct ethically sourced coffees, each brewed using one of the shop's unique methods. Participants are then invited to guess the origin region (e.g., Africa, Latin America) or a dominant flavor note, with correct guesses earning an amplified discount (e.g., 50% off their first specialty brew in-store) or a small branded prize. This refinement intensifies engagement by gamifying the tasting experience, directly educating participants on the nuances of ethically sourced beans and unique brewing, and dramatically boosting social media mentions as people share their \"taste test triumphs and fails\" using a dedicated campaign hashtag, thereby driving both immediate local buzz and future walk-ins more effectively."
+        }
+      }
+    ],
+    "Campaign Definition Agent": [
+      {
+        "json": {
+          "output": "Campaign Name: \"The Roaming Brew Lab\"\n\nMission Statement: To surprise urban explorers with an unexpected taste of ethically sourced coffee innovation, sparking curiosity and driving them to our unique shop.\n\nCore Problem or Opportunity: The campaign directly addresses the challenge of limited brand awareness and low foot traffic for a small specialty coffee shop, particularly among young professionals and students who are often mobile and seeking novel experiences. By bringing the shop's unique offering—ethically sourced beans and distinct brewing methods—directly to high-traffic areas in an unexpected, interactive, and sensory-rich format, it capitalizes on the opportunity to create immediate local buzz, educate potential customers on the shop's values, and convert spontaneous curiosity into loyal patronage and amplified social media mentions."
+        }
+      }
+    ],
+    "Campaign Objectives Specialist": [
+      {
+        "json": {
+          "output": "Short-term objectives include driving a 15% redemption rate for \"The Roaming Brew Lab\" discount cards, directly translating to new customer walk-ins, within the first month of distribution. Additionally, the campaign aims to generate at least 150 unique social media mentions using a dedicated hashtag within the initial three weeks of launch, and engage with and provide samples to a minimum of 500 unique individuals across 10 pop-up sessions over two months. Long-term strategic objectives are to increase the monthly rate of repeat customer visits by 25% within six months, fostering lasting loyalty among new patrons introduced via the \"Brew Lab.\" Furthermore, the campaign seeks to enhance brand perception, aiming for a 10% increase in social media mentions specifically highlighting the shop’s unique brewing methods and ethical sourcing over the next 12 months, and secure partnerships with at least two local student organizations or complementary businesses within nine months to amplify community presence and sustained growth."
+        }
+      }
+    ],
+    "Current Situation Analyst": [
+      {
+        "json": {
+          "output": "Strengths of the specialty coffee shop include its strong differentiation through ethically sourced beans and unique brewing methods, which resonate deeply with contemporary consumer values, and its inherent agility as a small business to execute nimble guerrilla tactics. Weaknesses primarily involve limited brand awareness within a crowded market and a modest marketing budget that constrains traditional advertising reach. Opportunities are abundant, including the burgeoning demand for premium, ethically conscious coffee among young professionals and students, the power of social media to amplify unique experiences, and the strategic advantage of \"The Roaming Brew Lab\" to create direct, memorable encounters in high-traffic zones. Threats consist of intense competition from established large chains and numerous independent cafes vying for the same demographic, potential permit challenges for mobile pop-ups, and the general challenge of consistently converting novelty into sustained foot traffic.\n\nThe current competitor landscape is characterized by a dual challenge: the widespread convenience and brand recognition of large coffee chains, and the increasing number of other independent specialty cafes, each attempting to carve out its own niche. Market dynamics reflect a consumer base that increasingly prioritizes quality, ethical sourcing, and unique experiences over mere price or ubiquity, yet convenience and speed remain significant factors, particularly for the target demographic.\n\nKey consumer trends highly relevant to this campaign include a pronounced shift towards ethical consumption and transparency in sourcing, a strong inclination towards experiential rather than transactional interactions, and pervasive social media usage for sharing discoveries and authentic moments. Young professionals and students are particularly receptive to novel, interactive, and sensory-rich experiences that break the monotony of daily routines, making \"The Roaming Brew Lab\" well-positioned to leverage their desire for discovery and shareable content."
+        }
+      }
+    ],
+    "Target Persona Researcher": [
+      {
+        "json": {
+          "output": "**Persona: Indiana Jones (The Savvy Student/Explorer)**\n*   **Demographic Profile:** Age 19-24, any gender, typically a university student (undergraduate or graduate) or part-time intern. Income level is usually low to moderate, ranging from $500-$1500 per month, sustained through part-time work, allowances, or student loans.\n*   **Psychographic Profile:** Values discovery, learning, authenticity, and efficiency. Motivated by seeking new, engaging experiences that offer good value, finding social currency in sharing cool local finds, and supporting their academic or personal growth. They fear missing out on trends (FOMO), wasting precious budget on subpar quality, or being perceived as unoriginal. Their lifestyle is busy, balancing studies, social life, and exploring local areas, often active on social media.\n*   **Expected Buying Behaviors & Emotional Triggers:** Buys coffee frequently, often as a study aid, social ritual, or an affordable treat. They are highly attracted to unique offerings, loyalty programs, student discounts, and anything that promises a novel experience. Emotional triggers include the thrill of an unexpected discovery, a sense of belonging to an \"insider\" community, and the satisfaction of uncovering a hidden gem that delivers both quality and a compelling story. The unexpected appearance and unique nature of \"The Roaming Brew Lab\" would deeply appeal to their sense of adventure and desire for something new and shareable.\n\n**Persona: Hermione Granger (The Conscious Creator/Activist)**\n*   **Demographic Profile:** Age 22-30, any gender, often working as a junior graphic designer, NGO project coordinator, freelance writer, or a graduate student in social sciences. Income level is moderate, typically between $2,000-$4,000 per month.\n*   **Psychographic Profile:** Deeply values sustainability, ethical practices, social justice, authenticity, and community connection. They are motivated by supporting responsible businesses, ensuring their purchases align with strong personal values, and seeking genuine experiences that contribute positively to the world. Their primary fear is inadvertently supporting exploitative or unsustainable practices, or feeling disconnected from their values-driven community. Their lifestyle is characterized by active engagement in social causes, meticulous research of product origins, and a preference for local, artisanal, and ethically-certified goods.\n*   **Expected Buying Behaviors & Emotional Triggers:** Buys specialty coffee regularly, viewing it as a conscious choice rather than a mere transaction. They are strongly attracted to transparent sourcing, clear ethical certifications, and local ownership. Emotional triggers include a profound sense of purpose derived from their purchases, feeling like an active participant in a larger movement for good, and the pride in endorsing a business that genuinely reflects their moral principles. \"The Roaming Brew Lab's\" emphasis on ethically sourced beans and the stories behind unique brewing methods directly resonates with their value system.\n\n**Persona: Harvey Specter (The Ambitious Professional/Trendsetter)**\n*   **Demographic Profile:** Age 28-38, any gender, typically a marketing manager, tech startup associate, consultant, or junior lawyer. Income level is upper-moderate to high, often exceeding $4,000-$8,000+ per month.\n*   **Psychographic Profile:** Values excellence, efficiency, reputation, and unique, high-quality experiences. They are motivated by enhancing their personal brand, staying ahead of cultural and industry trends, optimizing their daily routines for maximum productivity, and leveraging social influence. Their fears include being perceived as outdated or out of touch, wasting valuable time, or compromising on the quality and sophistication of their choices. Their lifestyle is fast-paced, career-focused, and highly curated, frequently engaging with platforms like LinkedIn and Instagram, and prioritizing aesthetics and efficiency.\n*   **Expected Buying Behaviors & Emotional Triggers:** Purchases premium coffee daily, often for professional meetings or as a refined, quick personal indulgence. They are drawn to superior taste, sophisticated brewing methods, and establishments that project a chic, efficient, and exclusive atmosphere. Emotional triggers include the feeling of being an 'insider' who discovers exclusive, cutting-edge trends, the prestige associated with consuming a high-quality, unique product, and the seamless integration of a superior coffee experience into their busy, demanding schedule. \"The Roaming Brew Lab's\" unexpected, high-quality brewing demonstration appeals directly to their desire for novel, elevated, and shareable experiences that augment their sophisticated lifestyle.\n\n**Persona: Monica Geller (The Social Seeker/Networker)**\n*   **Demographic Profile:** Age 20-28, any gender, frequently a university student, event coordinator, entry-level HR professional, or community manager. Income level is moderate, generally ranging from $1,500-$3,000 per month.\n*   **Psychographic Profile:** Values community, strong social connection, shared experiences, inclusivity, and creating fun, memorable moments. They are motivated by socializing, meeting new people, discovering great spots for group hangouts, and generating engaging, shareable content for their social circles. Their fears center around loneliness, missing out on social events, or enduring awkward social situations. Their lifestyle is highly social, actively engaging across all major social media platforms, keen on attending events, organizing meetups, and participating in group activities.\n*   **Expected Buying Behaviors & Emotional Triggers:** Purchases coffee primarily as a social lubricant or a convenient reason to meet friends and colleagues. They are especially attracted to inviting atmospheres, group discounts, and highly \"Instagrammable\" moments that can be shared instantly. Emotional triggers include the pure joy of shared discovery with friends, the ability to introduce their network to a cool new spot, and the satisfaction of effortlessly creating engaging social media content. \"The Roaming Brew Lab\" offers a novel, interactive experience perfectly suited for sharing and discussion, serving as an instant conversation starter and a compelling reason to visit the main coffee shop with friends.\n\n**Persona: Remy (The Experience Enthusiast/Connoisseur-in-training)**\n*   **Demographic Profile:** Age 24-34, any gender, often a freelance artist, food blogger, junior chef, aspiring barista, or marketing coordinator. Income level is moderate, typically between $2,500-$4,500 per month.\n*   **Psychographic Profile:** Passionately values craftsmanship, sensory pleasure, acquiring knowledge, personal growth, and the quality and authenticity of ingredients. They are motivated by learning new skills, expanding their palate, deeply appreciating the artistry and technique behind products, and actively seeking out unique flavors and experiences. Their primary fears are blandness, generic or uninspired experiences, and missing out on truly exceptional tastes. Their lifestyle is characterized by a \"foodie\" mentality, often involving home cooking or baking, frequent visits to farmers' markets, extensive product research, and attendance at workshops or classes related to culinary arts.\n*   **Expected Buying Behaviors & Emotional Triggers:** Buys specialty coffee specifically for its nuanced flavor profile and the precise brewing technique employed. They are highly attracted by detailed descriptions of bean origins, live brewing demonstrations, and specific tasting notes. Emotional triggers include the profound satisfaction derived from a perfectly crafted cup, the excitement of discovering a new or subtle flavor nuance, and the intellectual engagement of understanding the intricate brewing process. \"The Roaming Brew Lab,\" with its unique brewing demonstrations and detailed stories of bean origins, caters directly to their innate desire for knowledge and sophisticated sensory exploration, motivating them to visit the shop for a deeper immersion into the coffee craft."
+        }
+      }
+    ],
+    "Key Messaging Specialist": [
+      {
+        "json": {
+          "output": "The primary message of \"The Roaming Brew Lab\" campaign is to deliver an unexpected, sensory-rich encounter with ethically sourced specialty coffee, highlighting the unique craftsmanship behind each brew and inviting discovery beyond the ordinary. The core phrase, \"Unexpected Sips, Unforgettable Stories,\" encapsulates the campaign's surprise element, the premium taste experience, and the deeper narrative of the coffee. The tone of voice is intriguing, knowledgeable, and spirited, blending the scientific curiosity implied by \"Lab\" with the passionate artistry of specialty coffee, all delivered with an air of approachable discovery. This messaging directly targets the audience's desire for novelty, authentic experiences, and shareable content, appealing to their curiosity for discovery, their appreciation for ethical sourcing, and their enjoyment of unique, high-quality tastes."
+        }
+      }
+    ],
+    "Main Strategy Architect": [
+      {
+        "json": {
+          "output": "The strategic direction for \"The Roaming Brew Lab\" is primarily **interaction-driven penetration and emotional stimulation**. This campaign aims to disrupt conventional coffee marketing by directly engaging the target audience in their natural environments, creating a highly personal and memorable brand experience. Leveraging the guerrilla tactic of a **hyper-mobile, pop-up micro-brew station**, the strategy focuses on unexpected appearances in high-traffic areas frequented by young professionals and students, such as near university entrances or business lunch spots. This approach capitalizes on a high surprise factor, as consumers encounter a sophisticated coffee demonstration and complimentary samples where they least expect it, immediately grabbing attention and fostering curiosity. The visual spectacle of unique brewing methods, combined with the sensory experience of freshly brewed, ethically sourced coffee, creates deep emotional involvement and encourages immediate social media sharing. This counters competitive patterns of static storefronts and generic advertising by bringing the shop's distinct value proposition directly to the consumer in a dynamic and interactive manner. The plan is highly realistic and executable within the $1,000 budget, relying on a minimalist setup and the owner's or a volunteer's expertise, while maximizing viral potential through its inherently shareable and unique format. It's a bold move that transforms passive observation into an active discovery, driving direct foot traffic and social buzz through an unforgettable, personal brand encounter."
+        }
+      }
+    ],
+    "guerrilla Tactics Designer": [
+      {
+        "json": {
+          "output": "To maximize impact with \"The Roaming Brew Lab,\" the primary tactic involves unexpected, high-frequency appearances in strategic urban locations. This hyper-mobile pop-up station will leverage the novelty of a unique brewing demonstration—like a pour-over or siphon—and offer complimentary sips of ethically sourced coffee. Each interaction is designed to be a mini \"Brew Blind Taste Test Challenge,\" where participants guess bean origin or flavor notes, amplifying engagement and directly linking a prize (enhanced discount or small branded gift) to active participation and learning. This is inherently viral, as the visual spectacle, the engaging challenge, and the unexpected nature of the experience encourage immediate social media sharing and real-time conversation.\n\nComplementing this, \"Ephemeral Scent & Sight Trails\" will utilize ambient marketing by discreetly placing biodegradable, coffee-scented chalk stencils or artistic chalk drawings of steam wisps on sidewalks leading subtly towards the main coffee shop or potential \"Brew Lab\" locations. This low-cost tactic creates a subconscious sensory intrigue and a visual breadcrumb trail, piquing curiosity and encouraging people to literally follow their noses to discovery, while also generating shareable local \"street art\" moments.\n\nFinally, a \"Spot the Lab & Share\" social media challenge will act as a real-time engagement driver. Leading up to each \"Brew Lab\" pop-up, cryptic clues or teaser images will be shared on social platforms like Instagram or TikTok, hinting at the general area of its next appearance. The first few individuals to find \"The Roaming Brew Lab,\" post a photo or video with a unique hashtag, and tag the shop will receive an exclusive reward, fostering a competitive and immediate social sharing frenzy. This tactic leverages the innate desire for discovery and social recognition, transforming casual encounters into interactive hunts that generate widespread organic buzz for minimal cost."
+        }
+      }
+    ],
+    "Channel Strategy Expert": [
+      {
+        "json": {
+          "output": "Key distribution for \"The Roaming Brew Lab\" campaign will heavily leverage social media platforms such as Instagram and TikTok, acting as the primary hub for generating and amplifying user-generated content (UGC). Participants will be encouraged to share their unexpected encounters with the mobile brew lab, their \"Brew Blind Taste Test Challenge\" results, and photos/videos of unique brewing methods using a dedicated campaign hashtag, creating a rapid, organic spread of buzz and increasing brand visibility at minimal cost.\n\nThe physical presence of \"The Roaming Brew Lab\" itself in high-traffic public places, like university entrances, business lunch zones, and local parks, serves as a crucial distribution channel. This guerrilla tactic maximizes visibility through direct, sensory-rich interactions, drawing immediate attention from passersby with the spectacle of unique brewing and complimentary sips, leading to real-time word-of-mouth and further social media amplification.\n\nLocal public relations and community channels, including online local event listings, university student newspapers, and local community noticeboards, will be utilized for low-cost announcements about the \"Brew Lab's\" general pop-up schedule or specific locations. This approach targets the local demographic directly and cost-effectively, generating foundational awareness and piquing the interest of those actively seeking local happenings.\n\nFinally, strategic collaborations with complementary local businesses (e.g., independent bookstores, artisanal bakeries) and relevant student organizations will extend the campaign's reach. These partnerships facilitate cross-promotion through their respective channels and physical locations, tapping into established audiences and lending credibility, all while maintaining the campaign's low-cost, high-impact ethos."
+        }
+      }
+    ],
+    "Idea Generator": [
+      {
+        "json": {
+          "output": "Create \"The Roaming Brew Lab,\" a hyper-mobile, pop-up micro-brew station that unexpectedly appears in high-traffic areas frequented by young professionals and students, such as near university entrances or business lunch spots. Utilizing a minimalist, distinctive cart or setup, a barista demonstrates one unique brewing method, like a pour-over or siphon, offering tiny, complimentary sips of a specialty, ethically sourced coffee. Each sample comes with a small card detailing the bean's origin via a QR code, the shop's location, and a limited-time discount for first-time visitors who mention \"The Roaming Brew Lab.\" This guerrilla tactic directly addresses low brand awareness and foot traffic by bringing the shop's unique experience to the target audience, leveraging surprise and sensory engagement to generate immediate local buzz. It succeeds by transforming passive observation into an interactive, shareable moment, highlighting the shop's distinctive value proposition through visual appeal and direct taste, driving curiosity, social media mentions, and ultimately, walk-ins through a memorable and personal encounter that fits well within a $1,000 budget for materials and a few hours of owner/volunteer time."
+        }
+      }
+    ],
+    "Execution Planner": [
+      {
+        "json": {
+          "output": "The execution of \"The Roaming Brew Lab\" campaign will be structured into three agile phases over approximately six to eight weeks to ensure maximum impact and responsiveness within the budget. Phase one, **Preparation & Setup (Weeks 1-2)**, focuses on acquiring and branding the minimalist mobile brew station, gathering necessary portable brewing equipment (e.g., pour-over drippers, small kettle, sample cups), and designing/printing the discount cards with QR codes linking to bean stories and the shop's location. During this period, the owner will also scout potential high-traffic, high-visibility locations near universities and business districts, ensuring compliance with any local regulations for temporary pop-ups. This phase requires an estimated budget of $500-$700 for materials and equipment, with the shop owner primarily responsible for coordination and initial setup, minimizing external dependencies.\n\nPhase two, **Launch & Activation (Weeks 3-6)**, will involve consistently executing \"The Roaming Brew Lab\" pop-ups. The shop owner or a trained barista will operate the mobile station 2-3 times per week for 2-4 hours per session, rotating through the identified strategic locations. Each session will feature a demonstration of a unique brewing method, offer complimentary sips of ethically sourced coffee, and engage passersby with the \"Brew Blind Taste Test Challenge.\" Discount cards will be distributed, and participants will be actively encouraged to share their experiences on social media using a dedicated hashtag. Simultaneously, subtle, biodegradable chalk art or coffee-scented stencils will be placed strategically near pop-up zones or leading to the main shop to enhance ambient intrigue. Social media teasers, hinting at general locations, will be posted prior to each pop-up to build anticipation. This phase relies on the owner/barista's direct engagement and quick adaptation based on real-time foot traffic and interaction.\n\nPhase three, **Monitoring, Engagement & Adaptation (Weeks 3-Ongoing)**, runs concurrently with and after the activation. The shop owner will rigorously track social media mentions, hashtag usage, and direct messages daily, actively engaging with user-generated content by liking, commenting, and reposting. The redemption rate of the discount cards at the physical shop will be closely monitored to gauge direct conversions. This continuous feedback loop allows for immediate, agile adjustments to pop-up locations, timings, and even the featured brewing methods or coffee stories to maximize engagement and conversion. The emphasis is on quick reactions to what resonates most with the target audience, ensuring resources are optimally utilized to drive sustained buzz and walk-ins."
+        }
+      }
+    ],
+    "Budget Planning Specialist": [
+      {
+        "json": {
+          "output": "The budget of $1,000 for \"The Roaming Brew Lab\" campaign will be strategically allocated to prioritize low-cost, high-impact solutions, focusing on maximum return on investment through direct engagement and viral potential. Approximately 60% of the budget, around $600, will be dedicated to essential materials for the mobile brew station and consumables. This includes a minimalist, branded cart or modified setup ($200), core portable brewing equipment (e.g., pour-over drippers, small kettle, filters - $100), ethically sourced specialty coffee for sampling ($150), and eco-friendly sample cups and custom-printed discount cards with QR codes ($150).\n\nAnother 15% ($150) is allocated to logistics and ambient marketing, covering potential small-scale local permits or fees for pop-up locations ($100), and biodegradable chalk/stencils for \"Ephemeral Scent & Sight Trails\" ($50), which aim to enhance discovery without significant investment. Content creation for QR codes (bean stories) and social media teasers will be managed in-house by the owner to keep costs minimal.\n\nFinally, a critical 25% of the budget ($250) will be reserved as a contingency fund for unexpected expenses, such as unforeseen permit requirements, equipment mishaps, or opportunities to amplify reach with a small, last-minute localized push. This lean yet flexible budget ensures that every dollar directly fuels interactive experiences, generating social media buzz and driving new foot traffic to the shop."
+        }
+      }
+    ],
+    "Monitoring and KPIs Expert": [
+      {
+        "json": {
+          "output": "For \"The Roaming Brew Lab\" campaign, Key Performance Indicators (KPIs) will cover awareness, engagement, and conversion to ensure comprehensive performance monitoring. For **Awareness**, key metrics include the **Number of Unique Interactions at Pop-ups**, measured by a manual tally of complimentary samples distributed and direct conversations had. This is complemented by **Social Media Reach and Impressions** of campaign-related teasers and user-generated content (UGC), tracked through native platform analytics (Instagram, TikTok) and a dedicated campaign hashtag search.\n\n**Engagement** will be measured by the **QR Code Scan Rate** on the discount cards, utilizing free QR code analytics services (e.g., Bitly) to track clicks to bean stories and the shop's location. The **Social Media Engagement Rate** (likes, comments, shares, saves) on posts featuring the \"Brew Lab\" and the **Participation Rate in the \"Brew Blind Taste Test Challenge\"** at pop-ups (a simple tally of participants) will also be closely monitored. These metrics provide insight into how effectively the campaign captures attention and fosters interaction.\n\n**Conversion** is critical and will be measured primarily through the **Discount Card Redemption Rate**, by tracking how many unique cards are presented at the physical shop. This will be supported by monitoring **New Customer Walk-ins** explicitly mentioning \"The Roaming Brew Lab\" or presenting the campaign's unique discount code, which can be tracked through the shop's Point-of-Sale (POS) system or a simple manual log. Long-term conversion will be assessed by the **Repeat Visit Rate** of these new customers over a two to three-month period, potentially through a simple loyalty program or customer feedback. The primary tools for measurement will be manual counting, basic social media analytics dashboards, and POS data, supplemented by direct customer inquiries to ensure cost-effectiveness and practicality."
+        }
+      }
+    ],
+    "Risk Management Expert": [
+      {
+        "json": {
+          "output": "Key risks for \"The Roaming Brew Lab\" campaign encompass legal, operational, and branding challenges, each requiring agile mitigation strategies. Legally, the primary concern is operating a mobile pop-up and distributing samples in public spaces without proper permits, potentially leading to fines or cessation orders. To mitigate this, thorough research into local vending, food service, and public assembly ordinances will be conducted prior to deployment. The campaign will prioritize locations on private property where explicit, ideally written, permission from owners (e.g., university administration, business complex managers) has been secured. Additionally, \"Ephemeral Scent & Sight Trails\" will strictly use temporary, water-soluble chalk to avoid property damage or littering infractions, ensuring easy removal and minimal environmental impact.\n\nOperationally, risks include equipment malfunction, adverse weather affecting pop-up attendance, or a single operator becoming overwhelmed. Mitigation involves proactive equipment checks and having backup supplies. The pop-up schedule will remain flexible, allowing for cancellation or relocation based on real-time weather forecasts or observed low foot traffic, ensuring resources are not wasted. The owner, acting as the primary operator, will be fully trained in both brewing and customer engagement, with clear protocols for managing crowds or unexpected scenarios.\n\nBranding risks revolve around potential negative public perception (e.g., seen as intrusive or unhygienic) or inconsistent messaging. This will be addressed by maintaining a consistently clean, professional, and visually appealing \"Brew Lab\" setup. The operator will be meticulously trained to embody the shop's values, delivering friendly, knowledgeable service while clearly articulating the ethical sourcing and unique brewing methods. Any immediate negative feedback, online or in person, will be addressed promptly and professionally to safeguard brand reputation and maintain the positive, surprising spirit of the guerrilla campaign."
+        }
+      }
+    ],
+    "Do's and Don'ts Advisor": [
+      {
+        "json": {
+          "output": "**Do's for \"The Roaming Brew Lab\" Campaign:**\n\n*   **Do Prioritize Legalities and Permissions:** Always secure necessary permits for public vending or obtain explicit written permission from private property owners (e.g., university grounds, business complexes) before setting up. This prevents costly fines, forced shutdowns, and negative public relations.\n*   **Do Maximize the Surprise and Sensory Experience:** Choose diverse, high-traffic locations for pop-ups and vary the timing to maintain the element of surprise. Leverage the aroma of freshly brewed coffee, the visual appeal of unique brewing methods, and the tactile experience of a quality cup to create memorable, shareable moments.\n*   **Do Engage Enthusiastically and Authentically:** The barista operating \"The Roaming Brew Lab\" must be knowledgeable, friendly, and genuinely passionate about the coffee and its ethical sourcing. Actively encourage participation in the \"Brew Blind Taste Test Challenge\" and spark conversations to deepen engagement.\n*   **Do Facilitate Effortless Social Sharing:** Ensure the campaign hashtag is prominently displayed and easy to remember. Encourage photo and video sharing by creating visually appealing setup elements and offering a clear call to action for social media posts.\n*   **Do Maintain Impeccable Quality and Cleanliness:** Despite being a pop-up, the coffee must be of the highest standard, and the \"Brew Lab\" itself kept spotless. This reinforces the brand's premium image and prevents any negative associations with a temporary setup.\n*   **Do Implement Clear Calls to Action:** Every sample and interaction should seamlessly guide potential customers to the main shop, utilizing the discount cards with QR codes effectively to track conversions and provide a tangible incentive.\n*   **Do Be Agile and Adaptable:** Continuously monitor social media buzz and direct feedback. Be prepared to shift pop-up locations, timings, or even the featured brewing method based on what resonates most with the audience and yields the best results.\n\n**Don'ts for \"The Roaming Brew Lab\" Campaign:**\n\n*   **Don't Operate Without Proper Authority:** Illegally occupying public space or violating health codes can severely damage brand reputation and incur significant penalties, far outweighing the initial budget savings.\n*   **Don't Be Intrusive or Pushy:** Guerrilla marketing thrives on discovery, not aggression. Avoid blocking pathways, making excessive noise, or pressuring people into interactions, which can create a negative experience.\n*   **Don't Overstay Your Welcome:** Keep pop-up sessions impactful but relatively brief to maintain the novelty and exclusivity of the \"Roaming Brew Lab\" concept. Constantly being in the same spot at the same time diminishes the surprise.\n*   **Don't Skimp on Key Information:** While the experience is fast-paced, ensure the essential story of ethical sourcing and unique brewing is conveyed succinctly, either verbally or via the QR codes, so the message isn't lost.\n*   **Don't Leave a Trace:** Ensure all materials, especially the biodegradable chalk and disposable cups, are properly managed and cleaned up after each session. Littering undermines the ethical brand image.\n*   **Don't Ignore Negative Feedback:** Promptly address any criticisms or complaints, especially online. A swift, polite, and authentic response can turn a negative into a positive.\n*   **Don't Rely Solely on Physical Presence:** Neglecting social media integration would miss a massive opportunity for amplification and virality, which is crucial for a low-budget guerrilla campaign."
+        }
+      }
+    ],
+    "Final To-Do List Creator": [
+      {
+        "json": {
+          "output": "The \"The Roaming Brew Lab\" campaign's final action plan is structured for agile execution and maximum impact within the allocated budget.\n\n**Phase 1: Preparation & Setup (Weeks 1-2)**\n*   **Budget Allocation:** Allocate $600 for mobile setup and consumables (cart, brewing gear, coffee, cups, discount cards), $150 for logistics/ambient marketing (permits, chalk), and $250 for contingency.\n*   **Materials Procurement:** Acquire and brand a minimalist, mobile brew station. Purchase portable brewing equipment (e.g., pour-over, kettle), eco-friendly sample cups, and biodegradable chalk/stencils.\n*   **Content & Design:** Design and print discount cards featuring a unique QR code for bean origin stories, shop location, and a clear call-to-action for first-time visitors mentioning \"The Roaming Brew Lab.\"\n*   **Location Scouting & Permissions:** Research and proactively secure all necessary permits for public vending or obtain written permissions from private property owners (e.g., universities, business parks) for pop-up locations.\n*   **Barista Training:** Ensure the operator (owner/barista) is proficient in unique brewing methods, knowledgeable about ethical sourcing stories, and skilled in engaging customers for the \"Brew Blind Taste Test Challenge.\"\n*   **Social Media Pre-launch:** Plan teaser content and define a memorable campaign hashtag for initial buzz.\n\n**Phase 2: Launch & Activation (Weeks 3-6)**\n*   **Consistent Pop-ups:** Execute 2-3 \"The Roaming Brew Lab\" sessions per week, each 2-4 hours, rotating through identified high-traffic locations to maximize surprise and reach.\n*   **Interactive Engagement:** Conduct live demonstrations of unique brewing methods, offer complimentary sips of ethically sourced coffee, and actively engage passersby with the \"Brew Blind Taste Test Challenge.\"\n*   **Discount Card Distribution:** Distribute discount cards with clear calls-to-action to every participant.\n*   **Ambient Marketing Deployment:** Strategically apply water-soluble chalk stencils or coffee-scented trails on sidewalks leading to pop-up locations or the main shop, ensuring immediate cleanup after each session.\n*   **Social Media Drive:** Post cryptic clues or teasers hinting at the next pop-up location to build anticipation. Run the \"Spot the Lab & Share\" social media challenge, encouraging UGC with the campaign hashtag for rewards.\n*   **Brand Experience:** Maintain impeccable cleanliness and a professional appearance for the \"Brew Lab\" at all times, ensuring friendly and authentic interactions.\n\n**Phase 3: Monitoring, Optimization & Sustained Growth (Weeks 3-Ongoing)**\n*   **KPI Tracking:** Continuously monitor unique interactions at pop-ups (manual tally), social media reach and impressions (platform analytics), QR code scan rates (Bitly), engagement rates, taste test participation, and most critically, discount card redemption rates and new customer walk-ins (POS/manual log).\n*   **Social Media Engagement:** Actively engage with all user-generated content, liking, commenting, and reposting mentions to amplify reach and foster community.\n*   **Agile Adaptation:** Analyze performance data daily to quickly adjust pop-up locations, timings, messaging, or featured brewing methods/coffees to maximize engagement and conversion.\n*   **Risk Management:** Remain vigilant regarding permit compliance, equipment functionality, and potential negative feedback, responding promptly and professionally to maintain brand reputation.\n*   **Partnership Exploration:** Begin exploring potential collaborations with local student organizations or complementary businesses to extend reach and foster sustained community presence."
+        }
+      }
+    ],
+    "Post-Campaign Analyst": [
+      {
+        "json": {
+          "output": "Upon conclusion of \"The Roaming Brew Lab\" campaign's active phase, a comprehensive post-campaign analysis will be conducted to evaluate its success against defined objectives and extract actionable insights.\n\n**Campaign Evaluation:** Success will be directly measured by comparing actual performance data against the SMART KPIs established. This includes analyzing the **discount card redemption rate** to determine new customer acquisition, cross-referencing this with POS data to identify new customer walk-ins directly attributable to the campaign. **Social media mentions and engagement rates** (likes, comments, shares, saves) using the dedicated hashtag will be quantitatively assessed to gauge local buzz and viral reach. The **number of unique interactions at pop-ups** and **QR code scan rates** will quantify direct audience engagement and interest in the shop's unique value propositions. A financial review will calculate the overall cost-effectiveness and initial ROI of the $1,000 budget, particularly noting the conversion cost per new customer.\n\n**Feedback Collection:** Feedback will be collected through multiple channels. During the pop-up phase, direct qualitative feedback from participants will be noted by the barista. Post-campaign, social media comments and direct messages referencing the \"Brew Lab\" will be systematically reviewed for sentiment and specific suggestions. Additionally, a brief, anonymous in-store survey or quick verbal poll for new customers (especially those redeeming the discount) will gather insights into what specifically motivated their visit and their perception of the \"Brew Lab\" experience. This multi-faceted approach ensures both quantitative and qualitative data informs the learning process.\n\n**Key Learnings and Improvement Opportunities:** The post-campaign analysis will identify which pop-up locations yielded the highest engagement and conversion rates, informing future location strategies. We will assess the effectiveness of different unique brewing method demonstrations and the \"Brew Blind Taste Test Challenge\" in sparking interest and education. Learnings will also cover which social media content (teasers, UGC, challenge prompts) resonated most, guiding future digital outreach. Operational challenges encountered (e.g., power supply, weather dependency, staffing needs) will be documented, alongside their solutions, to refine logistical planning for future mobile initiatives. The overall reusability and scalability of \"The Roaming Brew Lab\" concept will be evaluated, determining if it warrants becoming a recurring event or if elements can be adapted into new guerrilla campaigns to maintain freshness and continued buzz."
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Input Parser": {
+      "main": [
+        [
+          {
+            "node": "Idea Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge results": {
+      "main": [
+        [
+          {
+            "node": "Result organizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Introduction Writer",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Campaign Definition Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Current Situation Analyst",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Target Persona Researcher",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Key Messaging Specialist",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Campaign Objectives Specialist",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Main Strategy Architect",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "guerrilla Tactics Designer",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Channel Strategy Expert",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Execution Planner",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Budget Planning Specialist",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Monitoring and KPIs Expert",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Risk Management Expert",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Do's and Don'ts Advisor",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Final To-Do List Creator",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Post-Campaign Analyst",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Idea Generator",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Idea Generator": {
+      "main": [
+        [
+          {
+            "node": "Combine outputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine outputs": {
+      "main": [
+        [
+          {
+            "node": "Introduction Writer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Campaign Definition Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Campaign Objectives Specialist",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Current Situation Analyst",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Target Persona Researcher",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Key Messaging Specialist",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Main Strategy Architect",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "guerrilla Tactics Designer",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Channel Strategy Expert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execution Planner",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Budget Planning Specialist",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Monitoring and KPIs Expert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Risk Management Expert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Do's and Don'ts Advisor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Final To-Do List Creator",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Post-Campaign Analyst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Result organizer": {
+      "main": [
+        [
+          {
+            "node": "Final result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execution Planner": {
+      "main": [
+        [
+          {
+            "node": "Merge results 1/2",
+            "type": "main",
+            "index": 9
+          }
+        ]
+      ]
+    },
+    "Merge results 1/2": {
+      "main": [
+        [
+          {
+            "node": "Merge results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge results 2/2": {
+      "main": [
+        [
+          {
+            "node": "Merge results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Introduction Writer": {
+      "main": [
+        [
+          {
+            "node": "Merge results 1/2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post-Campaign Analyst": {
+      "main": [
+        [
+          {
+            "node": "Merge results 2/2",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Risk Management Expert": {
+      "main": [
+        [
+          {
+            "node": "Merge results 2/2",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Channel Strategy Expert": {
+      "main": [
+        [
+          {
+            "node": "Merge results 1/2",
+            "type": "main",
+            "index": 8
+          }
+        ]
+      ]
+    },
+    "Do's and Don'ts Advisor": {
+      "main": [
+        [
+          {
+            "node": "Merge results 2/2",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Main Strategy Architect": {
+      "main": [
+        [
+          {
+            "node": "Merge results 1/2",
+            "type": "main",
+            "index": 6
+          }
+        ]
+      ]
+    },
+    "Final To-Do List Creator": {
+      "main": [
+        [
+          {
+            "node": "Merge results 2/2",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Key Messaging Specialist": {
+      "main": [
+        [
+          {
+            "node": "Merge results 1/2",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Campaign Definition Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge results 1/2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Current Situation Analyst": {
+      "main": [
+        [
+          {
+            "node": "Merge results 1/2",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Target Persona Researcher": {
+      "main": [
+        [
+          {
+            "node": "Merge results 1/2",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Budget Planning Specialist": {
+      "main": [
+        [
+          {
+            "node": "Merge results 2/2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monitoring and KPIs Expert": {
+      "main": [
+        [
+          {
+            "node": "Merge results 2/2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Input Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "guerrilla Tactics Designer": {
+      "main": [
+        [
+          {
+            "node": "Merge results 1/2",
+            "type": "main",
+            "index": 7
+          }
+        ]
+      ]
+    },
+    "Campaign Objectives Specialist": {
+      "main": [
+        [
+          {
+            "node": "Merge results 1/2",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Idea Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Introduction Writer",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Campaign Definition Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Campaign Objectives Specialist",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Current Situation Analyst",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Target Persona Researcher",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Key Messaging Specialist",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Main Strategy Architect",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "guerrilla Tactics Designer",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Channel Strategy Expert",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Execution Planner",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Budget Planning Specialist",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Monitoring and KPIs Expert",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Risk Management Expert",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Do's and Don'ts Advisor",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Final To-Do List Creator",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Post-Campaign Analyst",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "60b92beb-fac8-45d1-8735-1e7472854c88",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "93ed6a94a482e1415c1391a4d98bec025d67c846672cce4bbbb4a9390479302a"
+  },
+  "id": "ymg8NrGy1XqhqgNW",
+  "tags": []
+}
