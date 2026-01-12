@@ -87,3 +87,9 @@ Sophisticated workflows that leverage cutting-edge AI tools to enhance productiv
 - Smart integrations with popular AI platforms and APIs
 
 ---
+
+## License
+
+This project is licensed under the terms specified in the [LICENSE](LICENSE) file.
+
+For more information about usage rights and restrictions, please refer to the LICENSE file in the repository root.
