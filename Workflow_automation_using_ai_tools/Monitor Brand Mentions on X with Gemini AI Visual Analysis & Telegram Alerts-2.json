@@ -1,0 +1,1289 @@
+{
+  "name": "Monitor Brand Mentions on X with Gemini AI Visual Analysis & Telegram Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "7d16677e-6045-40e1-8926-6e754fe45c2d",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.type === 'tweet' }}",
+              "rightValue": ""
+            },
+            {
+              "id": "548064ee-0ddf-46f8-b827-08437628b83c",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.lang === $('Config').item.json.lang }}",
+              "rightValue": ""
+            },
+            {
+              "id": "afaa1330-1b72-410c-bb48-33b1ea1efaa3",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.card.isEmpty() }}",
+              "rightValue": "null"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4daa1a4c-8dab-46ad-ac39-ec5025b1838b",
+      "name": "If Tweet",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -768,
+        672
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2b13642a-d453-4338-943b-0b27d39ce3b3",
+              "name": "lang",
+              "type": "string",
+              "value": "en"
+            },
+            {
+              "id": "de62b7a8-be52-4208-8218-03ac673dbbad",
+              "name": "actorId",
+              "type": "string",
+              "value": "kaitoeasyapi~twitter-x-data-tweet-scraper-pay-per-result-cheapest"
+            },
+            {
+              "id": "cc4b39e1-4fa3-4855-9158-1c3501d5ebfe",
+              "name": "searchTerms",
+              "type": "string",
+              "value": "(Tesla OR $TSLA OR Cybertruck OR \"Model Y\" OR FSD) -Nikola"
+            },
+            {
+              "id": "32fcc432-e793-420b-85a4-74fcf5e7b966",
+              "name": "min_faves",
+              "type": "string",
+              "value": "10"
+            },
+            {
+              "id": "f326a257-1f18-4880-9e93-7c57b2a81616",
+              "name": "tweetsToScrape",
+              "type": "string",
+              "value": "20"
+            },
+            {
+              "id": "2c5d5c11-01db-4bdb-aaf5-92364c36f239",
+              "name": "airtableBaseId",
+              "type": "string",
+              "value": "appROv6j4Kx2eOkfF"
+            },
+            {
+              "id": "70c29ffb-8b8a-4838-9770-a382d5b7d2ac",
+              "name": "airtableTableId",
+              "type": "string",
+              "value": "tblre5zMnroZijDQn"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4253f13d-1e98-465c-aa6a-90752514190b",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1216,
+        672
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## Get Only Tweets\nFilter out any results that aren’t tweets, such as X advertisements or other non-post content.",
+        "height": 464,
+        "width": 608,
+        "color": 2
+      },
+      "id": "7e34225c-e893-4010-87b8-1500258db75b",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -880,
+        464
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "396f7b57-fa1d-4323-9c47-59087f1f4905",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -320,
+        576
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "1b074293-6d3b-4fd8-916a-54ec64b56da3",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.isEmpty() }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "16a7dc50-7cf1-487a-a67f-2c0a4daa90eb",
+      "name": "If New",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        128,
+        336
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config').item.json.airtableBaseId }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config').item.json.airtableTableId }}"
+        },
+        "filterByFormula": "={postID}='{{ $json.post.id }}'",
+        "options": {}
+      },
+      "id": "7a445504-5186-4639-a3a7-5e1fb7aa2262",
+      "name": "Post Exists",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        -96,
+        304
+      ],
+      "typeVersion": 2.1,
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "mLExmC9Qy2i9bJBp",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "41682df1-932d-4373-83a8-7516bad2245f",
+              "name": "post.id",
+              "type": "string",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "id": "249814ac-3491-485c-bb6e-4907bd55de5f",
+              "name": "post.url",
+              "type": "string",
+              "value": "={{ $json.url }}"
+            },
+            {
+              "id": "04c15380-02da-4a97-8e0f-d06f60b7403b",
+              "name": "post.text",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "id": "a2710583-74c3-497a-8bb6-de5fbee69ca1",
+              "name": "post.lang",
+              "type": "string",
+              "value": "={{ $json.lang }}"
+            },
+            {
+              "id": "23e6e90b-7fc3-4c51-bbfe-8fa25da32577",
+              "name": "post.createdAt",
+              "type": "string",
+              "value": "={{ $json.createdAt.toDateTime().toISO() }}"
+            },
+            {
+              "id": "b0bd2f75-ca94-4e3e-a2f2-5dbbe9f14a1d",
+              "name": "author.userName",
+              "type": "string",
+              "value": "={{ $json.author.userName }}"
+            },
+            {
+              "id": "749e1fe5-8c95-4522-8491-e24f542e211a",
+              "name": "author.name",
+              "type": "string",
+              "value": "={{ $json.author.name }}"
+            },
+            {
+              "id": "780b5a0f-62f6-4e7b-a22d-6f5c9ee98e3d",
+              "name": "media.photos",
+              "type": "array",
+              "value": "={{ ($json.extendedEntities.media?.filter(item => item.type === 'photo').map(item => item.media_url_https).filter(url => url)) || [] }}"
+            },
+            {
+              "id": "cafdf61f-ee05-4f7b-8c99-2460f93b41f4",
+              "name": "media.videos",
+              "type": "array",
+              "value": "={{ \n\n($json.extendedEntities.media || []).map(item => (item.video_info?.variants || []).filter(v => v?.content_type === 'video/mp4' && v.bitrate != null).sort((a, b) => b.bitrate - a.bitrate)[0]?.url).filter(url => url)\n\n}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c5a2e2fe-7002-4ec9-8b09-f4758478ebeb",
+      "name": "Set Required Fields",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -544,
+        576
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"overallSentiment\": \"Positive\",\n  \"relevanceScore\": 8,\n  \"reasoning\": \"A one-sentence explanation for your decision, referencing both text and visuals if available.\",\n  \"photosSummary\": \"A concise, one to two-sentence summary of the entire post, combining insights from both the text and the images.\"\n}"
+      },
+      "id": "77056124-33a5-4383-9467-e899b1b8c3cf",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        1168,
+        560
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "7b1ab8fb-30b5-448a-a5b1-0cd1dd09f2a1",
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    },
+                    "leftValue": "={{ $json.output.relevanceScore }}",
+                    "rightValue": 7
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "High Relevance"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "513914f6-3119-4809-a613-d8764d03ef46",
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    },
+                    "leftValue": "={{ $json.output.relevanceScore }}",
+                    "rightValue": 4
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Not Relevance"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "82944e41-fbb3-481c-afc5-6b28b68b1704",
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "leftValue": "={{ $json.output.relevanceScore }}",
+                    "rightValue": 4
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Medium Relevance"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "aa60b784-9d07-42f1-ad84-7c43bc6e5428",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        1376,
+        320
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 4
+            }
+          ]
+        }
+      },
+      "id": "40bb6ba9-2125-4bd4-9d5d-045e4c41bfa7",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -1440,
+        576
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {},
+      "id": "01ff4c2c-b3c0-45ee-928b-25bc5cb5e1a6",
+      "name": "Done!",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        -96,
+        112
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config').item.json.airtableBaseId }}"
+        },
+        "table": {
+          "__rl": true,
+          "value": "={{ $('Config').item.json.airtableTableId }}",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "For Weekly Review",
+            "postURL": "={{ $('Loop Over Items').item.json.post.url }}",
+            "authorName": "={{ $('Loop Over Items').item.json.author.name }}",
+            "relevanceScore": "={{ $('Analyze Text and Photos').item.json.output.relevanceScore }}",
+            "relevanceReasoning": "={{ $('Analyze Text and Photos').item.json.output.reasoning }}",
+            "mediaPhotosAnalysis": "={{ $('Analyze Text and Photos').item.json.output.photosSummary}}",
+            "postId": "={{ $('Loop Over Items').item.json.post.id }}",
+            "postTextAAAAAA": "={{ $('Loop Over Items').item.json.post.text }}",
+            "postDateCreated": "={{ $('Loop Over Items').item.json.post.createdAt }}",
+            "authorUsername": "={{ $('Loop Over Items').item.json.author.userName }}",
+            "sentiment": "={{ $json.output.overallSentiment }}"
+          },
+          "matchingColumns": [
+            "postId"
+          ],
+          "schema": [
+            {
+              "id": "postId",
+              "displayName": "postId",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "postURL",
+              "displayName": "postURL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "postTextAAAAAA",
+              "displayName": "postTextAAAAAA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "postDateCreated",
+              "displayName": "postDateCreated",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "authorUsername",
+              "displayName": "authorUsername",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "authorName",
+              "displayName": "authorName",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "relevanceScore",
+              "displayName": "relevanceScore",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "relevanceReasoning",
+              "displayName": "relevanceReasoning",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mediaPhotosAnalysis",
+              "displayName": "mediaPhotosAnalysis",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "For Weekly Review",
+                  "value": "For Weekly Review"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "5409adc7-a230-47db-8630-702b891e0d40",
+      "name": "Log the Medium Relevance Post",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        1600,
+        480
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "mLExmC9Qy2i9bJBp",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config').item.json.airtableBaseId }}"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Config').item.json.airtableTableId }}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "postURL": "={{ $('Loop Over Items').item.json.post.url }}",
+            "authorName": "={{ $('Loop Over Items').item.json.author.name }}",
+            "relevanceScore": "={{ $('Analyze Text and Photos').item.json.output.relevanceScore }}",
+            "relevanceReasoning": "={{ $('Analyze Text and Photos').item.json.output.reasoning }}",
+            "mediaPhotosAnalysis": "={{ $('Analyze Text and Photos').item.json.output.photosSummary}}",
+            "postId": "={{ $('Loop Over Items').item.json.post.id }}",
+            "postTextAAAAAA": "={{ $('Loop Over Items').item.json.post.text }}",
+            "postDateCreated": "={{ $('Loop Over Items').item.json.post.createdAt }}",
+            "authorUsername": "={{ $('Loop Over Items').item.json.author.userName }}",
+            "sentiment": "={{ $json.output.overallSentiment }}",
+            "status": "New"
+          },
+          "matchingColumns": [
+            "postId"
+          ],
+          "schema": [
+            {
+              "id": "postId",
+              "displayName": "postId",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "postURL",
+              "displayName": "postURL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "postTextAAAAAA",
+              "displayName": "postTextAAAAAA",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "postDateCreated",
+              "displayName": "postDateCreated",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "authorUsername",
+              "displayName": "authorUsername",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "authorName",
+              "displayName": "authorName",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "relevanceScore",
+              "displayName": "relevanceScore",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "relevanceReasoning",
+              "displayName": "relevanceReasoning",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mediaPhotosAnalysis",
+              "displayName": "mediaPhotosAnalysis",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "For Weekly Review",
+                  "value": "For Weekly Review"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "ee75618c-e27a-4334-9d8b-c455059e6281",
+      "name": "Log the High Relevance Post",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        1600,
+        288
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "mLExmC9Qy2i9bJBp",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "aeb8ffb1-8c73-472d-9281-7fabd14f21d8",
+      "name": "Not Interested!",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        -544,
+        768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "models/gemini-2.5-flash",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "=You are provided with several images. For EACH image, provide a brief description and its sentiment.\n\nRespond with a JSON object containing a list of your findings, structured like this:\n{\n  \"image_analyses\": [\n    { \"image_index\": 0, \"description\": \"...\", \"sentiment\": \"...\" },\n    { \"image_index\": 1, \"description\": \"...\", \"sentiment\": \"...\" }\n  ]\n}",
+        "imageUrls": "={{ $('Loop Over Items').item.json.media.photos.join(',') }}",
+        "options": {}
+      },
+      "id": "dfd44909-87a7-44e0-9e91-917b0ab312d4",
+      "name": "Analyze Post Photos",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "position": [
+        576,
+        304
+      ],
+      "executeOnce": false,
+      "typeVersion": 1,
+      "alwaysOutputData": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "UoegopAf9B7E6UKT",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 'items' is an array of all your inputs.\n// We loop through each one using .map().\nconst allData = $input.first().json.content.parts.map(item => {\n  // Get the raw text string from the current item.\n  const rawText = item.text;\n\n  // Find and extract the clean JSON string from the code block.\n  const match = rawText.match(/```json\\n([\\s\\S]*)\\n```/);\n  const jsonString = match ? match[1] : '{}'; // Default to empty object if no match\n\n  // Parse the string into a real JSON object.\n  return JSON.parse(jsonString);\n});\n\n// Return a single new item containing the array of all parsed data.\nreturn [{\n  json: {\n    photos_results: allData\n  },\n  // The index of the input item that generated this output item\n  \"pairedItem\": 0\n}];"
+      },
+      "id": "ebf2ced5-20be-4221-94a6-3dfe944c34fe",
+      "name": "Get Final Photos Analysis Results",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        800,
+        304
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "0220f75b-64a3-430c-ac44-887c7be35ece",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $('Loop Over Items').item.json.media.photos.isNotEmpty() }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9c3ef806-13ee-403c-9afb-0af9cd71d88a",
+      "name": "If Has Photos",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        352,
+        336
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "content": "## Analyze the Post Photos\nIf the post includes photos, they must also be analyzed to improve the relevance score and sentiment status. Additionally, a photo summary should be generated to better capture the mood of the post.",
+        "height": 416,
+        "width": 672,
+        "color": 3
+      },
+      "id": "4921f8be-ead0-4332-b29d-7178781b12e7",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Check Post Relevance to the Brand\n- High relevance: relevance score > 7\n- Medium relevance: relevance score ≥ 4 and ≤ 7\n- Not relevance: relevance score < 4",
+        "height": 656,
+        "width": 704,
+        "color": 5
+      },
+      "id": "3d0d3ce2-84c2-4181-a44f-3d65d782bb2f",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        896,
+        48
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/acts/kaitoeasyapi~twitter-x-data-tweet-scraper-pay-per-result-cheapest/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filter:blue_verified\": false,\n  \"filter:consumer_video\": false,\n  \"filter:has_engagement\": false,\n  \"filter:hashtags\": false,\n  \"filter:images\": true,\n  \"filter:links\": false,\n  \"filter:media\": false,\n  \"filter:mentions\": false,\n  \"filter:native_video\": false,\n  \"filter:nativeretweets\": false,\n  \"filter:news\": false,\n  \"filter:pro_video\": false,\n  \"filter:quote\": false,\n  \"filter:replies\": false,\n  \"filter:safe\": false,\n  \"filter:spaces\": false,\n  \"filter:twimg\": false,\n  \"filter:videos\": false,\n  \"filter:vine\": false,\n  \"include:nativeretweets\": false,\n  \"lang\": \"{{ $json.lang }}\",\n  \"searchTerms\": [\n    {{ $json.searchTerms.toJsonString() }}\n  ],\n  \"since\": \"{{ new Date(Date.now() - 86400000).toISOString().slice(0, 19).replace('T', '_') + '_UTC'; }}\",\n  \"maxItems\": {{ $json.tweetsToScrape }},\n  \"queryType\": \"Latest\",\n  \"min_retweets\": 0,\n  \"min_faves\": {{ $json.min_faves }},\n  \"min_replies\": 0,\n  \"-min_retweets\": 0,\n  \"-min_faves\": 0,\n  \"-min_replies\": 0\n}",
+        "options": {}
+      },
+      "id": "8c137b1a-9aae-40f8-9ba7-4f7ea0430f3f",
+      "name": "Scrape X",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -992,
+        672
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "vBDMEm4SRh6IQXEV",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "bd1371f1-756f-4d83-9831-e8571f30e926",
+      "name": "Manual Executing",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -1440,
+        768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chatId": "7493883462",
+        "text": "=<b>🔥 New High-Relevance Tesla Mention! 🔥</b>\n\n<i>Author:</i> {{ $('Loop Over Items').item.json.author.name }} (@{{ $('Loop Over Items').item.json.author.userName }})\n<i>Sentiment:</i> <code>{{ $('Analyze Text and Photos').item.json.output.overallSentiment }}</code>\n<i>Relevance Score:</i> <code>{{ $('Analyze Text and Photos').item.json.output.relevanceScore }}/10</code>\n\n<blockquote>{{ $('Loop Over Items').item.json.post.text.replace(/</g, '<') }}</blockquote>\n\n<a href=\"{{ $('Loop Over Items').item.json.post.url }}\">Link to Tweet</a>\n\n",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "1c7817ba-511e-4c76-be50-42f31d31d4c2",
+      "name": "Send High Relevance Post to Monitoring Group",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1824,
+        416
+      ],
+      "webhookId": "376c4c49-f408-4b40-96f7-6c6f79c5cee8",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "uK5Fs5zn4OVYJ4Xg",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Perform a final analysis based on the following data.\n\n--- Post Text ---\n\"\"\"\n{{ $('Loop Over Items').item.json.post.text }}\n\"\"\"\n\n--- Image Analysis (JSON) ---\n\"\"\"\n{{ $('Get Final Photos Analysis Results').isExecuted ? ($json.photos_results ? JSON.stringify($json.photos_results) : \"No images were included in this post.\") : \"No images were included in this post.2\"}}\n\"\"\"\n\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a Head Brand Strategist for Tesla. Your job is to synthesize the provided analyses of a social media post's text and visuals into a final, conclusive assessment.\n\n--- Brand Context ---\n- Brand Identifiers: \"Tesla\", \"$TSLA\"\n- Core Products: \"Model S\", \"Model 3\", \"Model Y\", \"Cybertruck\", \"Autopilot\", \"FSD\"\n- Nuance: Ignore mentions of \"Nikola Tesla\" the inventor.\n\n--- Your Task ---\n1.  First, look at the `Image Analysis (JSON)`. Synthesize the individual image descriptions into a single, one-sentence summary for the `photosSummary` field.\n2.  **Crucial Rule:** If the `Image Analysis` section says \"No images were included in this post\", you MUST return an empty string (\"\") for the `photosSummary` field.\n3.  Then, using all available information (the `Post Text` and your new `photoSummary`), determine the final sentiment, relevance, and a suggested status.\n\n--- Output Format ---\nRespond ONLY with a single, valid JSON object with this exact structure:\n{\n  \"overallSentiment\": \"Positive\", \"Negative\", or \"Neutral\",\n  \"relevanceScore\": integer (0-10),\n  \"reasoning\": \"A one-sentence explanation for your decision, referencing both text and visuals if available.\",\n  \"photosSummary\": \"A one-sentence summary of the visual story from the images, OR an empty string if there are no images.\"\n}\n",
+          "passthroughBinaryImages": true
+        }
+      },
+      "id": "79ce6f44-58d8-42af-b89a-acbb0dd42199",
+      "name": "Analyze Text and Photos",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1024,
+        336
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "37b020e9-a2ee-4e8e-b4fd-28805020df02",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [
+        944,
+        544
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "UoegopAf9B7E6UKT",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Monitor Brand Mentions on X with Gemini AI Visual Analysis & Telegram Alerts",
+        "height": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        144
+      ],
+      "id": "13a83187-b05f-4511-9362-40cf4195f49e",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Scrape X",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If New": {
+      "main": [
+        [
+          {
+            "node": "If Has Photos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Log the High Relevance Post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log the Medium Relevance Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Tweet": {
+      "main": [
+        [
+          {
+            "node": "Set Required Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Not Interested!",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape X": {
+      "main": [
+        [
+          {
+            "node": "If Tweet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Exists": {
+      "main": [
+        [
+          {
+            "node": "If New",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Has Photos": {
+      "main": [
+        [
+          {
+            "node": "Analyze Post Photos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Analyze Text and Photos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Done!",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Post Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Executing": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Post Photos": {
+      "main": [
+        [
+          {
+            "node": "Get Final Photos Analysis Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Required Fields": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Text and Photos": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze Text and Photos",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Analyze Text and Photos",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log the High Relevance Post": {
+      "main": [
+        [
+          {
+            "node": "Send High Relevance Post to Monitoring Group",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log the Medium Relevance Post": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Final Photos Analysis Results": {
+      "main": [
+        [
+          {
+            "node": "Analyze Text and Photos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send High Relevance Post to Monitoring Group": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a451a336-69f3-4dc5-9e83-d8a84ddf3259",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "92897899e43cb5f4ab79bd0f0cc53ff5ed4ac039aacc32039356fda35bcb92c7"
+  },
+  "id": "l6JCQaFvJAzPsFdw",
+  "tags": []
+}

@@ -1,0 +1,237 @@
+{
+  "name": "Generate Ad Image with Nano Banana",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        96
+      ],
+      "id": "7f1288ce-ce6c-4a3f-a291-20a4049a1ce6",
+      "name": "Telegram Trigger",
+      "webhookId": "61bebbfa-0e55-4a3b-8d9e-8f4d92df7dd1",
+      "credentials": {
+        "telegramApi": {
+          "id": "dzvciQjHvspoT3Au",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot8203448601:AAGYN-8pr9QICsDFsMasVQHdIFiRYtxHnrs/getFile?file_id={{ $json.message.photo[1].file_id }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        336,
+        96
+      ],
+      "id": "eaa2f14f-d5b3-4659-89b6-cdf53f7c1809",
+      "name": "Get File Path"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "db1d43f9-5fa1-4165-a3c0-885170fc0200",
+              "name": "img_url",
+              "value": "=https://api.telegram.org/file/bot8066435371:AAG0p3sQa1mH3I69vugc4xrNSmfzsgpBs9I/{{ $json.result.file_path }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        544,
+        96
+      ],
+      "id": "573d12b3-e4cd-410f-963a-2688d4155d71",
+      "name": "Set img_url"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "Got it! I'm sending it to our image generator right now!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        96
+      ],
+      "id": "b6b85ea2-e257-42d8-bc67-4857f232d615",
+      "name": "Img Received Response",
+      "webhookId": "5c20fce7-c55c-4b17-92f9-aeb4edbff9fb",
+      "credentials": {
+        "telegramApi": {
+          "id": "dzvciQjHvspoT3Au",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"google/nano-banana-edit\",\n  \"callBackUrl\": \"{{ $execution.resumeUrl }}\",\n  \"input\": {\n   \"prompt\": \"{{ $('Telegram Trigger').item.json.message.caption }}\",\n    \"image_urls\": [\n      \"{{ $('Set img_url').item.json.img_url }}\"\n    ],\n    \"output_format\": \"png\",\n    \"image_size\": \"1:1\"\n  }\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        176,
+        336
+      ],
+      "id": "81a4c1ac-9b74-4761-b43a-0ebe1f881310",
+      "name": "Generate Image NB",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "LnWq6e611HaWDXcK",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resume": "webhook",
+        "httpMethod": "POST",
+        "responseCode": 100,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        336
+      ],
+      "id": "2a9d4c20-b329-4281-b1bb-16fc2b465546",
+      "name": "Wait",
+      "webhookId": "64b7a9de-5d87-4c13-9eed-3466cee77041"
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Img Received Response').item.json.result.chat.id }}",
+        "file": "={{ $json.lastImgURL }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        336
+      ],
+      "id": "817b38c2-1b0b-4a05-8e42-4fe08907ac73",
+      "name": "Send Image",
+      "webhookId": "76cfe886-40b6-4e4a-a4dc-445ddc317bb3",
+      "credentials": {
+        "telegramApi": {
+          "id": "dzvciQjHvspoT3Au",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get File Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File Path": {
+      "main": [
+        [
+          {
+            "node": "Set img_url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set img_url": {
+      "main": [
+        [
+          {
+            "node": "Img Received Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Img Received Response": {
+      "main": [
+        [
+          {
+            "node": "Generate Image NB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image NB": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "53bbf8b7-1a99-4c12-998a-ea894adce5d4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "059e1d37d6d88b9640523069b0cfc25ef547fd76775ae7a6684f25855ad837e1"
+  },
+  "id": "bBNTZ25PBvElm9mf",
+  "tags": []
+}

@@ -1,0 +1,575 @@
+{
+  "name": "Create Curated Newsletters from Reddit Discussions with GPT-4o Mini and Gmail",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "6eadf28f-7439-45d9-bf8b-7fe90c017ccd",
+      "name": "When clicking ‘Execute workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        1088,
+        -672
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "subreddit": "microsaas",
+        "limit": 20,
+        "filters": {
+          "category": "hot"
+        }
+      },
+      "id": "88dac563-6134-41c1-af87-51313e2f09bb",
+      "name": "Get many posts",
+      "type": "n8n-nodes-base.reddit",
+      "position": [
+        1488,
+        -672
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "mLaMkTh5skKu2Pc3",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8fd840da-788a-4513-9523-66fa92f32850",
+              "name": "topic",
+              "type": "string",
+              "value": "app"
+            },
+            {
+              "id": "9ba01335-5307-4c37-bd21-7e887ce934cb",
+              "name": "post",
+              "type": "object",
+              "value": "={{$json}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b3ef22e5-924c-452c-9c90-7ae5ae581fe7",
+      "name": "Set topic of interest",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2288,
+        -672
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "747516e0-1d6e-4e36-aaee-70b36100d307",
+              "name": "post",
+              "type": "object",
+              "value": "={{ $json }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ebbcf9eb-f0d9-4042-a448-005e657ccf33",
+      "name": "post",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        4240,
+        -592
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "ddd5ead9-3c87-4d2d-9221-0fe1f9b7a3ed",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        5888,
+        -576
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node (JavaScript) — v2 API\n// Simplifica un comentario de Reddit (y sus replies) a una lista plana con campos clave.\n// Devuelve 1 item por entrada con: post_id, post_url, subreddit, comments_count, comments[]\n\nfunction absPermalink(permalink) {\n  if (!permalink || typeof permalink !== 'string') return null;\n  return permalink.startsWith('http')\n    ? permalink\n    : `https://www.reddit.com${permalink}`;\n}\n\nfunction extractPostIdFromLinkId(link_id) {\n  // link_id suele ser \"t3_<postid>\"\n  if (typeof link_id !== 'string') return null;\n  const m = link_id.match(/^t3_(.+)$/i);\n  return m ? m[1] : null;\n}\n\nfunction walkComment(node, out, depth = 0) {\n  if (!node || typeof node !== 'object') return;\n\n  // El comentario suele ir en node.data si viene envuelto con { kind: \"t1\", data: {...} }\n  const c = node.data ? node.data : node;\n\n  // Añade el comentario actual, si tiene cuerpo o al menos ID\n  const simplified = {\n    id: c.id ?? null,\n    author: c.author ?? null,\n    body: c.body ?? null,\n    ups: typeof c.ups === 'number' ? c.ups : (typeof c.score === 'number' ? c.score : 0),\n    created_utc: typeof c.created_utc === 'number' ? c.created_utc : null,\n    permalink: absPermalink(c.permalink),\n    parent_id: c.parent_id ?? null,\n    is_submitter: Boolean(c.is_submitter),\n    depth: typeof c.depth === 'number' ? c.depth : depth,\n  };\n\n  // Solo empuja si al menos hay id o body\n  if (simplified.id || simplified.body) {\n    out.push(simplified);\n  }\n\n  // Procesa replies: pueden ser \"\" o un Listing con data.children[]\n  const replies = c.replies;\n  if (replies && typeof replies === 'object' && replies.data && Array.isArray(replies.data.children)) {\n    for (const child of replies.data.children) {\n      walkComment(child, out, (simplified.depth ?? depth) + 1);\n    }\n  }\n}\n\nreturn items.map((it, idx) => {\n  const c = it.json || {};\n\n  // Obtén post_id desde link_id (t3_<id>), si existe\n  const post_id = extractPostIdFromLinkId(c.link_id) ||\n                  (c.data ? extractPostIdFromLinkId(c.data.link_id) : null);\n\n  // URL del post (minimal) si tenemos post_id\n  const post_url = post_id ? `https://www.reddit.com/comments/${post_id}/` : null;\n\n  // Subreddit (intenta varias llaves por seguridad)\n  const subreddit = c.subreddit || c.subreddit_name_prefixed || (c.data ? c.data.subreddit : null) || null;\n\n  // Aplana el comentario raíz + sus replies\n  const flat = [];\n  walkComment(c, flat, typeof c.depth === 'number' ? c.depth : 0);\n\n  return {\n    json: {\n      post_id,\n      post_url,\n      subreddit,\n      comments_count: flat.length,\n      comments: flat,\n    },\n    pairedItem: { item: idx }, // conserva pairing con el item de entrada\n  };\n});\n"
+      },
+      "id": "ccab0383-7578-4dd7-b59c-e39d14d43eaf",
+      "name": "clean comments",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        5056,
+        -464
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Crea un único item con un array \"list\" que contiene los N items originales\nconst list = items.map(it => it.json);\n\n// Si solo quieres ciertos campos:\n// const list = items.map(it => ({ id: it.json.id, title: it.json.title, url: it.json.url }));\n\nreturn [\n  { json: { list } }\n];\n"
+      },
+      "id": "b2800aa5-1049-4b86-b34f-c4cf1a833217",
+      "name": "merge comments",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        5488,
+        -464
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Crea un único item con un array \"list\" que contiene los N items originales\nconst list = items.map(it => it.json);\n\n// Si solo quieres ciertos campos:\n// const list = items.map(it => ({ id: it.json.id, title: it.json.title, url: it.json.url }));\n\nreturn [\n  { json: { list } }\n];\n"
+      },
+      "id": "932d4d5a-7e5b-437f-afa0-11032fc6d3dd",
+      "name": "merge summaries",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4112,
+        -704
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an editorial AI specialized in creating engaging newsletters from community discussions. \nYour role is not just to summarize, but to *curate and narrate* Reddit content so it feels fun, easy to read, and worth sharing.\n\nGOALS\n- Make the newsletter feel like a friendly, smart editor walking the reader through the highlights of Reddit.\n- Stay true to the source: everything must come from the JSON input (posts, comments, summaries).\n- Add flow, hooks, and personality — but never add outside facts.\n\nSTYLE\n- Warm, conversational, slightly witty.\n- Use simple words, short sentences, and a light narrative voice.\n- Structure content for skimming: headlines, bullets, quotes.\n- Sprinkle emojis thoughtfully to guide attention (🚀, 💡, 🎯, 🔥, etc).\n- Always attribute quotes with username and link.\n\nOUTPUT\n- Return only valid HTML, suitable for an email newsletter.\n- No Markdown, no code fences.\n- Use <h1>, <h2>, <p>, <ul>, <li>, <blockquote>, and <a>.\n- Keep formatting clean, responsive, and email-friendly.\n\nCONSISTENCY\n- Every post should follow the same section format: \n  headline → short narrative → “What we learned” bullets → one quote → numbers line.\n- Smoothly skip elements if data is missing (never show “Unknown”).\n- Maintain a clear intro, outline, body sections, and energetic closing.\n\nYour priority: deliver an entertaining, easy-to-digest newsletter that makes the reader feel they just got the best of Reddit without doing the scrolling.\n",
+              "role": "=system"
+            },
+            {
+              "content": "=You are a creative newsletter editor. Your job is to turn a JSON array called \"list\" into an entertaining and easy-to-read HTML newsletter. \nThe newsletter must feel like a conversation with the reader, not like a dry report.\n\nSTYLE & TONE\n- Warm, engaging, slightly playful but professional.\n- Write like a smart curator who has read Reddit so the reader doesn’t have to.\n- Use short sentences, catchy hooks, and occasional rhetorical questions.\n- Make the reader feel part of an insider community.\n- Avoid generic phrases (“Author: Unknown”, “Date: Unknown”). If data is missing, just skip it smoothly.\n\nSTRUCTURE\n1. **Header**: Big catchy title (“🚀 Reddit Microsaas Weekly” or similar), date, and a friendly short intro (2–3 sentences) that sets the mood.\n2. **Outline**: Quick bullets with the main stories (like teasers with emoji).\n3. **Main body**: For EACH summary in the list:\n   - Headline (H2) with a hooky title + link to Reddit post.\n   - One paragraph storytelling style summary (what happened, why it matters).\n   - “What we learned” section → 3 key bullets, easy to skim.\n   - One spicy or emotional **quote from a comment**, styled as a blockquote, with attribution (username + link).\n   - A small “By the numbers” line if ups or num_comments exist (▲ X votes · 💬 Y comments).\n4. **Closing**: A short wrap-up with energy, like: “That’s it for this week — what will YOU build next? Jump on Reddit and share your story.”\n5. **Footer**: Disclaimer: “All content curated from Reddit. Click links for full threads.”\n\nFORMATTING\n- Output only valid HTML (no Markdown, no code fences).\n- Use simple HTML tags: <h1>, <h2>, <p>, <ul>, <li>, <blockquote>, <a>.\n- Make it scannable: bold for emphasis, emoji for spice.\n- Newsletter must look good in email clients (inline styles optional but keep it simple).\n\nDATA HANDLING\n- Each item in \"list\" may contain: title, url, subreddit, author, created_utc, summary, key_learnings, comments_insights[], ups, num_comments.\n- If something is missing, don’t mention it (no placeholders).\n- Always link headlines and quotes back to Reddit with <a> tags.\n\nNow transform this JSON input into the described HTML newsletter:.\n\n{{ JSON.stringify($json.list) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "70b431e3-9d3d-4919-9e7f-13bae6f728a0",
+      "name": "create newsletter",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        4448,
+        -704
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "WeOrHJL5CKijLoVI",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an assistant that analyzes Reddit discussions. \nYour job is to extract main insights, lessons, and takeaways ONLY from the content provided (post + comments).\nYou must strictly stick to the Reddit content and never introduce external knowledge. \nAlways include clear attribution: mention the Reddit user and include the Reddit URL of the post or comment. \nYour answers must be written in fluent, concise, and insightful English, suitable for repurposing into a newsletter and podcast script. \nFocus only on the requested topic of interest, ignoring unrelated parts of the discussion.\n",
+              "role": "system"
+            },
+            {
+              "content": "=Here is the Reddit discussion (post + comments) in JSON:\n\n{{ JSON.stringify($json.list) }}\n\nMy topic of interest is: {{ $json.post.topic }}\n`\nPlease analyze the discussion and output a JSON with the following structure:\n\n{\n  \"topic\": \"<the topic of interest>\",\n  \"main_post_summary\": \"<2-3 sentence summary of the original post, in your own words>\",\n  \"comments_insights\": [\n    {\n      \"insight\": \"<short summary of the comment’s valuable point, always from the perspective of the topic of interest>\",\n      \"user\": \"<Reddit username>\",\n      \"url\": \"<permalink to comment or post>\"\n    }\n  ],\n  \"key_learnings\": [\n    \"<list of 3-5 concise takeaways relevant to the topic of interest, based ONLY on post and comments>\"\n  ]\n}\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ac456727-658e-4da2-a485-3d74d1279099",
+      "name": "Summarize post + comments",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        6288,
+        -448
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "WeOrHJL5CKijLoVI",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are an assistant that reviews Reddit posts.  \nYour task is to check if a given post is about a specific topic of interest.  \nAlways return the original JSON structure unchanged, but add one new field:  \n\"topic_of_interest\": true or false.  \n\n- If the post clearly relates to the requested topic, set it to true. You have to be very strict.  \n- If the relation is weak, unrelated, or ambiguous, set it to false.  \n- Do not remove or modify existing fields.  \n- Output must remain valid JSON.\n\n  topic is: {{ $json.topic }}",
+              "role": "system"
+            },
+            {
+              "content": "=Here is a Reddit post in JSON format:\n\n{{JSON.stringify($json.post)}}\n\nPlease return the same JSON with two additional fields:\n\"topic\":{{ $json.topic }}\n\"topic_of_interest\": true or false\n\nReturn ONLY a valid JSON object, no prose, no markdown."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b5c48ae2-b515-468f-a835-119ecf5bb0d5",
+      "name": "filter topic of interest",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        2672,
+        -672
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "frEneSu11hpc8feL",
+          "name": "OpenAi account AUDIO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "kzsakib@gmail.com",
+        "subject": "Reddit Digest",
+        "message": "={{ $json.message.content }}",
+        "options": {}
+      },
+      "id": "a7937f47-7ee8-4fcb-987d-04bf8937f861",
+      "name": "Send a message",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        4992,
+        -704
+      ],
+      "webhookId": "38198233-bfff-4ad6-8feb-9e739f2ada23",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "B36xoXlOCdnRY8Wy",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node (JavaScript)\n// Top 10 by ups; outputs only selected fields + pairedItem\n\n// Build a normalized list that remembers the source item index\nconst records = [];\nif (items.length === 1 && Array.isArray(items[0].json)) {\n  // Case: a single item with an array of posts inside\n  items[0].json.forEach((post, _idxInArray) => {\n    records.push({ data: post, src: 0 });\n  });\n} else {\n  // Case: one post per incoming item\n  items.forEach((it, idx) => {\n    records.push({ data: it.json || {}, src: idx });\n  });\n}\n\n// Sort with fallbacks\nconst sorted = records\n  .map(r => {\n    const j = r.data || {};\n    return {\n      ...r,\n      _ups: typeof j.ups === 'number' ? j.ups : (typeof j.score === 'number' ? j.score : 0),\n      _comments: typeof j.num_comments === 'number' ? j.num_comments : 0,\n      _created: typeof j.created_utc === 'number' ? j.created_utc : 0,\n    };\n  })\n  .sort((a, b) => {\n    if (b._ups !== a._ups) return b._ups - a._ups;\n    if (b._comments !== a._comments) return b._comments - a._comments;\n    return b._created - a._created;\n  });\n\n// Take top 10 and output minimal fields + pairedItem\nconst out = sorted.slice(0, 5).map((r, i) => {\n  const p = r.data || {};\n  return {\n    json: {\n      rank: i + 1,\n      id: p.id ?? null,\n      subreddit: p.subreddit ?? null,\n      title: p.title ?? null,\n      selftext: p.selftext ?? null,\n      url: p.permalink ? `https://www.reddit.com${p.permalink}` : null,\n      author: p.author ?? null,\n      ups: (typeof p.ups === 'number' ? p.ups : (typeof p.score === 'number' ? p.score : r._ups)),\n      num_comments: (typeof p.num_comments === 'number' ? p.num_comments : r._comments),\n      created_utc: (typeof p.created_utc === 'number' ? p.created_utc : r._created),\n    },\n    // 🔹 This keeps items \"paired\" to their original source\n    pairedItem: { item: r.src },\n  };\n});\n\nreturn out;\n\n"
+      },
+      "id": "ec75f4d2-0158-4ff4-9ecb-02ee4965c9e7",
+      "name": "Select Top 10 Post",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1888,
+        -672
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node (JavaScript)\n// Parsea \"message.content\" del nodo OpenAI a JSON robustamente.\n// Soporta: JSON puro, bloque ```json ... ```, y string JSON escapado.\n\nfunction extractFromCodeFence(s) {\n  const m = s.match(/```(?:json)?\\s*([\\s\\S]*?)```/i);\n  return m ? m[1] : null;\n}\n\nfunction extractFirstJsonObject(s) {\n  // Busca el primer bloque {...} (simple pero útil como último recurso)\n  const start = s.indexOf('{');\n  const end = s.lastIndexOf('}');\n  if (start !== -1 && end !== -1 && end > start) {\n    return s.slice(start, end + 1);\n  }\n  return null;\n}\n\nfunction smartParse(text) {\n  let t = text ?? '';\n\n  // 1) Si viene dentro de code fences ```json ... ```\n  const fenced = extractFromCodeFence(t);\n  if (fenced) t = fenced;\n\n  t = t.trim();\n\n  // 2) Intento directo\n  try {\n    const v = JSON.parse(t);\n    // Si al parsear obtenemos un string (caso de JSON doblemente escapado), parsea otra vez\n    if (typeof v === 'string') {\n      try { return JSON.parse(v); } catch { return v; }\n    }\n    return v;\n  } catch {}\n\n  // 3) Extrae el primer bloque {...} y reintenta\n  const objText = extractFirstJsonObject(t);\n  if (objText) {\n    try { return JSON.parse(objText); } catch {}\n  }\n\n  // 4) Fallback: devuelve error con el raw para inspección\n  return { error: 'Invalid JSON', raw: text };\n}\n\nreturn items.map((item) => {\n  const content =\n    item.json?.content ??\n    item.json?.message?.content ?? // estructura típica del nodo \"Message a model\"\n    '';\n\n  const parsed = smartParse(String(content));\n\n  return {\n    json: parsed,\n    // Mantén pairing si vienes encadenando nodos que lo requieren:\n    pairedItem: item.pairedItem ? item.pairedItem : undefined,\n  };\n});\n\n"
+      },
+      "id": "bf207a8a-4330-4605-a197-f2c71fc48e58",
+      "name": "String to Json",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        3072,
+        -672
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "7d1039e0-2ae3-4935-b355-c60fbd9ffce5",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.topic_of_interest }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "88b5217d-b4d7-47f3-a461-e2241bfbf6a7",
+      "name": "If topic of interest",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3472,
+        -672
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "resource": "postComment",
+        "operation": "getAll",
+        "subreddit": "={{ $json.post.subreddit }}",
+        "postId": "={{ $json.post.id }}",
+        "limit": "=5"
+      },
+      "id": "e7aa2220-f6da-4789-97bc-a6c7ab433567",
+      "name": "Get post comments",
+      "type": "n8n-nodes-base.reddit",
+      "position": [
+        4672,
+        -464
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "mLaMkTh5skKu2Pc3",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3776,
+        -688
+      ],
+      "id": "62ec92b0-5d5c-48a5-bba5-8b400f5e6685",
+      "name": "Loop Over Items1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "post": {
+      "main": [
+        [
+          {
+            "node": "Get post comments",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Summarize post + comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many posts": {
+      "main": [
+        [
+          {
+            "node": "Select Top 10 Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "String to Json": {
+      "main": [
+        [
+          {
+            "node": "If topic of interest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "clean comments": {
+      "main": [
+        [
+          {
+            "node": "merge comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "merge comments": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "merge summaries": {
+      "main": [
+        [
+          {
+            "node": "create newsletter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get post comments": {
+      "main": [
+        [
+          {
+            "node": "clean comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create newsletter": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Top 10 Post": {
+      "main": [
+        [
+          {
+            "node": "Set topic of interest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If topic of interest": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set topic of interest": {
+      "main": [
+        [
+          {
+            "node": "filter topic of interest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "filter topic of interest": {
+      "main": [
+        [
+          {
+            "node": "String to Json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize post + comments": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get many posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "merge summaries",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b424e749-813f-482f-b2a6-6951ce79d917",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f2f9a39beefde290018433988fb188a8717f5a87fc352d6cf5aaa1908f787990"
+  },
+  "id": "MDMvMQFHHMtvt8uB",
+  "tags": []
+}

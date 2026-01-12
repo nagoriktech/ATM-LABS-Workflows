@@ -1,0 +1,508 @@
+{
+  "name": "Travel Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        416
+      ],
+      "id": "6c09ef51-dd52-4b57-be39-a712f167e1ba",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "p5P3f12dEokd41g7",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"origin\": {\n      \"type\": \"string\",\n      \"description\": \"The origin\"\n    },\n    \"destination\": {\n      \"type\": \"string\",\n      \"description\": \"The destination\"\n    },\n    \"departure\": {\n      \"type\": \"string\",\n      \"format\": \"date\",\n      \"description\": \"The departure date (YYYY-MM-DD)\"\n    },\n    \"return\": {\n      \"type\": \"string\",\n      \"format\": \"date\"\n    }\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        416
+      ],
+      "id": "82b180ba-9b31-4d37-9b58-350f5befe5d0",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "query": "={{ $('Arrange the data').item.json.Activities }} in {{ $('Arrange the data').item.json.Destination }}",
+        "options": {
+          "topic": "general",
+          "search_depth": "basic",
+          "max_results": 3,
+          "days": 3,
+          "include_answer": "basic"
+        }
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavily",
+      "typeVersion": 1,
+      "position": [
+        320,
+        224
+      ],
+      "id": "50aac46f-9210-4d7c-b025-29a14eccfd41",
+      "name": "Activities",
+      "credentials": {
+        "tavilyApi": {
+          "id": "fr7DmXSHZpGfoZyb",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google_hotels"
+            },
+            {
+              "name": "api_key",
+              "value": "9eb35b8234c061818bd3d084e20202961ab8f907f7544440ecfbc000f526892d"
+            },
+            {
+              "name": "q",
+              "value": "={{ $('Arrange the data').item.json.Destination }}"
+            },
+            {
+              "name": "check_in_date",
+              "value": "={{ $('Generate Airport Codes for flights').item.json.output.departure }}"
+            },
+            {
+              "name": "check_out_date",
+              "value": "={{ $('Generate Airport Codes for flights').item.json.output.return }}"
+            },
+            {
+              "name": "adults",
+              "value": "={{ $('Arrange the data').item.json.Travellers }}"
+            },
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        528,
+        224
+      ],
+      "id": "c786dcf9-c6ca-4480-8db2-360648a8b53d",
+      "name": "Hotels"
+    },
+    {
+      "parameters": {
+        "operation": "google_flights",
+        "departure_id": "={{ $('Generate Airport Codes for flights').item.json.output.origin }}",
+        "arrival_id": "={{ $('Generate Airport Codes for flights').item.json.output.destination }}",
+        "outbound_date": "={{ $('Generate Airport Codes for flights').item.json.output.departure }}",
+        "return_date": "={{ $('Generate Airport Codes for flights').item.json.output.return }}",
+        "additionalFields": {
+          "adults": "={{ $('Arrange the data').item.json.Travellers }}"
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        592
+      ],
+      "id": "3c5e14f0-cd13-4bd5-b4e3-7db24f1ca62e",
+      "name": "Flights",
+      "credentials": {
+        "serpApi": {
+          "id": "BcTMJ5iS39rDZbv2",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        800
+      ],
+      "id": "444c23f2-182e-4acb-91fb-3ecc66233d2c",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "p5P3f12dEokd41g7",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"subject\": {\n      \"type\": \"string\",\n      \"description\": \"the email subject\"\n    },\n    \"emailBody\": {\n      \"type\": \"string\",\n      \"description\": \"the email body\"\n    }\n  },\n  \"required\": [\"subject\", \"emailBody\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        800
+      ],
+      "id": "668c97a7-94be-44d4-944e-5ed9e59596cd",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Arrange the data').item.json.Email }}",
+        "subject": "={{ $json.output.subject }}",
+        "message": "={{ $json.output.emailBody }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        160,
+        592
+      ],
+      "id": "8ede993a-9d5c-4482-9884-5bf69786ed49",
+      "name": "Send a message",
+      "webhookId": "b35e746e-69ef-4f08-9d9e-1e35b297fc89",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QUSyQkNxUhGURWIw",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        576,
+        592
+      ],
+      "id": "47f0b422-a777-43fc-b57b-c33ce2754d0a",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "89ca3b55-959e-4ccf-acd9-a27da508bed4",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -496,
+        224
+      ],
+      "id": "3a59f728-e5a8-4f23-a636-4acb9898881c",
+      "name": "Fetch data from user",
+      "webhookId": "89ca3b55-959e-4ccf-acd9-a27da508bed4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ca2ac988-4586-485d-adf9-8d3098bf8d23",
+              "name": "Origin",
+              "value": "={{ $json.body.origin }}",
+              "type": "string"
+            },
+            {
+              "id": "a4e04235-ecdc-4ef4-aec9-47780e93238f",
+              "name": "Destination",
+              "value": "={{ $json.body.destination }}",
+              "type": "string"
+            },
+            {
+              "id": "56485d26-ac9f-4689-9257-37f404ea19f2",
+              "name": "Return Date",
+              "value": "={{ $json.body.return_date }}",
+              "type": "string"
+            },
+            {
+              "id": "36a988f1-ca1e-40fd-854c-8f5131eff413",
+              "name": "Departure Date",
+              "value": "={{ $json.body.departure_date }}",
+              "type": "string"
+            },
+            {
+              "id": "0656618a-8962-479b-8859-38f4f181de07",
+              "name": "Travellers",
+              "value": "={{ $json.body.travellers }}",
+              "type": "string"
+            },
+            {
+              "id": "d013194c-261c-4987-a7d5-3c911a04d5e7",
+              "name": "Activities",
+              "value": "={{ $json.body.activities }}",
+              "type": "string"
+            },
+            {
+              "id": "f62bab91-ef27-4933-870f-22f9e0ba3e53",
+              "name": "Email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -288,
+        224
+      ],
+      "id": "0f45247c-c49e-428f-871d-b13dc3d88d40",
+      "name": "Arrange the data"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Origin : {{ $json.Origin }}\nDestination :{{ $json.Destination }}\nReturn date :{{ $json['Return Date'] }}\nDeparture Date : {{ $json['Departure Date'] }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Turn the origin and destination into their airports codes.\nMake sure that all the dates are in future not in past.\nCurrent date and time : {{ $now }}\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -80,
+        224
+      ],
+      "id": "65a2c932-0fa4-4ddb-a79f-647ea9dec25f",
+      "name": "Generate Airport Codes for flights"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Flights from {{ $('Arrange the data').item.json.Origin }} to {{ $('Arrange the data').item.json.Destination }} on {{ $('Arrange the data').item.json['Departure Date'] }} to {{ $('Arrange the data').item.json['Return Date'] }}\n\n1) {{ $json.other_flights[0].flights[0].airline }} , {{ $json.other_flights[0].flights[0].arrival_airport.time }} , {{ $json.other_flights[0].flights[0].duration }} minutes\n\nFeatures:{{ $json.other_flights[0].flights[0].extensions }}\n\nPrice: $\n\n2) {{ $json.other_flights[0].flights[1].airline }} , {{ $json.other_flights[0].flights[1].arrival_airport.time }} , {{ $json.other_flights[0].flights[1].duration }}minutes\n\nFeatures : {{ $json.other_flights[0].flights[1].extensions }}\n\nPrice : ${{ $json.other_flights[0].price }} ,{{ $json.other_flights[0].type }}\n\n#Resorts \n\n1) {{ $('Hotels').item.json.properties[0].name }}\nLink :{{ $('Hotels').item.json.properties[0].link }}\n\nImage : {{ $('Hotels').item.json.properties[0].images[0].original_image }}\n\nRate Per Night : {{ $('Hotels').item.json.properties[0].rate_per_night.lowest }}\n\nTotal rate : {{ $('Hotels').item.json.properties[0].total_rate.lowest }}\n\nNearby Places : \n1) {{ $('Hotels').item.json.properties[0].nearby_places[0].name }} by {{ $('Hotels').item.json.properties[0].nearby_places[0].transportations[0].type }} in {{ $('Hotels').item.json.properties[0].nearby_places[0].transportations[0].duration }}\n\n2) {{ $('Hotels').item.json.properties[0].nearby_places[1].name }} by {{ $('Hotels').item.json.properties[0].nearby_places[1].transportations[0].type }} in {{ $('Hotels').item.json.properties[0].nearby_places[1].transportations[0].duration }}\n\n3) {{ $('Hotels').item.json.properties[0].nearby_places[2].name }} by {{ $('Hotels').item.json.properties[0].nearby_places[2].transportations[0].type }} in {{ $('Hotels').item.json.properties[0].nearby_places[2].transportations[0].duration }}\n\nFeatures : {{ $('Hotels').item.json.properties[0].amenities }}\n\n2) {{ $('Hotels').item.json.properties[1].name }}\nLink : {{ $('Hotels').item.json.properties[1].link }}\n\nImage : {{ $('Hotels').item.json.properties[1].images[0].original_image }}\n\nRate Per Night : {{ $('Hotels').item.json.properties[1].rate_per_night.lowest }}\n\nTotal Rate : {{ $('Hotels').item.json.properties[1].total_rate.lowest }}\n\nNearby Places :\n1) {{ $('Hotels').item.json.properties[1].nearby_places[0].name }} by {{ $('Hotels').item.json.properties[1].nearby_places[0].transportations[0].type }} in {{ $('Hotels').item.json.properties[1].nearby_places[0].transportations[0].duration }}\n\n2) {{ $('Hotels').item.json.properties[1].nearby_places[1].name }} by {{ $('Hotels').item.json.properties[1].nearby_places[1].transportations[0].type }} in {{ $('Hotels').item.json.properties[1].nearby_places[1].transportations[0].duration }}\n\nFeatures : \n{{ $('Hotels').item.json.properties[1].amenities }}\n\n3) {{ $('Hotels').item.json.properties[2].name }}\nLink : {{ $('Hotels').item.json.properties[2].link }}\n\nImage : {{ $('Hotels').item.json.properties[2].images[0].original_image }}\n\nRate Per Night : {{ $('Hotels').item.json.properties[2].rate_per_night.lowest }}\n\nTotal Rate : {{ $('Hotels').item.json.properties[2].total_rate.lowest }}\n\nNearby places :\n1) {{ $('Hotels').item.json.properties[2].nearby_places[1].name }} by {{ $('Hotels').item.json.properties[2].nearby_places[1].transportations[0].type }} in {{ $('Hotels').item.json.properties[2].nearby_places[1].transportations[0].duration }}\n\n2) {{ $('Hotels').item.json.properties[2].nearby_places[2].name }} by {{ $('Hotels').item.json.properties[2].nearby_places[2].transportations[0].type }} in {{ $('Hotels').item.json.properties[2].nearby_places[2].transportations[0].duration }}\n\nFeatures : {{ $('Hotels').item.json.properties[2].amenities }}\n\nActivities : \n 1) {{ $('Activities').item.json.results[0].title }}\nLink: {{ $('Activities').item.json.results[0].url }}\nContent : {{ $('Activities').item.json.results[0].content }}\n\n2) {{ $('Activities').item.json.results[1].title }}\nLink : {{ $('Activities').item.json.results[1].url }}\nContent : {{ $('Activities').item.json.results[1].content }}\n\n3) {{ $('Activities').item.json.results[2].title }}\nLink : {{ $('Activities').item.json.results[2].url }}\nContent : {{ $('Activities').item.json.results[2].content }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=# Travel Email Writer AI Agent System Prompt\n\nYou are an expert email writer specializing in creating travel plans. Your job is to output an HTML email with clickable links. You must output a subject and an emailbody in separate parameters.\n\n# Objective\nYou will receive information about a vacation plan. Break the email into 3 sections: Flights, Resorts, and Activities\n\n# Output Format\n- The email should be structured as HTML that will be sent through email.\n- Use headers to separate the sections\n- Add a horizontal line to end each section\n\n# Subject\n- Should contain the travel dates and the arrival location\n\n# Introduction\n- The goal of this section is to get the traveler excited about their upcoming trip\n- You must add a horizontal line after this section, before the 'Flights' section\n\n# Flights\n- List the departure and return dates and locations\n- List the flights and details about each one\n\n# Resorts\n- List each resort with a clickable link as the name of the resort\n- Number the list of resorts\n- Output images in HTML format like this:\n`<img src=\"[image url here]\" style=\"max-width:200; height:auto;\">`\n- Leave a new line between the resort name and its image and after the image\n\n# Activities\n- List the activities with clickable links as the name of the activity\n- Provide a brief description of each activity\n\n# Signoff\n- Sign the email off in a friendly way.\n- Sign off as TrueHorizon Travel Team\n\n# Important\n- Do not output more than 1000 words"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -192,
+        592
+      ],
+      "id": "e601e152-687e-4067-a73a-596a0f013b7a",
+      "name": "Sum up"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9e25f8ed-8e59-44f1-8400-1875e79fecae",
+              "name": "Response",
+              "value": "=An email has been sent to for travel plan : {{ $('Sum up').item.json.output.subject }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        592
+      ],
+      "id": "7ef103b4-9cac-438b-bde6-9d03e2ac498d",
+      "name": "Response"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Airport Codes for flights",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate Airport Codes for flights",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Activities": {
+      "main": [
+        [
+          {
+            "node": "Hotels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hotels": {
+      "main": [
+        [
+          {
+            "node": "Flights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flights": {
+      "main": [
+        [
+          {
+            "node": "Sum up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sum up",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Sum up",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch data from user": {
+      "main": [
+        [
+          {
+            "node": "Arrange the data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Arrange the data": {
+      "main": [
+        [
+          {
+            "node": "Generate Airport Codes for flights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Airport Codes for flights": {
+      "main": [
+        [
+          {
+            "node": "Activities",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sum up": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d4428cec-4163-46a3-9d7b-5c5c231b169a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b111f235aa596ab07e577bb95b3f49e73715f6f5b0b572f8d54d660382634c3c"
+  },
+  "id": "Ao3CogpaJ9hl1CyN",
+  "tags": []
+}

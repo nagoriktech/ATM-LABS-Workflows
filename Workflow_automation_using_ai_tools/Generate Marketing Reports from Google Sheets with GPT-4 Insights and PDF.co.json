@@ -1,0 +1,490 @@
+{
+  "name": "Generate Marketing Reports from Google Sheets with GPT-4 Insights and PDF.co",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "e7b18884-0c03-4b85-9bf8-4d1f1bedaf0b",
+      "name": "When clicking ‘Execute workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -1056,
+        -272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "398d4c07-367e-488a-b02b-522a90c0629d",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -160,
+        160
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"summary\": \"summary\"\n}"
+      },
+      "id": "b99f4c47-b099-4f91-ba7f-ebfb6a413be3",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        -32,
+        160
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "content": "# 📊 Marketing Spend Report → Google Sheets + PDF\n\nThis workflow pulls **marketing data from Google Sheets**, aggregates spend by channel, generates an **AI-written summary**, and outputs a formatted **PDF report** using a custom HTML template on **PDF.co**.  \n\n        ",
+        "height": 1056,
+        "width": 2752,
+        "color": 7
+      },
+      "id": "eba69d17-aa47-49e3-a22a-b3aba9e9a4ab",
+      "name": "Sticky Note53",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1232,
+        -768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1NyZD132mhj5bWzYTf6kV1pmbScVde55FOi5nev1t6I4",
+          "mode": "list",
+          "cachedResultName": "Marketing Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NyZD132mhj5bWzYTf6kV1pmbScVde55FOi5nev1t6I4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NyZD132mhj5bWzYTf6kV1pmbScVde55FOi5nev1t6I4/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "6f8c99ba-c9cb-4f0b-a4af-d4576403a5cb",
+      "name": "Get Marketing Data",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -832,
+        -272
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HBUcSC8TyEZnv7nr",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "Spend ($)"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "Channel",
+        "options": {}
+      },
+      "id": "921e2b81-86d0-4b2c-a910-bfc0cf34a6df",
+      "name": "Sum Spend by Channel",
+      "type": "n8n-nodes-base.summarize",
+      "position": [
+        -608,
+        -192
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "Spend ($)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "81f0f9db-7ef4-44d7-810d-80d845d858c4",
+      "name": "Sum Spend",
+      "type": "n8n-nodes-base.summarize",
+      "position": [
+        -96,
+        -464
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are writing a daily update message about the marketing data. The data is provided. Output a 4 sentance summary. \n\nOutput like this. \n\n{\n\t\"summary\": \"summary\"\n}"
+        }
+      },
+      "id": "536540f0-e024-4968-84e5-9cfadb8e344e",
+      "name": "Write Summary",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -160,
+        -80
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "id": "5c48a3e2-08a1-4903-bdf2-314d1a58ecea",
+      "name": "Combine All",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        192,
+        -336
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node (JavaScript)\n// Input: ONE item whose .json is the array you posted\n// Output: ONE item in correct n8n shape: [{ json: <object for HTML/Mustache> }]\n\nconst fmtUSD = (n) => Number(n || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });\n\nconst items = $input.all();\nif (!items.length) {\n  return [{ json: { error: 'No input data' } }];\n}\n\n// Handle your exact incoming shape (array with one object)\nlet root = items[0].json;\nif (Array.isArray(root)) root = root[0] || {};\n\nconst totalSpendRaw = Number(root[\"sum_Spend_($)\"] || 0);\nconst channelsRaw = Array.isArray(root.data) ? root.data : [];\nconst summary = (typeof root.output?.summary === 'string') ? root.output.summary : '';\n\n// Build channels list for the HTML template\nconst channels = channelsRaw.map(r => ({\n  channel: r.Channel || 'Unknown',\n  spendFmt: fmtUSD(Number(r[\"sum_Spend_($)\"] || 0)),\n}));\n\n// Final object expected by your HTML/Mustache\nconst out = {\n  generatedDate: new Date().toISOString().slice(0, 10),\n  totalSpendFmt: fmtUSD(totalSpendRaw),\n  channelCount: channels.length,\n  channels,\n  summary,\n};\n\n// ✅ Return in proper n8n format\nreturn [{ json: out }];\n"
+      },
+      "id": "66f3dc9a-ab29-4e91-a16b-ab30633d336a",
+      "name": "Convert to PDF Upload",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        416,
+        -320
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "77f7908d-f901-4e08-9fb1-aef9c547029c",
+      "name": "Covert to 1 row",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        -384,
+        -192
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "URL/HTML to PDF",
+        "convertType": "htmlTemplateToPDF",
+        "templateId": "14025",
+        "templateData": "={{ JSON.stringify($json) }}\n",
+        "advancedOptions": {}
+      },
+      "id": "bfbb4b7d-fb27-425f-b15d-bee18919e99e",
+      "name": "Create PDF1",
+      "type": "n8n-nodes-pdfco.PDFco Api",
+      "position": [
+        640,
+        -320
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "pdfcoApi": {
+          "id": "a9bKYC8QeTrhkDSW",
+          "name": "PDF.co account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "kzsakib@gmail.com",
+        "subject": "=Marketing Report  {{ $('Convert to PDF Upload').item.json.generatedDate }}",
+        "message": "=<p>Please find attached the Marketing Spend Report generated on {{ $('Convert to PDF Upload').item.json.generatedDate }}.</p>\n\n<p>The report provides a detailed breakdown of spend across all marketing channels and includes insights that may help guide future budget decisions.</p>\n\n<p>If you have any questions or would like to discuss the results further, feel free to reach out.</p>\n\n<p>Best Regards,<br>\nEthan Winters</p>\n",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1088,
+        -192
+      ],
+      "id": "eacb9070-63a9-47d6-b5d7-443fe4ae5f97",
+      "name": "Send a message",
+      "webhookId": "020aa067-0342-47f1-b4cc-2a36f60bfe8a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xUCItSN2KcMWBYcp",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        864,
+        -320
+      ],
+      "id": "c80192c7-4d29-405b-b590-5371a4a7c1fa",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "chatId": "6617255993",
+        "text": "=Please find attached the Marketing Spend Report generated on {{ $('Convert to PDF Upload').item.json.generatedDate }} .\n\nThe report provides a detailed breakdown of spend across all marketing channels and includes insights that may help guide future budget decisions.\n\nIf you have any questions or would like to discuss the results further, feel free to reach out.",
+        "additionalFields": {
+          "appendAttribution": true
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        -416
+      ],
+      "id": "931f4a3a-c306-4290-a4fd-0a66fc37550c",
+      "name": "Send a text message",
+      "webhookId": "0fbb6a8e-deaa-487d-8a4c-7165ecbf673e",
+      "credentials": {
+        "telegramApi": {
+          "id": "hkggKKxNuqkNxHIC",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "6617255993",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1312,
+        -320
+      ],
+      "id": "21608769-5c86-4f29-a353-4dc67b257473",
+      "name": "Send a document",
+      "webhookId": "1cd5227d-03b3-45eb-9e06-aac02fdabbd4",
+      "credentials": {
+        "telegramApi": {
+          "id": "hkggKKxNuqkNxHIC",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Sum Spend": {
+      "main": [
+        [
+          {
+            "node": "Combine All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine All": {
+      "main": [
+        [
+          {
+            "node": "Convert to PDF Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Summary": {
+      "main": [
+        [
+          {
+            "node": "Combine All",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Covert to 1 row": {
+      "main": [
+        [
+          {
+            "node": "Combine All",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Write Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Write Summary",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Marketing Data": {
+      "main": [
+        [
+          {
+            "node": "Sum Spend",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sum Spend by Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sum Spend by Channel": {
+      "main": [
+        [
+          {
+            "node": "Covert to 1 row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Write Summary",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Marketing Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to PDF Upload": {
+      "main": [
+        [
+          {
+            "node": "Create PDF1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create PDF1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "936aad12-653f-4f9a-b523-6a37a12e085d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "edb67d3a7f9d12c7abb88f04023272f13c5753dec2ada987b4428826f48ef7ab"
+  },
+  "id": "EdteT7KusbXMmabw",
+  "tags": []
+}

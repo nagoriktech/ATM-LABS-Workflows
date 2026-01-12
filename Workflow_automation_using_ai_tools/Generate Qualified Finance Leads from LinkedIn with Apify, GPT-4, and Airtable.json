@@ -1,0 +1,895 @@
+{
+  "name": "Generate Qualified Finance Leads from LinkedIn with Apify, GPT-4, and Airtable",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a5c513e1-efd8-4cb0-813e-25a30cbb6b64",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        80,
+        384
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "config_linkedin_urls",
+              "name": "linkedinUrls",
+              "type": "string",
+              "value": "https://www.linkedin.com/jobs/search/?keywords=CFO&location=United%20States"
+            },
+            {
+              "id": "config_max_employees",
+              "name": "maxEmployees",
+              "type": "number",
+              "value": 200
+            },
+            {
+              "id": "config_batch_size",
+              "name": "batchSize",
+              "type": "number",
+              "value": 1
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "53b5a281-30d9-4edf-b2c1-b927fb52b971",
+      "name": "Edit Variables",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        304,
+        384
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/curious_coder~linkedin-jobs-scraper/run-sync-get-dataset-items?token=apify_api_vRHUj4EgaU9ABA4mjY3a8hwhTYYuJn4i36sb",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "apifyApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"count\": 100, \"scrapeCompany\": true, \"urls\": [ $('Edit Variables').item.json.linkedinUrls ] } }}",
+        "options": {}
+      },
+      "id": "a3947fb7-00d3-4a82-95ac-45e9ee3a2f60",
+      "name": "Scrape LinkedIn Jobs",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        528,
+        384
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "RCyvCaPLLBU8Cgmb",
+          "name": "Bearer Auth account"
+        },
+        "apifyApi": {
+          "id": "aHiA6tAomertaMOf",
+          "name": "Apify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "companyName",
+        "include": "selectedOtherFields",
+        "fieldsToInclude": "title, link, descriptionText, postedAt, companyLinkedinUrl, jobPosterName, seniorityLevel, industries, companyEmployeesCount, location, jobPosterProfileUrl",
+        "options": {}
+      },
+      "id": "20c1f5de-8030-4878-8482-226561e98c84",
+      "name": "Split Job Data",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        752,
+        320
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "companyName",
+        "options": {}
+      },
+      "id": "439db0ff-8c42-491e-b99b-d1fed827ceca",
+      "name": "Remove Duplicates",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "position": [
+        976,
+        320
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7e3c28ee-e9bc-4e13-9615-f6a339d53f40",
+              "name": "company_name",
+              "type": "string",
+              "value": "={{ $json.companyName }}"
+            },
+            {
+              "id": "51697efd-3564-48e8-b7c6-442a819d37a7",
+              "name": "title",
+              "type": "string",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "id": "23ff3936-c963-485c-8576-7aae534f8758",
+              "name": "=job_link",
+              "type": "string",
+              "value": "={{ $json.link }}"
+            },
+            {
+              "id": "52ae4935-d361-43ae-aa76-ffc1d8e184ff",
+              "name": "description",
+              "type": "string",
+              "value": "={{ $json.descriptionText }}"
+            },
+            {
+              "id": "e5f9077c-71a3-41dd-91b2-d7e187b56ba1",
+              "name": "posted_at",
+              "type": "string",
+              "value": "={{ $json.postedAt }}"
+            },
+            {
+              "id": "39ef0ce0-718b-47b1-8138-0bf2246fba51",
+              "name": "company_link",
+              "type": "string",
+              "value": "={{ $json.companyLinkedinUrl }}"
+            },
+            {
+              "id": "24590a98-f2d3-437a-b656-8538ce961b43",
+              "name": "seniority_level",
+              "type": "string",
+              "value": "={{ $json.seniorityLevel }}"
+            },
+            {
+              "id": "bc1eecff-0570-4c0f-ac5b-a5d7f5c53ec0",
+              "name": "industry",
+              "type": "string",
+              "value": "={{ $json.industries }}"
+            },
+            {
+              "id": "e0070649-5261-482f-9c09-fa54689e7659",
+              "name": "company_employees",
+              "type": "number",
+              "value": "={{ $json.companyEmployeesCount }}"
+            },
+            {
+              "id": "02c838e5-8977-47c0-bdd7-31bbe9166ed9",
+              "name": "location",
+              "type": "string",
+              "value": "={{ $json.location }}"
+            },
+            {
+              "id": "9e36bb42-ea6f-401f-92dc-280962a2182b",
+              "name": "job_poster",
+              "value": "={{ $json.jobPosterName }}",
+              "type": "string"
+            },
+            {
+              "id": "80f7b25b-a613-47d3-90f3-e6674b05f052",
+              "name": "jobposter_profile",
+              "value": "={{ $json.jobPosterProfileUrl }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b7bf7658-ca19-4847-a25d-51cfbfa17e92",
+      "name": "Clean Data Format",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1200,
+        320
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appt6WSLl5XQvUyra",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblWKqCnA6hcqe0NP",
+          "mode": "id"
+        },
+        "options": {
+          "fields": [
+            "Company Name",
+            "Company LinkedIn",
+            "Company Category",
+            "Job Summary"
+          ]
+        }
+      },
+      "id": "7b2b4bd4-37a4-4ecf-8c81-d7cd856f3a61",
+      "name": "Get Existing Leads",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        1424,
+        384
+      ],
+      "executeOnce": true,
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "db8rqvdsaxIUzju8",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lead deduplication and categorization logic\nconst existingLeads = $('Get Existing Leads').all().map(i => i.json);\nconst newLeads = $('Clean Data Format').all().map(i => i.json);\n\nreturn newLeads.map(lead => {\n  const match = existingLeads.find(existing =>\n    existing.company_name?.toLowerCase().trim() === lead.company_name?.toLowerCase().trim()\n  );\n\n  const existingSummary = match?.job_summary ?? '';\n  const existingJobPoster = match?.jobposter_profile ?? '';\n\n  const isSummaryMissing = existingSummary.trim() === '';\n  const isJobPosterMissing = existingJobPoster.trim() === '';\n\n  let category;\n  let processingReason = '';\n\n  if (!match || isSummaryMissing) {\n    category = 1;\n    processingReason = !match ? 'New company lead' : 'Existing lead missing AI analysis';\n  } else if (isJobPosterMissing) {\n    category = 2;\n    processingReason = 'Lead ready for enrichment';\n  } else {\n    category = 3;\n    processingReason = 'Complete lead - already processed';\n  }\n\n  return {\n    ...lead,\n    category,\n    processingReason,\n    isExistingLead: !!match\n  };\n});"
+      },
+      "id": "df33e00e-7277-4d6f-853e-2245a3040b39",
+      "name": "Categorize Leads",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1648,
+        384
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "e02f6478-e7bf-428c-8350-1f463062743c",
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": 1
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "New Leads"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "02aae098-3b8b-46fa-9917-de8d5d9af1f5",
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": 2
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Incomplete Leads"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "9fbed109-bbcf-455a-bcb4-ef084b2a92da",
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": 3
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "Existing Leads"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4933921b-d246-4312-8b31-3226b1bd705b",
+      "name": "Route Leads",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        1872,
+        368
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "70a23b0e-95ea-4f8a-97d2-4e99286aee51",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              },
+              "leftValue": "={{ $json.company_employees }}",
+              "rightValue": "={{ $('Edit Variables').item.json.maxEmployees }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "75a6d0e4-568a-48d3-bf2d-8ff1fc872507",
+      "name": "Filter by Company Size",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        2096,
+        288
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "batchSize": "={{ $('Edit Variables').item.json.batchSize }}",
+        "options": {}
+      },
+      "id": "3ef0a80f-f31e-46ba-af3a-301e811acce5",
+      "name": "Process in Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        2320,
+        288
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional lead qualification assistant specializing in finance and accounting roles.\n\nAnalyze this job posting:\nCompany: {{ $json.company_name }}\nJob Title: {{ $json.title }}\nDescription: {{ $json.description }}\nCompany Link: {{ $json.company_link }}\n\nCategorize according to:\n\n1. Company Category:\n   - \"Consumer\": Companies hiring for their own operations\n   - \"Fractional CFO\": Companies providing fractional CFO services\n   - \"Recruiting\": Recruitment agencies\n   - \"Other\": None of the above\n\n2. Finance Job: Is this truly a finance-related position?\n\n3. Seniority Level: Entry, Mid, Senior, Director, C-Level\n\n4. Summary: One-line role description\n5. Title: Title of the job\nReturn JSON format only.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "eeac5552-efd0-475a-a601-7f9bd37b0200",
+      "name": "AI Lead Analyzer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        2544,
+        160
+      ],
+      "executeOnce": false,
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "da164bc5-01d3-4931-9f48-f04ce952b8d8",
+      "name": "OpenAI GPT-4 Mini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        2560,
+        384
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "MSc3TfAJP9UrPlCe",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n    \"company_name\": \"TechCorp Inc\",\n    \"company_link\": \"https://linkedin.com/company/techcorp\",\n    \"seniority_level\": \"C-Level\",\n    \"is_finance_job\": true,\n    \"company_category\": \"Consumer\",\n    \"recap\": \"CFO role for financial strategy\"\n}"
+      },
+      "id": "ec1af055-efdb-4ee3-8c93-5d92a9bbd7ab",
+      "name": "Structure AI Output",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        2688,
+        384
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appt6WSLl5XQvUyra",
+          "mode": "list",
+          "cachedResultName": "FirstBase",
+          "cachedResultUrl": "https://airtable.com/appt6WSLl5XQvUyra"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblWKqCnA6hcqe0NP",
+          "mode": "list",
+          "cachedResultName": "Qualified Leads",
+          "cachedResultUrl": "https://airtable.com/appt6WSLl5XQvUyra/tblWKqCnA6hcqe0NP"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Is Finance Job": "={{ $json.output.is_finance_job }}",
+            "Company Name": "={{ $json.output.company_name }}",
+            "Job Summary": "={{ $('Process in Batches').item.json.description }}",
+            "Company Category": "={{ $json.output.company_category }}",
+            "Seniority Level": "={{ $json.output.seniority_level }}",
+            "Company Employees": "={{ $('Process in Batches').item.json.company_employees }}",
+            "Job Title": "={{ $('Process in Batches').item.json.title }}",
+            "Company LinkedIn": "={{ $('Process in Batches').item.json.company_link }}",
+            "Job Link": "={{ $('Process in Batches').item.json.job_link }}",
+            "Posted Date": "={{ $('Process in Batches').item.json.posted_at }}",
+            "Location": "={{ $('Process in Batches').item.json.location }}",
+            "Industry": "={{ $('Process in Batches').item.json.industry }}"
+          },
+          "matchingColumns": [
+            "Company Name"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Is Finance Job",
+              "displayName": "Is Finance Job",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Seniority Level",
+              "displayName": "Seniority Level",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Entry",
+                  "value": "Entry"
+                },
+                {
+                  "name": "Mid",
+                  "value": "Mid"
+                },
+                {
+                  "name": "Senior",
+                  "value": "Senior"
+                },
+                {
+                  "name": "Director",
+                  "value": "Director"
+                },
+                {
+                  "name": "C-Level",
+                  "value": "C-Level"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company Category",
+              "displayName": "Company Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Consumer",
+                  "value": "Consumer"
+                },
+                {
+                  "name": "Recruiting",
+                  "value": "Recruiting"
+                },
+                {
+                  "name": "Fractional CFO",
+                  "value": "Fractional CFO"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job Summary",
+              "displayName": "Job Summary",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company LinkedIn",
+              "displayName": "Company LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job Link",
+              "displayName": "Job Link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Posted Date",
+              "displayName": "Posted Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company Employees",
+              "displayName": "Company Employees",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "05419da4-fa77-4b91-ba11-edb64d4add04",
+      "name": "Save to Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        2896,
+        288
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "db8rqvdsaxIUzju8",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "9c84ee57-47fe-40ff-b1f6-85e2f33db6b9",
+      "name": "Workflow Complete",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        2096,
+        480
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Edit Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Leads": {
+      "main": [
+        [
+          {
+            "node": "Filter by Company Size",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Workflow Complete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Workflow Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Variables": {
+      "main": [
+        [
+          {
+            "node": "Scrape LinkedIn Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Job Data": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Lead Analyzer": {
+      "main": [
+        [
+          {
+            "node": "Save to Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Categorize Leads": {
+      "main": [
+        [
+          {
+            "node": "Route Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Airtable": {
+      "main": [
+        [
+          {
+            "node": "Process in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Data Format": {
+      "main": [
+        [
+          {
+            "node": "Get Existing Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT-4 Mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Lead Analyzer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Clean Data Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Existing Leads": {
+      "main": [
+        [
+          {
+            "node": "Categorize Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process in Batches": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Lead Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure AI Output": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Lead Analyzer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape LinkedIn Jobs": {
+      "main": [
+        [
+          {
+            "node": "Split Job Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Existing Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter by Company Size": {
+      "main": [
+        [
+          {
+            "node": "Process in Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "558c9fde-c3a6-4117-82cf-69f243f612a3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ca0aeb06c64520f624090add2832ae0c0affc16d150c0ae028c346987209f147"
+  },
+  "id": "FFoyKefNL8ddIqAY",
+  "tags": []
+}

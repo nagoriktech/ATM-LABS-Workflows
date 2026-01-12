@@ -1,0 +1,572 @@
+{
+  "name": "email_to_toDoList",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "da92226f-c728-4cb4-9a8b-1263a5f36700",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -720,
+        480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $json.id }}"
+      },
+      "id": "85c883e4-3d6a-4ed8-9d47-fa1c83faf213",
+      "name": "Mark As Read",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        80,
+        144
+      ],
+      "webhookId": "b1551d40-6d53-47ec-ad90-0386c04de860",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "51xyhEFYEuzrLNCk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 5,
+        "filters": {
+          "labelIds": [
+            "INBOX",
+            "CATEGORY_PERSONAL"
+          ],
+          "readStatus": "unread",
+          "receivedAfter": "2025-08-24T00:00:00"
+        }
+      },
+      "id": "63ed4c9d-9d37-46af-9715-7126003689f7",
+      "name": "Get Unread From Inbox",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -208,
+        224
+      ],
+      "webhookId": "848b9f06-db3c-4c74-aac3-fb40feb1187b",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "51xyhEFYEuzrLNCk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "443f2e6e-5145-4c09-af8e-193f24b6536f",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.content }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5db18633-835e-42c5-82b9-b60ec5d60683",
+      "name": "If Task Not Exist",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -640,
+        1184
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "b4f6b79e-d5a1-467d-8045-893a50a7f1f2",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -288,
+        1200
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "wIXy1qZotSXCZ3Ho",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"content\": \"Task name\",\n\t\"description\": \"Description of the thread\",\n    \"actions\": \"What actions should you take before closing this task\",\n    \"answer\": \"Proposed answer to the thread or propositions of possible actions\"\n}"
+      },
+      "id": "5dbc5b32-a0f5-461a-8ba4-d1c7298d3409",
+      "name": "Structure Output Todoist Ready",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        112,
+        1200
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "1109c955-21b6-4342-8851-1926ae4216b7",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.output.content }}",
+              "rightValue": ""
+            },
+            {
+              "id": "cc5ac32f-564f-47be-8782-600d278995fb",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.output.description }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f3bf7e60-72fd-4c7b-a295-5525846d9b9d",
+      "name": "If AI responded properly",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        240,
+        960
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "project": {
+          "__rl": true,
+          "value": "2358853423",
+          "mode": "list",
+          "cachedResultName": "test_n8n"
+        },
+        "content": "={{ $json.output.content || 'New Task' }}\n",
+        "options": {
+          "description": "={{ $json.output.description }}\n\n**Proposed actions**\n\n{{ $json.output.actions }}\n\n**Proposed answer**\n\n{{ $json.output.answer }}"
+        }
+      },
+      "id": "72d19c80-092a-40d1-84d8-f6fd62161edb",
+      "name": "Create Todoist Task",
+      "type": "n8n-nodes-base.todoist",
+      "position": [
+        1200,
+        912
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "todoistApi": {
+          "id": "DhqTo3jUpNiasso2",
+          "name": "Todoist account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": false,
+        "options": {}
+      },
+      "id": "1990efe9-0faf-4f6d-92b8-88226e021fce",
+      "name": "Get Full Message",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -368,
+        960
+      ],
+      "webhookId": "d20c5a51-4078-47e2-bec4-54af54ddf4dd",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "51xyhEFYEuzrLNCk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional email assistant. Your task is to analyze provided email content and transform email into task. If an email is about one time passwords then ignore it. Decide if an email is important and requires any actins before generating output. if no action is required, then don't generate any output for that email. Your output will be JSON and will have: - \"content\", which is exactly \"{{ $json.subject }}\" - \"description\", which is short summary what this email is about and what is whole thread point - \"actions\", which is your proposition on what actions should be done before responding or closing this email thread - \"answer\", which is your proposition on how to respond to this email, when all actions are done Answer should be detailed and assuming that content of the email is not known to reader. Email content is: {{ $json.html }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "5c67f5c7-553e-44ad-93da-b6846aa76a12",
+      "name": "Summarize Message",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -160,
+        960
+      ],
+      "typeVersion": 1.8,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "Subject",
+              "field2": "content"
+            }
+          ]
+        },
+        "joinMode": "enrichInput1",
+        "options": {
+          "multipleMatches": "all"
+        }
+      },
+      "id": "79f2c6ff-30df-42f7-82df-de4947a9f96a",
+      "name": "Enrich Emails With Tasks",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        272,
+        768
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "96f3d74c-1c0c-4c4c-96a6-531232c3e7bc",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -720,
+        128
+      ],
+      "typeVersion": 1.2,
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "id": "701bf832-3f76-4c54-91ca-f82d86422908",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        -496,
+        480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 5,
+        "filters": {
+          "projectId": "2358853423"
+        }
+      },
+      "id": "768aa69f-f610-43e8-b4f9-16680752d234",
+      "name": "Get Open Tasks",
+      "type": "n8n-nodes-base.todoist",
+      "position": [
+        -208,
+        592
+      ],
+      "typeVersion": 2.1,
+      "credentials": {
+        "todoistApi": {
+          "id": "DhqTo3jUpNiasso2",
+          "name": "Todoist account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        512,
+        864
+      ],
+      "id": "76a9bcbb-ffbe-4267-9768-f7363d2d4656",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e4985b3d-d2de-4233-acf0-0e51966fa507",
+              "leftValue": "={{ $json.output.content }}",
+              "rightValue": "The email is marked as 'false', indicating that it may not contain relevant information or an actionable item for the recipient. It appears to be an incomplete or erroneous message with no context or content to analyze further.",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        960
+      ],
+      "id": "08a3e6c7-b951-4d0c-9a62-3a7a891afb09",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Mark As Read": {
+      "main": [
+        []
+      ]
+    },
+    "Get Open Tasks": {
+      "main": [
+        [
+          {
+            "node": "Enrich Emails With Tasks",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Full Message": {
+      "main": [
+        [
+          {
+            "node": "Summarize Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Task Not Exist": {
+      "main": [
+        [
+          {
+            "node": "Get Full Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarize Message",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize Message": {
+      "main": [
+        [
+          {
+            "node": "If AI responded properly",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Unread From Inbox": {
+      "main": [
+        [
+          {
+            "node": "Mark As Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enrich Emails With Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich Emails With Tasks": {
+      "main": [
+        [
+          {
+            "node": "If Task Not Exist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If AI responded properly": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Get Unread From Inbox",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Open Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure Output Todoist Ready": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Summarize Message",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Todoist Task": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create Todoist Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "22a702dd-0efa-43f0-8447-70c860f4b6ad",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8d401f885e1d55f4ab54b9409be28c0a99616546f3fde5dcc217c9802d0a05db"
+  },
+  "id": "ZX4g3W9XZDVtNBkI",
+  "tags": []
+}

@@ -1,0 +1,450 @@
+{
+  "name": "Generate Video Script from RSS Feeds",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2240,
+        16
+      ],
+      "id": "d4def69f-0bea-488b-9e74-0e13696fc948",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "return[\n  { \"json\": { \"feed\": \"https://www.technologyreview.com/feed/\" } },\n  { \"json\": { \"feed\": \"https://towardsdatascience.com/feed\" } },\n  { \"json\": { \"feed\": \"https://www.aitrends.com/feed/\" } },\n  { \"json\": { \"feed\": \"https://news.mit.edu/rss/topic/artificial-intelligence2\" } },\n  { \"json\": { \"feed\": \"https://thegradient.pub/feed/\" } }\n]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2032,
+        16
+      ],
+      "id": "08ce26f3-68cd-4f79-80a8-e96171e37e0f",
+      "name": "RSS Feeds"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1792,
+        16
+      ],
+      "id": "cb723d76-9939-4f57-a553-0aadc00ebfe5",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.feed }}",
+        "options": {
+          "ignoreSSL": false
+        }
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -1504,
+        208
+      ],
+      "id": "6288ada9-1128-42ef-b573-b2441799f0a1",
+      "name": "RSS Read",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "aabfdeff-d854-4ea8-9446-a77fae3c589e",
+              "leftValue": "={{ $json.pubDate }}",
+              "rightValue": "={{ DateTime.now().minus({ days: 2 }) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "f88959e8-d2c6-435a-b966-ff1df441094c",
+              "leftValue": "={{ $json.pubDate }}",
+              "rightValue": "={{ DateTime.now().minus({ days: 1 }) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1568,
+        -16
+      ],
+      "id": "eb231b08-69aa-40c7-b9ad-172eea6367c7",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function definition remains the same...\nfunction condenseAndFilterNews(inputDataArray) { // Changed parameter name for clarity\n  const condensedItems = [];\n  const seenLinks = new Set(); // To track unique links for deduplication\n\n  // Helper function to process a single article-like object\n  function processArticle(article) {\n     // Ensure 'article' is a valid object before processing\n     if (typeof article !== 'object' || article === null) {\n        console.warn(\"Skipping processing non-object article:\", article);\n        return null;\n     }\n\n    const title = article.title || '';\n    const link = article.link || article.url || article.guid || '';\n    // Ensure source attempts to find creator/author even if dc:creator is null/undefined\n    const source = article.creator || article.author || (article['dc:creator'] ? article['dc:creator'] : 'Unknown Source');\n    const content = article.contentSnippet || article.content || '';\n    const pubDate = article.isoDate || article.pubDate || '';\n\n    // --- Basic Validation and Deduplication ---\n    if (!title || !link) { // Require both title and a link/url/guid\n      // console.log('Skipping due to missing title or link:', title, link); // Optional logging\n      return null;\n    }\n    if (link && seenLinks.has(link)) { // Check for duplicates using the link/url/guid\n      // console.log('Skipping duplicate link:', link); // Optional logging\n      return null;\n    }\n    if (link) { // Only add non-empty links to the set\n      seenLinks.add(link);\n    }\n    // --- End Validation and Deduplication ---\n\n    // Keyword functionality removed here\n\n    return {\n      title,\n      source,\n      link,\n      content,\n      pubDate\n      // hasKeywords property removed here\n    };\n  }\n\n  // Iterate through the input array (which contains the actual data objects)\n  inputDataArray.forEach(item => {\n    // Ensure 'item' is a valid object before processing\n    if (typeof item !== 'object' || item === null) {\n      console.warn(\"Skipping non-object item in inputDataArray:\", item);\n      return; // Skips this iteration of forEach\n    }\n\n    if (item.error) {\n      // console.log('Skipping item with error property:', item); // Optional logging\n      // Skip items that explicitly signal an error\n      return; // Skips this iteration of forEach\n    }\n\n    // Check if it's a Tavily search result container\n    if (item.query && Array.isArray(item.results)) {\n       // console.log('Processing Tavily results for query:', item.query); // Optional logging\n      item.results.forEach(result => {\n        const condensed = processArticle(result);\n        if (condensed) {\n          condensedItems.push(condensed); // Add the processed data object\n        }\n      });\n    }\n    // Check if it looks like a direct RSS item or similar structure\n    else if (item.title && (item.link || item.url || item.guid)) {\n       // console.log('Processing direct item:', item.title); // Optional logging\n       const condensed = processArticle(item);\n       if (condensed) {\n         condensedItems.push(condensed); // Add the processed data object\n       }\n    }\n     // Skip Tavily summary items explicitly (those with query but no results array)\n     else if (item.query && !Array.isArray(item.results)) {\n        // console.log('Skipping Tavily summary object for query:', item.query); // Optional logging\n        // This is likely the Tavily summary object itself, skip it\n        return; // Skips this iteration of forEach\n     }\n    // Optional: Log unrecognized structures\n    // else {\n    //   console.warn(\"Skipping unrecognized item structure:\", JSON.stringify(item));\n    // }\n  });\n\n  // Return the array of processed data objects\n  // console.log('Condensed items count:', condensedItems.length); // Optional logging\n  return condensedItems;\n}\n\n// --- n8n Execution Part ---\n// n8n provides the input items in the 'items' variable (array of {json: {...}, binary: {...}})\n\n// 1. Extract the 'json' data from each incoming n8n item\n// Add a check in case items is empty or not an array\nconst inputData = Array.isArray(items) ? items.map(item => item.json) : [];\n\n// 2. Call your processing function with the extracted data\n// The function returns an array of your desired data objects: [{title: ..., source: ...}, ...]\nconst processedDataArray = condenseAndFilterNews(inputData);\n\n// 3. Map the processed data array back into the n8n item structure: [{json: {title:..., source:...}}, ...]\n// Ensure processedDataArray is an array before mapping\nconst n8nOutputItems = Array.isArray(processedDataArray) ? processedDataArray.map(dataObject => ({ json: dataObject })) : [];\n\n// 4. Return the final array structured for n8n\nreturn n8nOutputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        96
+      ],
+      "id": "468dae1f-62b4-4c96-bf7f-cdc2caad029f",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        96
+      ],
+      "id": "9f1ba3d8-9847-436c-895a-eaa4a2ac552f",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "13scgAakwUgVDsDNeiwcXyT1IobFfR8MNp27RKSyv5cY",
+          "mode": "list",
+          "cachedResultName": "Script",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13scgAakwUgVDsDNeiwcXyT1IobFfR8MNp27RKSyv5cY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13scgAakwUgVDsDNeiwcXyT1IobFfR8MNp27RKSyv5cY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Headline": "={{ $json.Headline }}",
+            "Source": "={{ $json.Source }}",
+            "Script": "={{ $json.Script }}",
+            "Link": "={{ $json.Link }}"
+          },
+          "matchingColumns": [
+            "Emails"
+          ],
+          "schema": [
+            {
+              "id": "Headline",
+              "displayName": "Headline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Script",
+              "displayName": "Script",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -64,
+        -176
+      ],
+      "id": "88444752-e1b3-4cf1-9b64-355d45f207ab",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -1360,
+        96
+      ],
+      "id": "b1b5092d-d545-4a02-b286-c2c410e1fb37",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        48
+      ],
+      "id": "fc9fd5df-740e-49b3-aa55-b6897c3199d8",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"array\",\n  \"items\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"Headline\": {\n        \"type\": \"string\",\n        \"description\": \"The article's headline.\"\n      },\n      \"Source\": {\n        \"type\": \"string\",\n        \"description\": \"The source or author of the article.\"\n      },\n      \"Script\": {\n        \"type\": \"string\",\n        \"description\": \"A concise, presenter-style script line summarizing the article.\"\n      },\n      \"Link\": {\n        \"type\": \"string\",\n        \"description\": \"The article's URL.\"\n      }\n    },\n    \"required\": [\"Headline\", \"Source\", \"Script\", \"Link\"]\n  }\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        48
+      ],
+      "id": "57526f92-6fc8-47a9-a15d-2e04b1605959",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Your task is to analyze the provided list of processed news articles and generate a comprehensive 2000-word video script highlighting the most significant recent AI developments.\n\nSelection Criteria\n\nPrioritize Impactful AI News\n\nBreakthroughs: New model releases (GPT, Claude, Gemini, Llama), novel training methods, major benchmark results.\n\nIndustry: Product launches, partnerships, funding, acquisitions, strategic pivots.\n\nResearch: Foundational papers, infrastructure projects, or novel techniques.\n\nPolicy & Ethics: Government actions, lawsuits, regulations, societal debates.\n\nHardware: AI chips (NVIDIA, Google TPU, Intel, AMD) and compute infrastructure advances.\n\nRecency & Significance\n\nChoose the most recent and high-impact events.\n\nAvoid routine product updates or minor news.\n\nAvoid Redundancy\n\nIf multiple articles cover the same story, select the most authoritative one.\n\nOutput Requirements\n\nSelect 10–15 articles that best meet the above criteria.\n\nFor each article, extract and present:\n\nHeadline: [Article headline]\n\nSource: [Publication/author]\n\nLink: [URL]\n\nScript Section: A detailed 150–250 word narration segment that:\n\nIntroduces the news in a presenter-style line.\n\nExplains key details and why it matters.\n\nAdds context, impact, and potential implications for AI, industry, or society.\n\nFlows naturally into the next story.\n\nTotal script length: at least 2000 words. Do not shorten. If fewer than 2000 words, expand with context, analysis, and future outlooks.\n\nScript Format\n\nIntro Hook (100–150 words):\n\nEnergetic, engaging, setting up the episode (e.g., “This week in AI — from groundbreaking models to global regulations, here’s what’s reshaping the future of technology.”).\n\nMain Segments (10–15 articles × ~150–250 words each = ~1800–2500 words):\n\nEach with headline, source, and narration.\n\nSmooth transitions between items.\n\nClosing Statement (100–150 words):\n\nConcise wrap-up.\n\nCall to action (“Stay tuned for more AI developments next week.”)."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        -640,
+        -176
+      ],
+      "id": "17e77ef8-a4a7-436a-944a-49a85970daee",
+      "name": "summarizeArticles"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -176
+      ],
+      "id": "e0570f59-ec7b-4b4c-bea1-4ee1637b822b",
+      "name": "Split Out"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feeds": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "summarizeArticles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "summarizeArticles",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "summarizeArticles",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "summarizeArticles": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "98a30419-5d70-4346-80c5-916775a0f950",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c0c3fe71cadf27e20e684308c0530c747e9c1a4ed38a7f10a34a9b19fa0b1bce"
+  },
+  "id": "9SbiWmHHy2lSLqK1",
+  "tags": []
+}

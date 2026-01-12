@@ -1,0 +1,741 @@
+{
+  "name": "Article Writer",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 1,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "sender": "mhn.khan646@gmail.com"
+        },
+        "options": {
+          "dataPropertyAttachmentsPrefixName": "attachment_",
+          "downloadAttachments": true
+        }
+      },
+      "id": "b2d6bc23-6f89-4a71-96f5-72a742af3de4",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "position": [
+        -864,
+        544
+      ],
+      "notesInFlow": false,
+      "typeVersion": 1.2,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "f1gihLFgwj6wsgAe",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/drive/v3/files/{{$json[\"id\"]}}/copy\n",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer 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\",\n  \"Content-Type\": \"application/json\"\n}\n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"mimeType\": \"application/vnd.google-apps.document\"\n}\n",
+        "options": {}
+      },
+      "id": "a80c48ad-5276-4f77-8db0-0a43181ed253",
+      "name": "HTTP Request2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        496,
+        464
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "YNSg2yUNyLNAoEz4",
+          "name": "Google Docs account"
+        },
+        "googleDriveOAuth2Api": {
+          "id": "aDywSQrzHJTw1FR7",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/drive/v3/files/{{$json[\"id\"]}}/export?mimeType=text/plain\n",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"Authorization\": \"Bearer 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\"\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "77e178b2-6714-443d-84cc-ce9fb42e838c",
+      "name": "HTTP Request3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        720,
+        464
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "YNSg2yUNyLNAoEz4",
+          "name": "Google Docs account"
+        },
+        "googleDriveOAuth2Api": {
+          "id": "aDywSQrzHJTw1FR7",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\nlet data = [];\nallItems.forEach(item => {\n  const binaryData = item.binary;\n  if (binaryData) {\n    Object.keys(binaryData).forEach(key => {\n      // MIME-Types für PDF und Word\n      const allowedMimeTypes = [\n        'application/pdf',\n        'application/msword',\n        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'\n      ];\n      \n      if (allowedMimeTypes.includes(binaryData[key]?.mimeType)) {\n        data.push({\n          binary: { data: binaryData[key] },\n          json: {\n            fileName: binaryData[key].fileName,\n            mimeType: binaryData[key].mimeType\n          }\n        });\n      }\n    });\n  }\n});\nreturn data;"
+      },
+      "id": "0bc3402e-be85-42eb-bf0c-0972d1415d3c",
+      "name": "Code: delete all but pdf and word",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -624,
+        544
+      ],
+      "executeOnce": false,
+      "typeVersion": 2,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "id": "0cd4c70c-9562-486e-95bd-497ba4816aac",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "leftValue": "={{ Object.keys($binary).length }}\n",
+              "rightValue": 0
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "c9246ef9-9e48-48e2-92a2-86b84e51f1c1",
+      "name": "has attachment?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -384,
+        544
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "id": "0cd4c70c-9562-486e-95bd-497ba4816aac",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              },
+              "leftValue": "={{ $json.mimeType }}",
+              "rightValue": "pdf"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "589c8adb-6f99-4a16-9af7-2fa98eb5c563",
+      "name": "PDF or WORD?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -96,
+        416
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Your task is to compare the given input text with the output article.\nEvaluate whether all essential information from the input text is accurately included in the output article, without adding any new information not present in the input.\nProcedure:\n\nCheck completeness: Is all relevant information from the input included in the output?\nAssess accuracy: Has the content been accurately reproduced, without changes or omissions?\nIdentify additional information: Has content not been added in the input? If so, which?\n\nOutput:\n\nScore (1 to 5):\n1 = Very poor (much missing or incorrect information, significant new content)\n2 = Unsatisfactory (several important omissions or incorrect content)\n3 = Fair (some minor errors or additions)\n4 = Good (almost everything correct, minimal deviations)\n5 = Very good (complete, accurate match)\nTextual rationale: A brief analysis of why this rating was given.\n\nHere's the input:\n\n{{ $('Gmail Trigger').item.json.text }}\n\nAnd here's the output:\n{{ $json.output }}"
+            },
+            {
+              "content": "sei pedantisch",
+              "role": "assistant"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "23e544fb-b617-4ed0-8b50-7005fb3938cb",
+      "name": "OpenAI self assesment",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        256,
+        704
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "wbdT65RgIH51SXDK",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Your task is to compare the given input text with the output article.\nEvaluate whether all essential information from the input text is accurately included in the output article, without adding any new information not present in the input.\nProcedure:\n\nCheck completeness: Is all relevant information from the input included in the output?\nAssess accuracy: Has the content been accurately reproduced, without any changes or omissions?\nIdentify additional information: Has content not been added in the input? If so, which?\n\nOutput:\n\nRating (1 to 5):\n1 = Very poor (much missing or incorrect information, significant new content)\n2 = Unsatisfactory (several important omissions or incorrect content)\n3 = Fair (some minor errors or additions)\n4 = Good (almost everything correct, minimal deviations)\n5 = Very good (complete, accurate match)\nTextual justification: A brief analysis of why this rating was given.\n\nHere is the input:\n{{ $('Extract from PDF1').item.json.text }}\n{{ $('Gmail Trigger').item.json.text }}\n\nAnd here is the output:\n {{ $json.output }}"
+            },
+            {
+              "content": "sei pedantisch",
+              "role": "assistant"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a9511453-e83f-4c82-b42b-437f0e60ba79",
+      "name": "OpenAI self-assesment2",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        976,
+        96
+      ],
+      "retryOnFail": true,
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "wbdT65RgIH51SXDK",
+          "name": "OpenAi account 3"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "emailType": "text",
+        "message": "=***** ARTICLE ***** \n\n{{ $('AI Article Writer 3').item.json.output }}\n\n***** REVIEW *****\n\n{{ $json.message.content }}\n\n***** ORIGINAL MESSAGE *****\n\n{{ $('Gmail Trigger').item.json.text }}",
+        "options": {}
+      },
+      "id": "e637424c-07f7-47ae-b599-3c992f02d905",
+      "name": "reply to sender (no attachment)",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        672,
+        704
+      ],
+      "webhookId": "521f7992-d12c-4485-92d8-41cc5567938b",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "f1gihLFgwj6wsgAe",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "emailType": "text",
+        "message": "=***** ARTICLE *****\n\n{{ $('AI Article Writer 2').item.json.output }}\n\n***** REVIEW *****\nRating 1 (poor) to 5 (very good):\n{{ $json.message.content }}\n\n***** RECEIVED EMAIL *****\n\n{{ $('Gmail Trigger').item.json.text }}\n\n***** CONTENTS APPENDIX *****\n\n{{ $('HTTP Request3').item.json.data }}\n",
+        "options": {}
+      },
+      "id": "dd902481-5d05-4a0c-9d9a-a33531544963",
+      "name": "reply to sender (word)",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1600,
+        464
+      ],
+      "webhookId": "5767887a-ca7a-41f9-9745-34d49bb79691",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "f1gihLFgwj6wsgAe",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "emailType": "text",
+        "message": "=***** ARTICLE *****\n{{ $('AI Article Writer 1').item.json.output }}\n\n***** REVIEW *****\nRating 1 (poor) to 5 (very good):\n{{ $json.message.content }}\n\n***** RECEIVED EMAIL *****\n\n{{ $('Gmail Trigger').item.json.text }}\n\n***** TEXT FROM PDF *****\n\n{{ $('Extract from PDF1').item.json.text }}\n",
+        "options": {}
+      },
+      "id": "781e9773-0e5b-433f-a8cb-bdbdaf6e24b2",
+      "name": "reply to sender (pdf)",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1376,
+        96
+      ],
+      "webhookId": "523f355b-404f-4a60-b393-e2c5d8f29098",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "f1gihLFgwj6wsgAe",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an editor at the English cultural magazine BBC. Create a publication-ready article from the text information using the following structure and approach:\n\nStyle and Language\n– Write in neutral, concise, and clear language.\n– Use English orthography.\n– Adhere to gender-neutral, active, and understandable wording.\n\nForm and Structure\n– Use the inverted pyramid format (most important information first, decreasing in importance).\n– Write a title and clear subheadings (no bullet points).\n– For event announcements, begin the article with a sentence that answers who, when, where, and what (e.g., \"Franz Tomaschett will speak on December 5th in Chur about the topic of work.\").\n– The body text should be between 250 and 500 words.\n\nContent and Data\n– Summarize all relevant content clearly.\n– Stick to the information from the email. Don't invent anything! Be precise!\n- If you're missing information, don't construct new ones.\n– Ignore all other file formats (e.g., images, Excel spreadsheets).\n– Don't use bullet points in the final article.\n- If subjective or controversial views are expressed, attribute them to the originators of those views. State the source/author of such statements. Example: \"QUOTATION in direct or indirect speech,\" writes the Wolf group in its communication.\n\nAdditional instruction\n– First, extract all important dates, people, and keywords. List them in a structured manner (e.g., with paragraphs or clear separation) before the actual article. Also count the number of characters and words in the article.\n\nExample output structure\n\nImportant dates and people\nList all relevant names, dates, places, appointments, etc. here in a concise and structured manner.\n\nList all relevant names, dates, places, appointments, etc. here in a concise and structured manner. Title\nShort, concise title\n\nIntroductory paragraph with the most important information (who, when, where, what)\n\nSubheading 1\nBackground, further connections, decreasingly important details\n\nSubheading 2\nRemaining information, contextualized and summarized\n\n(End of article, maximum 500 words.)\n\nPlease use these guidelines to write the article in high-quality, English-compliant language.\n\nHere is the information from the email\n\n {{ $('Gmail Trigger').item.json.text }}\n\n{{ $json.text }}",
+        "options": {}
+      },
+      "id": "9244e007-196c-4138-8fa3-989a779cb627",
+      "name": "AI Article Writer 1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "maxTries": 5,
+      "position": [
+        624,
+        96
+      ],
+      "retryOnFail": true,
+      "typeVersion": 1.7,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an editor at the English cultural magazine BBC. Create a publication-ready article from the text information using the following structure and approach:\n\nStyle and Language\n– Write in neutral, concise, and clear language.\n– Use English orthography.\n– Adhere to gender-neutral, active, and understandable wording.\n\nForm and Structure\n– Use the inverted pyramid format (most important information first, decreasing in importance).\n– Write a title and clear subheadings (no bullet points).\n– For event announcements, begin the article with a sentence that answers who, when, where, and what (e.g., \"Franz Tomaschett will speak on December 5th in Chur about the topic of work.\").\n– The body text should be between 250 and 500 words.\n\nContent and Data\n– Summarize all relevant content clearly.\n– Stick to the information from the email. Don't invent anything! Be precise!\n- If you're missing information, don't construct new ones.\n– Ignore all other file formats (e.g., images, Excel spreadsheets).\n– Don't use bullet points in the final article.\n- If subjective or controversial views are expressed, attribute them to the originators of those views. State the source/author of such statements. Example: \"QUOTATION in direct or indirect speech,\" writes the Wolf group in its communication.\n\nAdditional instruction\n– First, extract all important dates, people, and keywords. List them in a structured manner (e.g., with paragraphs or clear separation) before the actual article. Also count the number of characters and words in the article.\n\nExample output structure\n\nImportant dates and people\nList all relevant names, dates, places, appointments, etc. here in a concise and structured manner.\n\nList all relevant names, dates, places, appointments, etc. here in a concise and structured manner. Title\nShort, concise title\n\nIntroductory paragraph with the most important information (who, when, where, what)\n\nSubheading 1\nBackground, further connections, decreasingly important details\n\nSubheading 2\nRemaining information, contextualized and summarized\n\n(End of article, maximum 500 words.)\n\nPlease use these guidelines to write the article in high-quality, English-compliant language.\n\nHere is the information from the email\n\n{{ $('Gmail Trigger').item.json.text }}{{ $json.data }}",
+        "options": {}
+      },
+      "id": "e3ecb80f-1907-47d1-a6cf-b1e84bec98ee",
+      "name": "AI Article Writer 2",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        944,
+        464
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an editor at the English cultural magazine BBC. Create a publication-ready article from the text information using the following structure and approach:\n\nStyle and Language\n– Write in neutral, concise, and clear language.\n– Use English orthography.\n– Adhere to gender-neutral, active, and understandable wording.\n\nForm and Structure\n– Use the inverted pyramid format (most important information first, decreasing in importance).\n– Write a title and clear subheadings (no bullet points).\n– For event announcements, begin the article with a sentence that answers who, when, where, and what (e.g., \"Franz Tomaschett will speak on December 5th in Chur about the topic of work.\").\n– The body text should be between 250 and 500 words.\n– If subjective or controversial views are expressed, attribute them to the originators of these views. Name the source/author of such statements. Example: \"QUOTATION in direct or indirect speech,\" writes the Wolf group in its statement.\n\nContent and Data\n– Summarize all relevant content clearly.\n– Stick to the information in the email. Don't invent anything! Be precise!\n– If you're missing information, don't create new ones.\n– Ignore all other file formats (e.g., images, Excel spreadsheets).\n– Do not use bullet points in the final article.\n\nAdditional Instructions\n– First, extract all important data, people, and keywords. List them in a structured manner (e.g., with paragraphs or clear separation) before the actual article. Also count the number of characters and words in the article.\n\nExample output structure\n\nImportant dates and people\nList all relevant names, dates, places, appointments, etc. here in a concise and structured manner.\n\nList all relevant names, dates, places, appointments, etc. here in a concise and structured manner. Title\nShort, concise title\n\nIntroductory paragraph with the most important information (who, when, where, what)\n\nSubheading 1\nBackground, further connections, decreasingly important details\n\nSubheading 2\nRemaining information, contextualized and summarized\n\n(End of article, maximum 500 words.)\n\nPlease use these guidelines to write the article in high-quality, English-compliant language.\n\nHere is the information from the email\n\n{{ $('Gmail Trigger').item.json.text }}",
+        "options": {}
+      },
+      "id": "e7fd2602-3dc4-41a5-9af7-0536ddcaf269",
+      "name": "AI Article Writer 3",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -112,
+        704
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Your task is to compare the given input text with the output article.\nEvaluate whether all essential information from the input text is accurately included in the output article, without adding any new information not present in the input.\nProcedure:\n\nCheck completeness: Is all relevant information from the input included in the output?\nAssess accuracy: Has the content been accurately reproduced, without changes or omissions?\nIdentify additional information: Has content not been added in the input? If so, which?\n\nOutput:\n\nScore (1 to 5):\n1 = Very poor (much missing or incorrect information, significant new content)\n2 = Unsatisfactory (several important omissions or incorrect content)\n3 = Fair (some minor errors or additions)\n4 = Good (almost everything correct, minimal deviations)\n5 = Very good (complete, accurate match)\nTextual rationale: A brief analysis of why this rating was given.\n\nHere is the input:\n{{ $('HTTP Request3').item.json.data }}\n{{ $('Gmail Trigger').item.json.text }}\nAnd here is the output:\n{{ $json.output }}"
+            },
+            {
+              "content": "sei pedantisch",
+              "role": "assistant"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "294fe720-2779-484d-9e7a-5487b40abce5",
+      "name": "OpenAI self-assesment",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        1264,
+        464
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "wbdT65RgIH51SXDK",
+          "name": "OpenAi account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "={{ $json.fileName }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1SoMlXsftPztU8456RZuZQwvM21lMzHr-",
+          "mode": "list",
+          "cachedResultName": "Article",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1SoMlXsftPztU8456RZuZQwvM21lMzHr-"
+        },
+        "options": {
+          "useContentAsIndexableText": false
+        }
+      },
+      "id": "1b919b0a-eadc-44e4-98dd-4d14e0cae6de",
+      "name": "Upload file",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        208,
+        464
+      ],
+      "typeVersion": 3,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "aDywSQrzHJTw1FR7",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        576,
+        288
+      ],
+      "id": "2df13bb1-adf5-4453-a869-bb51c5a770eb",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "RBLojq3llSxCUL6o",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        688
+      ],
+      "id": "27c91a24-c5ad-4768-9663-cc169116708d",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "RBLojq3llSxCUL6o",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        912
+      ],
+      "id": "d87fb91b-c26c-4ab1-afa0-2f0ed79ffe18",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "RBLojq3llSxCUL6o",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "876593c4-8f81-48f2-a6ab-b2d90bfe7339",
+      "name": "Extract from PDF1",
+      "type": "n8n-nodes-base.extractFromFile",
+      "position": [
+        352,
+        96
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "PDF or WORD?": {
+      "main": [
+        [
+          {
+            "node": "Extract from PDF1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code: delete all but pdf and word",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "AI Article Writer 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "has attachment?": {
+      "main": [
+        [
+          {
+            "node": "PDF or WORD?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Article Writer 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Article Writer 1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI self-assesment2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Article Writer 2": {
+      "main": [
+        [
+          {
+            "node": "OpenAI self-assesment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Article Writer 3": {
+      "main": [
+        [
+          {
+            "node": "OpenAI self assesment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI self assesment": {
+      "main": [
+        [
+          {
+            "node": "reply to sender (no attachment)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI self-assesment": {
+      "main": [
+        [
+          {
+            "node": "reply to sender (word)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI self-assesment2": {
+      "main": [
+        [
+          {
+            "node": "reply to sender (pdf)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: delete all but pdf and word": {
+      "main": [
+        [
+          {
+            "node": "has attachment?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Article Writer 1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Article Writer 2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Article Writer 3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from PDF1": {
+      "main": [
+        [
+          {
+            "node": "AI Article Writer 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b0545f14-9696-4437-a470-99a4e1b85f84",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b1c85ec0f1d89059933e75ba93bbfa790ff7415c9d3ecfdaab1b9d7357355ecb"
+  },
+  "id": "c3NneyQbZE9akmHM",
+  "tags": []
+}

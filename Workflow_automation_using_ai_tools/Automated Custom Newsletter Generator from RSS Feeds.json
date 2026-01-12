@@ -1,0 +1,407 @@
+{
+  "name": "CNG",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -848,
+        752
+      ],
+      "id": "4f2ffd2f-e9ac-4687-a68e-5c2ddbf4c269",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "return[\n  { \"json\": { \"feed\": \"https://www.technologyreview.com/feed/\" } },\n  { \"json\": { \"feed\": \"https://towardsdatascience.com/feed\" } },\n  { \"json\": { \"feed\": \"https://www.aitrends.com/feed/\" } },\n  { \"json\": { \"feed\": \"https://news.mit.edu/rss/topic/artificial-intelligence2\" } },\n  { \"json\": { \"feed\": \"https://thegradient.pub/feed/\" } }\n]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -640,
+        752
+      ],
+      "id": "bd720992-d5f2-4982-80c7-43745585e631",
+      "name": "RSS Feeds"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -464,
+        560
+      ],
+      "id": "7e2b5c1b-5b45-4c29-94e9-7205f0b740d5",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.feed }}",
+        "options": {
+          "ignoreSSL": false
+        }
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        688
+      ],
+      "id": "6054be34-944a-400c-b9d8-64170471a111",
+      "name": "RSS Read",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "aabfdeff-d854-4ea8-9446-a77fae3c589e",
+              "leftValue": "={{ $('RSS Read').first().json.pubDate }}",
+              "rightValue": "={{ DateTime.now().minus({ days: 0 }) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        544
+      ],
+      "id": "6ff716d9-fb19-4fc8-8e59-0244913e395e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        624
+      ],
+      "id": "ca153aa7-e981-4ca1-89a3-08588fd383e9",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "F5AUEFDaKINJ2iZP",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=**System Prompt: AI News Summary Generation**\n\nYour task is to analyze the provided list of processed news articles (which focus on Artificial Intelligence) and generate a concise summary of the most significant recent developments.\n\n**Selection Criteria:**\n\n1.  **Prioritize Impactful AI News:** Identify and select the most impactful recent news articles covering the following key AI areas found within the input data. Aim to represent a *diverse range* of these topics if significant news is present for them:\n    *   **Significant AI Breakthroughs:** New model releases (e.g., Llama 4, new GPT/Claude/Gemini versions), novel techniques (new training methods, architectures), or major benchmark achievements.\n    *   **Major Company/Industry News:** Key product launches (AI features, platforms), significant partnerships, major funding rounds for AI companies, leadership changes at prominent AI labs, important acquisitions, or major strategic shifts.\n    *   **Notable Research & Development:** Significant research papers or findings published, major updates on large-scale AI projects (like infrastructure builds, foundational research initiatives).\n    *   **AI Policy, Regulation & Ethics:** Major government actions (new laws, regulations, investigations), significant lawsuits involving AI, widely discussed ethical concerns, safety debates, or societal impact discussions.\n    *   **Significant Hardware Developments:** Announcements of new AI-specific chips (TPUs, GPUs), advancements in AI computing infrastructure.\n\n2.  **Recency and Significance:** Within these categories, give preference to articles that appear most recent (check `pubDate` if available) and describe genuinely significant events, announcements, or findings rather than minor updates or routine mentions.\n\n3.  **Avoid Redundancy:** If multiple articles cover the *exact same* core news point (e.g., several sources reporting the identical funding announcement with the same details), select only one representative article for that specific point. Choose the one that seems most comprehensive or comes from a primary source if possible.\n\n**Output Requirements:**\n\n*   Select approximately **10 to 15** of the most relevant articles based on the criteria above. Ensure a focus on significance and try to achieve diversity across the key AI areas listed.\n*   For *each* selected article, format the output clearly as follows:\n\n    **Headline**: [The article's headline]\n    **Source**: [The article's source/author]\n    **Summary**: [A concise, one-sentence summary focusing on the key **AI-related** news takeaway from the article.]\n    **Link**: [The article's URL]\n\n*   Present the selected articles as a numbered or bulleted list.\n*   **ALWAYS INCLUDE THE LINK TO THE ARTICLE'S URL.**\n*   Do not make up information. Base the summary *only* on the content provided for each article in the input list.\n\n**Example (Illustrative - Content based on your sample output):**\n\n*   **Headline**: Google’s new Ironwood chip is 24x more powerful than the world’s fastest supercomputer\n    **Source**: Michael Nuñez\n    **Summary**: Google announced its seventh-generation TPU, 'Ironwood', optimized for AI inference and claimed to deliver 42.5 exaflops, significantly outperforming current supercomputers.\n    **Link**: https://venturebeat.com/ai/googles-new-ironwood-chip-is-24x-more-powerful-than-the-worlds-fastest-supercomputer/\n\n*(... and so on for other selected articles)*\n\n\n\n\n\n\n\n"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        784,
+        432
+      ],
+      "id": "e48e62b5-fb48-466f-a88f-c2df7d3dd7fb",
+      "name": "summarizeArticles"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function definition remains the same...\nfunction condenseAndFilterNews(inputDataArray) { // Changed parameter name for clarity\n  const condensedItems = [];\n  const seenLinks = new Set(); // To track unique links for deduplication\n\n  // Helper function to process a single article-like object\n  function processArticle(article) {\n     // Ensure 'article' is a valid object before processing\n     if (typeof article !== 'object' || article === null) {\n        console.warn(\"Skipping processing non-object article:\", article);\n        return null;\n     }\n\n    const title = article.title || '';\n    const link = article.link || article.url || article.guid || '';\n    // Ensure source attempts to find creator/author even if dc:creator is null/undefined\n    const source = article.creator || article.author || (article['dc:creator'] ? article['dc:creator'] : 'Unknown Source');\n    const content = article.contentSnippet || article.content || '';\n    const pubDate = article.isoDate || article.pubDate || '';\n\n    // --- Basic Validation and Deduplication ---\n    if (!title || !link) { // Require both title and a link/url/guid\n      // console.log('Skipping due to missing title or link:', title, link); // Optional logging\n      return null;\n    }\n    if (link && seenLinks.has(link)) { // Check for duplicates using the link/url/guid\n      // console.log('Skipping duplicate link:', link); // Optional logging\n      return null;\n    }\n    if (link) { // Only add non-empty links to the set\n      seenLinks.add(link);\n    }\n    // --- End Validation and Deduplication ---\n\n    // Keyword functionality removed here\n\n    return {\n      title,\n      source,\n      link,\n      content,\n      pubDate\n      // hasKeywords property removed here\n    };\n  }\n\n  // Iterate through the input array (which contains the actual data objects)\n  inputDataArray.forEach(item => {\n    // Ensure 'item' is a valid object before processing\n    if (typeof item !== 'object' || item === null) {\n      console.warn(\"Skipping non-object item in inputDataArray:\", item);\n      return; // Skips this iteration of forEach\n    }\n\n    if (item.error) {\n      // console.log('Skipping item with error property:', item); // Optional logging\n      // Skip items that explicitly signal an error\n      return; // Skips this iteration of forEach\n    }\n\n    // Check if it's a Tavily search result container\n    if (item.query && Array.isArray(item.results)) {\n       // console.log('Processing Tavily results for query:', item.query); // Optional logging\n      item.results.forEach(result => {\n        const condensed = processArticle(result);\n        if (condensed) {\n          condensedItems.push(condensed); // Add the processed data object\n        }\n      });\n    }\n    // Check if it looks like a direct RSS item or similar structure\n    else if (item.title && (item.link || item.url || item.guid)) {\n       // console.log('Processing direct item:', item.title); // Optional logging\n       const condensed = processArticle(item);\n       if (condensed) {\n         condensedItems.push(condensed); // Add the processed data object\n       }\n    }\n     // Skip Tavily summary items explicitly (those with query but no results array)\n     else if (item.query && !Array.isArray(item.results)) {\n        // console.log('Skipping Tavily summary object for query:', item.query); // Optional logging\n        // This is likely the Tavily summary object itself, skip it\n        return; // Skips this iteration of forEach\n     }\n    // Optional: Log unrecognized structures\n    // else {\n    //   console.warn(\"Skipping unrecognized item structure:\", JSON.stringify(item));\n    // }\n  });\n\n  // Return the array of processed data objects\n  // console.log('Condensed items count:', condensedItems.length); // Optional logging\n  return condensedItems;\n}\n\n// --- n8n Execution Part ---\n// n8n provides the input items in the 'items' variable (array of {json: {...}, binary: {...}})\n\n// 1. Extract the 'json' data from each incoming n8n item\n// Add a check in case items is empty or not an array\nconst inputData = Array.isArray(items) ? items.map(item => item.json) : [];\n\n// 2. Call your processing function with the extracted data\n// The function returns an array of your desired data objects: [{title: ..., source: ...}, ...]\nconst processedDataArray = condenseAndFilterNews(inputData);\n\n// 3. Map the processed data array back into the n8n item structure: [{json: {title:..., source:...}}, ...]\n// Ensure processedDataArray is an array before mapping\nconst n8nOutputItems = Array.isArray(processedDataArray) ? processedDataArray.map(dataObject => ({ json: dataObject })) : [];\n\n// 4. Return the final array structured for n8n\nreturn n8nOutputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        432
+      ],
+      "id": "e6194440-12c6-4559-b94c-f29a72d90beb",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        368,
+        432
+      ],
+      "id": "6cbc9e43-a897-47a3-a756-d2ac9e7e28cc",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"Latest news headlines about Artificial Intelligence today with URLs. Focus on significant breakthroughs, major company announcements, and notable research updates. Dont make up any data\",\n  \"topic\": \"general\",\n  \"search_depth\": \"basic\",\n  \"chunks_per_source\": 3,\n  \"max_results\": 5,\n  \"time_range\": null,\n  \"days\": 1,\n  \"include_answer\": true,\n  \"include_raw_content\": false,\n  \"include_images\": false,\n  \"include_image_descriptions\": false,\n  \"include_domains\": [\n        \"https://www.ft.com/\",\n        \"https://www.wsj.com/\",\n        \"https://www.bloomberg.com/\",\n        \"https://www.reuters.com/\"\n  ],\n  \"exclude_domains\": []\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -464,
+        320
+      ],
+      "id": "6e795bfb-65a8-4c52-b9ae-9c1710e2a723",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        0,
+        432
+      ],
+      "id": "7d911451-2f39-4a76-b018-fab8f94f1a76",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sendTo": "nadvee646@gmail.com",
+        "subject": "={{ $now.toFormat(\"MMMM dd\") }} AI Report ",
+        "message": "={{ $json.emailBodyHtml }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1456,
+        432
+      ],
+      "id": "229325cc-ddff-42c7-9f53-f8c792a53086",
+      "name": "Gmail",
+      "webhookId": "26773064-ce2f-4d2a-b472-ddc97f503d50",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "iuAKZns0TetoV42W",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Assume the LLM output text is in the first input item's JSON\nconst markdownInput = items[0].json.text;\n\n// --- Helper Function to Parse AI News Markdown ---\nfunction parseAiNewsMarkdown(markdown) {\n  const lines = markdown.split('\\n').filter(line => line.trim() !== '');\n  const articles = [];\n  let currentItem = null;\n\n  // Regex definitions\n  const itemStartRegex = /^(\\d+)\\.\\s+\\*\\*(Headline|Title)\\*\\*:\\s+(.+)/i;\n  const sourceRegex = /^\\s*-?\\s*\\*\\*Source\\*\\*:\\s+(.+)/i;\n  const summaryRegex = /^\\s*-?\\s*\\*\\*Summary\\*\\*:\\s+(.+)/i;\n  // Capture [text](url) OR <url> OR plain https://url\n  const linkRegex = /^\\s*-?\\s*\\*\\*Link\\*\\*:\\s*(?:\\[.*?\\]\\((https?:\\/\\/[^\\s)]+)\\)|<?(https?:\\/\\/[^\\s>]+)>?)/i;\n\n  for (const line of lines) {\n    const itemMatch = line.match(itemStartRegex);\n    if (itemMatch) {\n      // Save previous item\n      if (currentItem) {\n        articles.push(currentItem);\n      }\n      // Start a new item\n      currentItem = { headline: itemMatch[3].trim() };\n      continue;\n    }\n\n    if (currentItem) {\n      const sourceMatch = line.match(sourceRegex);\n      if (sourceMatch) {\n        currentItem.source = sourceMatch[1].trim();\n        continue;\n      }\n      const summaryMatch = line.match(summaryRegex);\n      if (summaryMatch) {\n        currentItem.summary = summaryMatch[1].trim();\n        continue;\n      }\n      const linkMatch = line.match(linkRegex);\n      if (linkMatch) {\n        currentItem.link = (linkMatch[1] || linkMatch[2]).trim();\n        continue;\n      }\n    }\n  }\n\n  // Add last item\n  if (currentItem) {\n    articles.push(currentItem);\n  }\n\n  return articles;\n}\n\n// --- Parse the LLM's Markdown Output ---\nconst parsedArticles = parseAiNewsMarkdown(markdownInput);\n\n// --- Basic Inline CSS Styles ---\nconst styles = {\n  body: 'font-family: Arial, Helvetica, sans-serif; line-height: 1.6; color: #333; padding: 15px; background-color: #f9f9f9;',\n  h2: 'color: #1a0dab; border-bottom: 2px solid #1a0dab; padding-bottom: 8px; margin-bottom: 20px; font-size: 1.6em; text-align: center;',\n  list: 'list-style: none; padding-left: 0;',\n  listItem: 'margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);',\n  headline: 'font-weight: bold; color: #333; font-size: 1.15em; margin-bottom: 8px; display: block;',\n  label: 'font-weight: bold; color: #555;',\n  link: 'color: #1a0dab; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;',\n  footer: 'font-size: 0.8em; color: #777; margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px; text-align: center;'\n};\n\n// --- Build the HTML String ---\nconst summaryDate = new Date().toLocaleDateString();\n\nlet html = `\n<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>AI News Summary</title>\n</head>\n<body style=\"${styles.body}\">\n\n<h2 style=\"${styles.h2}\">AI News Summary (${summaryDate})</h2>\n`;\n\nif (parsedArticles && parsedArticles.length > 0) {\n  html += `<ul style=\"${styles.list}\">`;\n\n  parsedArticles.forEach((article) => {\n    html += `<li style=\"${styles.listItem}\">`;\n    html += `<span style=\"${styles.headline}\">${article.headline || 'AI News Item'}</span>`;\n    html += `<span style=\"${styles.label}\">Source:</span> ${article.source || 'N/A'}<br>`;\n    html += `<span style=\"${styles.label}\">Summary:</span> ${article.summary || 'N/A'}<br>`;\n    if (article.link) {\n      const cleanLink = article.link.trim();\n      html += `<a href=\"${cleanLink}\" target=\"_blank\" style=\"${styles.link}\" onmouseover=\"this.style.textDecoration='underline'\" onmouseout=\"this.style.textDecoration='none'\">Read More »</a>`;\n    }\n    html += `</li>`;\n  });\n\n  html += '</ul>';\n} else {\n  html += '<p>No relevant AI news articles found in the summary.</p>';\n}\n\nhtml += `\n<p style=\"${styles.footer}\">\n  This summary highlights key developments in Artificial Intelligence. Data processed on ${new Date().toLocaleString()}.\n</p>\n</body>\n</html>`;\n\n// Return the generated HTML in the n8n item structure\nreturn [{ json: { emailBodyHtml: html } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        432
+      ],
+      "id": "a42b84d4-82fe-4143-b73d-a95362b1e753",
+      "name": "Code1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Feeds",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feeds": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        []
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "summarizeArticles",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "summarizeArticles": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "summarizeArticles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ee1ba6e3-986a-4808-b348-ec6afe849e76",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3a4ba8ab3556586419b856ad3e16c5a3f85a65fac589a0e56e64299894c4d493"
+  },
+  "id": "itYiN9qIaeIlfHNT",
+  "tags": []
+}

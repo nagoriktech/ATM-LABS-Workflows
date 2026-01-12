@@ -1,0 +1,1152 @@
+{
+  "name": "Linkedin Outreach",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1fYFdVw2deu9OwxxO-NpPnXjZiKnaWzq53VkKDacCqWc",
+          "mode": "list",
+          "cachedResultName": "Apify + Apollo + n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fYFdVw2deu9OwxxO-NpPnXjZiKnaWzq53VkKDacCqWc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fYFdVw2deu9OwxxO-NpPnXjZiKnaWzq53VkKDacCqWc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Full Name": "={{ $json.output.fullName }}",
+            "Email": "={{ $json.output.email }}",
+            "Title": "={{ $json.output.title }}",
+            "Personal LinkedIn": "={{ $json.output.LinkedIn }}",
+            "Company Name": "={{ $json.output.companyName }}",
+            "Company Website": "={{ $json.output.companyWebsite }}",
+            "Company LinkedIn": "={{ $json.output.companyLinkedIn }}",
+            "Personal Summary": "={{ $json.output.summary }}",
+            "First Name": "={{ $json.output.firstName }}",
+            "Last Name": "={{ $json.output.lastName }}"
+          },
+          "matchingColumns": [
+            "Full Name"
+          ],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Personal LinkedIn",
+              "displayName": "Personal LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company Website",
+              "displayName": "Company Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company LinkedIn",
+              "displayName": "Company LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Personal Summary",
+              "displayName": "Personal Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Background",
+              "displayName": "Company Background",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Recent Company News",
+              "displayName": "Recent Company News",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Key Offerings",
+              "displayName": "Key Offerings",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Sentiment",
+              "displayName": "Customer Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Summary",
+              "displayName": "Company Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Outreach Message",
+              "displayName": "Outreach Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "9ea4ef08-7549-47ff-8614-462d1e956a1a",
+      "name": "Add to Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        272,
+        -480
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pF2CcSw9COIj9WOV",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Apollo + Apify Lead Generation",
+        "formDescription": "Describe the types of leads you are trying to find.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Job Title",
+              "placeholder": "Founder, Engineer, Owner"
+            },
+            {
+              "fieldLabel": "Company Size",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "1-10"
+                  },
+                  {
+                    "option": "11-50"
+                  },
+                  {
+                    "option": "51-200"
+                  },
+                  {
+                    "option": "201-1000"
+                  },
+                  {
+                    "option": "10001-5000"
+                  },
+                  {
+                    "option": "5001-10000"
+                  },
+                  {
+                    "option": "10001-100000"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Keywords",
+              "placeholder": "Keywords relevant to the contact or company"
+            },
+            {
+              "fieldLabel": "Location",
+              "placeholder": "United States, California, London"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -1264,
+        -464
+      ],
+      "id": "288ccbe9-7c75-4da1-ad54-ab3242ffc802",
+      "name": "On form submission",
+      "webhookId": "8cb700c7-42a3-4c74-a131-1f15ff4d52e4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Job Title: {{ $json['Job Title'] }}\n\nCompany Size: {{ $json['Company Size'] }}\n\nKeywords: {{ $json.Keywords }}\n\nLocation: {{ $json.Location }}\n\n\n",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are an expert Apollo.io search URL generator. Your task is to convert form data into a precise Apollo search URL.\n\n**CRITICAL INSTRUCTIONS:**\n\n1.  **Handle Multiple Values**: Fields like 'Job Title', 'Keywords', and 'Location' can contain multiple items separated by a comma. When you see a comma-separated list, you **MUST** create a separate URL parameter for **EACH** item in the list.\n    * _Example for Titles:_ `personTitles[]=Founder&personTitles[]=CEO`\n    * _Example for Locations:_ `personLocations[]=United%20States&personLocations[]=Austin`\n\n2.  **Supported Fields & URL Parameters**:\n    * **Location**: Maps to `personLocations[]`. Create one for each location in the list.\n    * **Job Title**: Maps to `personTitles[]`. Create one for each title in the list.\n    * **Company Size**: Maps to `organizationNumEmployeesRanges[]`. This is a single value and should use a hyphen (e.g., `1-10`).\n    * **Keywords**: Maps to `qOrganizationKeywordTags[]`. Create one for each keyword in the list.\n\n3.  **URL Encoding**: Ensure all values are properly URL-encoded (e.g., spaces become `%20`, and commas within a single location value like \"Austin, Texas\" become `%2C`).\n\n---\n\n**EXAMPLE:**\n\n**Input Data:**\nJob Title: Founder, CEO, President\nCompany Size: 1-10\nKeywords: Fintech, SaaS\nLocation: United States, Austin, Texas, Boston\n\n**Your Output (must be this exact format):**\nhttps://app.apollo.io/#/people?personTitles[]=Founder&personTitles[]=CEO&personTitles[]=President&organizationNumEmployeesRanges[]=1-10&qOrganizationKeywordTags[]=Fintech&qOrganizationKeywordTags[]=SaaS&personLocations[]=United%20States&personLocations[]=Austin%2C%20Texas&personLocations[]=Boston"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -1056,
+        -464
+      ],
+      "id": "b8100371-0131-4667-bee7-f3e2b97b75a4",
+      "name": "Apollo URL Generator"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/code_crafter~apollo-io-scraper/run-sync-get-dataset-items",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer apify_api_BMd6qXXeUXig87hpNFsHUPHz2Mfax13j5aWG"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"getPersonalEmails\": true,\n    \"getWorkEmails\": true,\n    \"totalRecords\": 500,\n    \"url\": \"{{ $json.text }}\"\n}",
+        "options": {}
+      },
+      "id": "17564b70-c503-47be-b741-e02d1d00038c",
+      "name": "Run Apify",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -736,
+        -464
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"fullName\": \"Stefan Chira\",\n  \"firstName\": \"Stefan\",\n  \"lastName\": \"Chira\",\n  \"email\": \"stefan@quantumturf.com\",\n  \"title\": \"Founder\",\n  \"LinkedIn\": \"http://www.linkedin.com/in/stefanchira\",\n  \"companyName\": \"Quantum Turf\",\n  \"companyWebsite\": \"http://www.quantumturf.com\",\n  \"companyLinkedIn\": \"http://www.linkedin.com/company/quantumturf\",\n  \"summary\": \"Stefan Chira is the Founder of Quantum Turf...\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -368,
+        -288
+      ],
+      "id": "222ede29-f362-4e1f-ba9b-709d86d5f92d",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Full Name: {{ $json.name }}\n\nFirst Name: {{ $json.first_name }}\n\nLast Name: {{ $json.last_name }}\n\nTitle: {{ $json.title }}\n\nEmail: {{ $json.email }}\n\nLinkedIn: {{ $json.linkedin_url }}\n\nOrg Name: {{ $json.organization_name }}\n\nOrg Website: {{ $json.organization_website_url }}\n\nOrg LinkedIn: {{ $json.organization_linkedin_url }}\n\n\n",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a sophisticated AI data-processing engine. Your task is to receive a raw JSON object for a single business prospect, perform two critical actions, and then provide your response in a specific JSON format.\n\n**Your Instructions:**\n\n1.  **EXTRACT KEY DATA:** You must parse the raw JSON input to find and extract the following specific data points. If a field is not present, use a value of `null`.\n    * **Full Name:** Look for `name`.\n    * **First Name** Look for 'first_name'\n    * **Last Name** Look for 'last_name'\n    * **Email:** Find the first available email address. Look in fields like `emails` or `personal_emails`.\n    * **LinkedIn** Look for the 'linkedin_url'\n    * **Title:** Look for the `title` field.\n    * **Company Name:** Look for the `organization_name` field.\n    * **Company Website:** Look for the `organization_website` field.\n    * **Company LinkedIn:** Combine `organization_linkedin.\n\n2.  **SYNTHESIZE A SUMMARY:** After extracting the data, write a concise, 2-3 sentence professional summary suitable for a sales team.\n\n3.  **FORMAT THE OUTPUT:** You MUST structure your entire response as a single, clean JSON object. The object should contain exactly the keys listed below. Do not include any other text, explanations, or greetings in your response—ONLY the final JSON object.\n\n**Required Output Format:**\n{\n  \"fullName\": \"...\",\n  \"firstName\": \"...\",\n  \"lastName\": \"...\",\n  \"email\": \"...\",\n  \"title\": \"...\",\n  \"LinkedIn\"\n  \"companyName\": \"...\",\n  \"companyWebsite\": \"...\",\n  \"companyLinkedIn\": \"...\",\n  \"summary\": \"...\"\n}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -560,
+        -464
+      ],
+      "id": "a1dff638-a135-4763-a041-abf76ff7c353",
+      "name": "Parse Lead Data",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## | LinkedIn Scraper + Cold Outreach [Upgraded]\n\n## How it Works\n\n### - Describe the leads you want via the form\n### - Apollo search URL is generated\n### - URL sent to Apify, Apollo scrape executed\n### - Raw lead data is parsed via OpenAI\n### - Lead data uploaded to Google Sheets\n### - Company research done via Tavily\n### - Lead info + company info combined for custom outreach messaging\n### - Lead + messaging added to Instantly.ai campaign\n\n## APIs Needed\n\n### - Apify.com API key\n### - Openai.com API key\n### - Instantly.ai API key\n### - Tavily.com API key\n\n## Apify Actor Used\n\n### - https://console.apify.com/actors/jljBwyyQakqrL1wae/input\n\n\n## Costs\n\n### - Instantly = $38 / month\n### - Tavily = free first 100 leads, then $0.08 / lead*\n### - Apify = $39  / month\n### - Apollo = $1.20 / 1000 leads\n### - That $1.20 is taken from your $39 credit\n### - < $0.10 / 100 leads for GPT API costs",
+        "height": 1020,
+        "width": 560,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1904,
+        -576
+      ],
+      "id": "20ce4fa9-7993-47f1-a247-983e52ed0bd3",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -976,
+        208
+      ],
+      "id": "33deb9f6-0a73-4eb9-8c6b-dd3da5e1aaa7",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "F5AUEFDaKINJ2iZP",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "66ed70ea-b2e8-4c7f-ac2c-34ef13066b55",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        -464
+      ],
+      "id": "a867dad1-cc2a-44a9-8751-73b74ab089ae",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        272,
+        -240
+      ],
+      "id": "78c6e056-793b-4686-86e2-b12f2f5cb138",
+      "name": "Limit1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1248,
+        -48
+      ],
+      "id": "2f6686da-0c8e-45ae-bb43-632af64198b6",
+      "name": "Loop Over Items",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1fYFdVw2deu9OwxxO-NpPnXjZiKnaWzq53VkKDacCqWc",
+          "mode": "list",
+          "cachedResultName": "Apify + Apollo + n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fYFdVw2deu9OwxxO-NpPnXjZiKnaWzq53VkKDacCqWc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fYFdVw2deu9OwxxO-NpPnXjZiKnaWzq53VkKDacCqWc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Loop Over Items').item.json.Email }}",
+            "Company Summary": "={{ $('Company Research').item.json.output.comprehensiveSummary }}",
+            "Recent Company News": "={{ $('Company Research').item.json.output.recentWebsiteNews }}",
+            "Key Offerings": "={{ $('Company Research').item.json.output.keyOfferings }}",
+            "Customer Sentiment": "={{ $('Company Research').item.json.output.thirdPartySentiment }}",
+            "Outreach Message": "={{ $json.text }}",
+            "Company Background": "={{ $('Company Research').item.json.output.companyOverview }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Personal LinkedIn",
+              "displayName": "Personal LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company Website",
+              "displayName": "Company Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company LinkedIn",
+              "displayName": "Company LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Personal Summary",
+              "displayName": "Personal Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Background",
+              "displayName": "Company Background",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Recent Company News",
+              "displayName": "Recent Company News",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Key Offerings",
+              "displayName": "Key Offerings",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Sentiment",
+              "displayName": "Customer Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Summary",
+              "displayName": "Company Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Outreach Message",
+              "displayName": "Outreach Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        144,
+        192
+      ],
+      "id": "85240ed2-c285-4d95-8b69-10bf085d80ce",
+      "name": "Add Company Info to Google Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pF2CcSw9COIj9WOV",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"companyOverview\": \"String: 1-2 sentence description from website. (Source: ...)\",\n  \"recentWebsiteNews\": \"String: Bullet points of recent website news/blog posts. (Source: ...)\",\n  \"keyOfferings\": \"String: Bullet points of key products/services. (Source: ...)\",\n  \"thirdPartySentiment\": \"String: Bullet points of third-party sentiment or 'Not found'. (Source: ...)\",\n  \"comprehensiveSummary\": \"String: 1-2 sentence synthesis of companyOverview, recentWebsiteNews, keyOfferings, and thirdPartySentiment\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -656,
+        208
+      ],
+      "id": "fb25777b-385b-46b6-93aa-3be4652addeb",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -448,
+        208
+      ],
+      "id": "c8e21c93-6fff-4342-9521-4d6e4c37b7a9",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "F5AUEFDaKINJ2iZP",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=name:  {{ $('Loop Over Items').item.json[\"Full Name\"] }}\n\npersonal background: {{ $('Loop Over Items').item.json[\"Personal Summary\"] }}\n\ncompany name: {{ $('Loop Over Items').item.json[\"Company Name\"] }}\n\ncompany background: {{ $json.output.comprehensiveSummary }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are an Expert B2B Cold Outreach Email Drafter. Your objective is to compose a concise, professional, and highly personalized email body (target 100-150 words) to introduce ChaseAI's AI consulting services to a business prospect.\n\n**Your Company:** ChaseAI\n**Your Offering:** AI consulting focused on helping businesses leverage AI for benefits like operational efficiency, enhanced customer engagement, data-driven decision making, and strategic growth.\n\n**Input Data Provided:**\nYou will receive the following information about the prospect and their company:\n*   `name`: The prospect's name\n*   `personal background`: A summary of the prospect's background\n*   `company name`: The name of the prospect's company.\n*   `company background`: A summary of the company's background.\n\n**Drafting Instructions:**\n\n1.  **Identify the Strongest Hook:**\n    *   Carefully analyze BOTH the `personal background` and the `company background` inputs.\n    *   Look for the *single most compelling and relevant piece of information* to use as a personalized opening. Prioritize items like:\n        *   Specific achievements, projects, or unique connectors mentioned.\n        *   Recent, significant company news (funding, major launch, partnership) from `company background`.\n        *   A key offering or aspect of the `companyOverview` that strongly aligns with potential AI applications.\n        *   A specific technical specialization or outreach angle\n    *   Choose the hook that allows the most natural and logical transition to the value of AI consulting for *this specific prospect* in *their specific company*.\n\n2.  **Structure & Content:**\n    *   **Opening (Personalized Hook):** Start by briefly acknowledging the prospect (using their name extracted from the `name` field) and referencing the specific hook you selected (1 sentence). Make it clear you've done some research.\n    *   **Introduction:** Briefly introduce ChaseAI and that you offer AI consulting (1 sentence).\n    *   **Value Proposition (Connecting the Dots):** Explain *why* AI consulting might be relevant *specifically* to them, given the hook point, their role ({{ $('Limit1').item.json.Title }}), and their `company`. Focus on potential benefits like efficiency, growth, tackling challenges related to their recent news, etc. (1-2 sentences).\n    *   **Call to Action (Soft):** Suggest a brief, low-pressure next step (e.g., \"Would exploring how AI could apply to [Specific Area Mentioned] be valuable?\", \"Open to a quick chat sometime next week?\").\n\n3.  **Tone:** Professional, concise, respectful, knowledgeable (demonstrated by the hook), and focused on potential value. Avoid jargon where possible.\n\n4.  **Constraints:**\n    *   Strict word count: Aim for 100-150 words for the email body.\n    *   Use only the information provided in the input fields. Do not invent details.\n    *   If both `personal background` and `company background` lack strong, specific hooks, create the most relevant message possible focusing on their role and the `company Overview`, connecting AI's general benefits.\n    *   Return ONLY the drafted email body as a single string. Do not include a subject line, greeting (\"Hi [Name],\"), sign-off (\"Best,\"), or begin the draft by mention their first name (the opener will have already been written with their first name)\n\n**Output Format:**\nReturn ONLY the drafted email body as a single string. Do not include a subject line, greeting (\"Hi [Name],\"), sign-off (\"Best,\"), or begin the draft by mention their first name (the opener will have already been written with their first name)\n\n**Example Output**\n\nI noticed Synchro Social’s focus on videography and strategic content creation, which presents great opportunities to harness AI for enhancing content personalization and streamlining production workflows. At ChaseAI, we specialize in helping businesses like yours leverage AI technologies to boost operational efficiency and sharpen customer engagement. Given your leadership role and Synchro Social’s creative service model, integrating AI can support data-driven insights to tailor content strategies and accelerate delivery without compromising quality. Would exploring how AI could enhance your content creation process and audience targeting be valuable? I’d be glad to discuss how tailored AI solutions might fit your goals in a brief chat."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        -464,
+        -16
+      ],
+      "id": "f90600b5-8c8d-4e37-b70f-63131a147276",
+      "name": "Generate Outreach Message",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=company: {{ $json[\"Company Name\"] }}\n\ncompany website: {{ $json[\"Company Website\"] }}\n\ncompany linkedin: {{ $json[\"Company LinkedIn\"] }}\n\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a Company Information Synthesizer. Your primary goal is to extract key information about a target company by leveraging the `tavilysearch` tool, prioritizing content likely originating from the company's official website. Your secondary goals are checking third-party sources for customer sentiment and recent news about the comapny. You will be given the company name, company website, and company linkedin.\n\n**CORE DIRECTIVES:**\n1.  **TOOL USAGE:** You MUST ONLY use the `tavilysearch` tool for information gathering.\n2.  **PRIMARY SOURCE FOCUS (Website):** Prioritize finding and summarizing information directly presented on the company's official website (e.g., About Us, News/Blog/Press sections, Product/Service pages, Contact Us page). Use Tavily to locate these pages or relevant summaries.\n3.  **SECONDARY SOURCE (Sentiment ONLY):** Use Tavily to search third-party review sites (G2, Capterra, etc.) or forums (Reddit) ONLY for customer sentiment.\n4.  **RECENCY:** For news and highlights, focus on information from the last 12-18 months.\n5.  **CONCISENESS:** Keep summaries brief and factual.\n6.  **ACCURACY:** Do not invent information.\n\n**RESEARCH FOCUS (Guide for using Tavily):**\n*   **Core Business:** Search for \"[Company Name] About Us\", \"[Company Name] Mission\", or what the company does, aiming for results likely linking to or summarizing their main website content.\n*   **Recent Website News:** Search for \"[Company Name] news\", \"[Company Name] press release\", \"[Company Name] blog\", looking for recent announcements likely hosted on their domain.\n*   **Products/Services:** Search for \"[Company Name] products\", \"[Company Name] services\", aiming for results describing their core offerings, likely from their website.\n*   **Third-Party Sentiment:** Search `\"[Company Name] review site:g2.com\"`, `\"[Company Name] reddit discussion\"`, etc.\n\n**OUTPUT FORMAT:**\nYour final response MUST be a single JSON object containing the following keys. Provide concise, bulleted string values where appropriate:\n\n{\n  \"companyOverview\": \"[1-2 sentence description of what the company does, its mission, or value proposition, based on information likely found on their website.] (Source: Primarily Company Website via Tavily Search Results)\",\n  \"recentWebsiteNews\": \"[Bullet point about a specific recent announcement, update, or blog post likely found on the company's website.] (Source: Link to specific page/article if found by Tavily, otherwise 'Company Website News/Blog')\\n- [Optional second bullet point.] (Source: Link or 'Company Website News/Blog')\",\n  \"keyOfferings\": \"[Bullet point listing a key product or service.] (Source: Company Website via Tavily Search Results)\\n- [Optional second bullet point listing another offering.] (Source: Company Website via Tavily Search Results)\",\n  \"thirdPartySentiment\": \"[Bullet point summarizing specific praise/criticism from a third-party review site/forum. Quote if concise.] (Source: [Specific URL/Site Name])\\n- [Optional second bullet point.] (Source: [Specific URL/Site Name])\",\n  \"comprehensiveSummary\": \"[1-2 sentence write up that synthesizes and ties the companyOverview, recentWebsiteNews, keyOfferings, and thirdPartySentiment all together]\"\n}\n\n**HANDLING NO RESULTS:**\nIf `tavilysearch` finds no relevant information, the value MUST be a string stating: \"No relevant [Category Name, e.g., recent website news] found via Tavily search.\" Source citation for website content (overview, news, offerings) can be general ('Company Website via Tavily') unless a specific article/page URL is readily available in the search results. Source citation for `thirdPartySentiment` MUST be specific."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -848,
+        -16
+      ],
+      "id": "62c56d19-a58f-4792-8092-25ca5951b0fd",
+      "name": "Company Research",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.instantly.ai/api/v2/leads",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer NmJhZGUyNGEtOWZmOC00MWM0LWEwYTAtYWM1ZWUwOGUzNGY2OmlNdGN2Y2x2QmJVZQ=="
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"campaign\": \"{{ $('On form submission').item.json[\"Instantly Campaign ID\"] }}\",\n  \"email\": \"{{ $json.Email }}\",\n  \"last_name\": \"{{ $('Loop Over Items').item.json['Last Name'] }}\",\n  \"first_name\": \"{{ $('Loop Over Items').item.json[\"First Name\"] }}\",\n  \"company_name\": \"{{ $('Loop Over Items').item.json['Company Name'] }}\",\n  \"custom_variables\": {\n    \"custom_body\": \"{{ $('Generate Outreach Message').item.json.text }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        848,
+        240
+      ],
+      "id": "b2e177cf-d1c1-4bc6-b891-5734185d87d6",
+      "name": "Add Lead to Instantly AI"
+    },
+    {
+      "parameters": {
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {
+          "search_depth": "advanced",
+          "max_results": 5,
+          "time_range": "year"
+        }
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        208
+      ],
+      "id": "04c85d6c-884f-4277-86cb-5a008fe13008",
+      "name": "Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "Vu2JizL93WCMgZ0z",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## LinkedIn Scraper via Apollo",
+        "height": 420,
+        "width": 1720,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        -560
+      ],
+      "id": "f63b6687-13b0-4cde-8bb7-b8321df43d09",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Company Research + Outreach",
+        "height": 540,
+        "width": 1720,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        -144
+      ],
+      "id": "2349a08b-37e9-471c-81d5-29c2d6c11240",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3540bb36-6c11-42b7-b60f-041949602341",
+              "leftValue": "={{ $json.output.email }}",
+              "rightValue": "\"null\"",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "5f93ee26-c354-4c13-99a0-837923a0737e",
+              "leftValue": "={{ $json.output.email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        -480
+      ],
+      "id": "f78f3214-6b7d-4eac-8e0f-d2b37c9e1536",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1104,
+        -272
+      ],
+      "id": "36db0a43-1acc-465d-b48c-50b5883b0a47",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "chYkaI9nIz4ccSsC",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        -256
+      ],
+      "id": "b3509d58-b696-47a6-ae24-0abc22b45d00",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "chYkaI9nIz4ccSsC",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Add to Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Limit1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Apollo URL Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo URL Generator": {
+      "main": [
+        [
+          {
+            "node": "Run Apify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Apify": {
+      "main": [
+        [
+          {
+            "node": "Parse Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Parse Lead Data",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Lead Data": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Company Research",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Company Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Company Info to Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Company Research",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Outreach Message",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Company Research": {
+      "main": [
+        [
+          {
+            "node": "Generate Outreach Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Outreach Message": {
+      "main": [
+        [
+          {
+            "node": "Add Company Info to Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Lead to Instantly AI": {
+      "main": [
+        []
+      ]
+    },
+    "Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "Company Research",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Add to Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Apollo URL Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Parse Lead Data",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e88db625-9a58-484f-8bde-9ac92c21dbee",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3a4ba8ab3556586419b856ad3e16c5a3f85a65fac589a0e56e64299894c4d493"
+  },
+  "id": "xqYjgRPBHhBu9d2Q",
+  "tags": []
+}

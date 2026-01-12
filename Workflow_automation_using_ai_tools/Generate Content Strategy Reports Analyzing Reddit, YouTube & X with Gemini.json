@@ -1,0 +1,988 @@
+{
+  "name": "content_strategy_report_generation",
+  "nodes": [
+    {
+      "parameters": {
+        "batchSize": 10,
+        "options": {}
+      },
+      "id": "b242c156-0c71-4787-9947-03e6b9e43ef7",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -2320,
+        384
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "formTitle": "Survey topic",
+        "formDescription": "Please enter the core keywords you want to analyze, then click Submit.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "keyword",
+              "placeholder": "e.g.AI",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "48501b5c-788d-430a-a932-022551be71ac",
+      "name": "Form Trigger",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        -3456,
+        304
+      ],
+      "webhookId": "253ac9e8-08aa-4cf5-af18-287fcb5b496b",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "keyword-assignment",
+              "name": "keyword",
+              "type": "string",
+              "value": "={{ $json.keyword}}"
+            },
+            {
+              "id": "date-assignment",
+              "name": "search_date",
+              "type": "string",
+              "value": "={{ $now.toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "id": "analysis-id",
+              "name": "analysis_id",
+              "type": "string",
+              "value": "={{ $now.toFormat('yyyyMMddHHmmss') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3ff53f54-ea50-4c13-b219-140374dafd8c",
+      "name": "Analysis Parameters",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -3280,
+        304
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "location": "allReddit",
+        "keyword": "={{ $('Analysis Parameters').item.json.keyword }}",
+        "limit": 20,
+        "additionalFields": {}
+      },
+      "id": "e91c4c2c-c847-4d03-a292-6a04806beba5",
+      "name": "Reddit: Search Posts",
+      "type": "n8n-nodes-base.reddit",
+      "position": [
+        -3072,
+        160
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "CnaZqfHB9XidJIrV",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "reddit-weight",
+              "name": "source_weight",
+              "type": "number",
+              "value": 0.7
+            },
+            {
+              "id": "reddit-source",
+              "name": "source_type",
+              "type": "string",
+              "value": "reddit"
+            },
+            {
+              "id": "reddit-content",
+              "name": "content",
+              "type": "string",
+              "value": "={{ $json.title + ' ' + ($json.selftext || '') }}"
+            },
+            {
+              "id": "reddit-url",
+              "name": "url",
+              "type": "string",
+              "value": "={{ $json.url }}"
+            },
+            {
+              "id": "reddit-score",
+              "name": "engagement_score",
+              "type": "number",
+              "value": "={{ $json.ups }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "07b8b628-d47c-4db6-a177-361cae2b18ab",
+      "name": "Format Reddit Data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -2880,
+        160
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/youtube/v3/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "q",
+              "value": "={{ $('Analysis Parameters').item.json.keyword }}"
+            },
+            {
+              "name": "type",
+              "value": "video"
+            },
+            {
+              "name": "order",
+              "value": "relevance"
+            },
+            {
+              "name": "maxResults",
+              "value": "15"
+            },
+            {
+              "name": "publishedAfter",
+              "value": "={{ $now.minus({days: 7}).toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ce762f7d-1358-4005-a75b-d176a1cdc158",
+      "name": "YouTube: Search Videos",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -3072,
+        352
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "gs8ussAa1EigBkCf",
+          "name": "Query Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "id": "48f5fa9e-0322-4836-bb00-1283af808f6d",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -2880,
+        352
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 新代码：输出与其他平台完全一致的格式，并增加 engagement_score\ntry {\n  const tweetObject = $input.item.json;\n\n  // 从推文的公开指标(public_metrics)中计算一个综合的互动分数\n  // 同时增加安全检查，防止某些指标不存在时报错\n  const metrics = tweetObject.public_metrics || {};\n  const likeCount = metrics.like_count || 0;\n  const retweetCount = metrics.retweet_count || 0;\n  const replyCount = metrics.reply_count || 0;\n  const quoteCount = metrics.quote_count || 0;\n  const engagementScore = likeCount + retweetCount + replyCount + quoteCount;\n\n  // 构建与其他平台格式完全一致的result对象\n  const result = {\n    source_weight: 0.9,                        // 权重\n    source_type: 'twitter',                    // 来源类型\n    content: tweetObject.text,                 // 推文内容\n    url: `https://x.com/anyuser/status/${tweetObject.id}`, // 推文链接\n    engagement_score: engagementScore          // 互动分数\n  };\n\n  return { json: result };\n\n} catch (error) {\n  console.error('处理推文JSON时出错:', error);\n  return { json: { error: '处理推文JSON失败', raw_data: $input.item.json } };\n}"
+      },
+      "id": "ca1d11ab-9944-4b6e-9f5a-071d32971a7c",
+      "name": "Parse Twitter Data",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -2880,
+        528
+      ],
+      "typeVersion": 2,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "youtube-weight",
+              "name": "source_weight",
+              "type": "number",
+              "value": 0.8
+            },
+            {
+              "id": "youtube-source",
+              "name": "source_type",
+              "type": "string",
+              "value": "youtube"
+            },
+            {
+              "id": "youtube-content",
+              "name": "content",
+              "type": "string",
+              "value": "={{ $json.snippet.title + ' ' + $json.snippet.description }}"
+            },
+            {
+              "id": "youtube-url",
+              "name": "url",
+              "type": "string",
+              "value": "=https://www.youtube.com/watch?v={{ $json.id.videoId }}"
+            },
+            {
+              "id": "youtube-channel",
+              "name": "channel",
+              "type": "string",
+              "value": "={{ $json.snippet.channelTitle }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0de2151a-a493-4cd8-8a1f-f5008f3ab47f",
+      "name": "Format YouTube Data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -2704,
+        352
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "4417b44f-2986-4e3b-b2a3-f09dc187f02b",
+      "name": "Merge: All Sources",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -2480,
+        368
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a sharp-minded topic planner. Your task is to identify potential content opportunities for editors, not to filter information, while also preserving the original content.\nBased on the given keyword, evaluate each piece of content. If the content meets any of the following conditions, mark it as \"YES\". Otherwise, mark it as \"NO\":\nContains strong personal opinions, emotions, or unique personal experiences.\nSparks controversy or involves multi-person discussion.\nRaises a novel question or presents an unconventional insight.\nEven if short, could signal an emerging trend or internet meme.\nYour guiding principle: “better too much than too little.” If there’s any chance the content could spark a good editorial angle, mark it as \"YES\". Only clear-cut advertisements or spam should be marked as \"NO\".\nYour response must strictly follow these rules:\nReturn a JSON array string only — no markdown markers (e.g., no ```json).\nThe array length must exactly match the input array.\nEach object in the array must include:\nurl: the original content’s URL.\ndecision: either \"YES\" or \"NO\".\ncontent: the original content text, unaltered.\nExample output format:\n[\n{ \"url\": \"http://example.com/article1\", \"decision\": \"YES\", \"content\": \"This is the content of the first article...\" },\n{ \"url\": \"http://example.com/article2\", \"decision\": \"NO\", \"content\": \"This is the content of the second article...\" }\n]\nKeyword: {{ $('Analysis Parameters').item.json.keyword }}\nContent array to process:\n{{ JSON.stringify($json) }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Keyword: {{ $('Analysis Parameters').item.json.keyword }}\nContent array to process: {{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "batching": {
+          "batchSize": 20
+        }
+      },
+      "id": "0a40d5e6-421c-41cc-a177-dbe3b4ebeb74",
+      "name": "AI Pre-filtering",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        -2144,
+        400
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "id": "87dbd2bc-899d-49d7-a3b9-34821b8bce18",
+      "name": "Pre-filter Content",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [
+        -2224,
+        576
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "RkTrozQnZ8k4AhMs",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst allParsedItems = [];\n\nfor (const batchItem of $input.all()) {\n  try {\n    const contentString = batchItem.json.text;\n    if (!contentString) continue; \n\n    const cleanedContent = contentString.replace(/```json/g, '').replace(/```/g, '').trim();\n\n   \n    const itemsInBatch = JSON.parse(cleanedContent);\n\n    \n    if (Array.isArray(itemsInBatch)) {\n      allParsedItems.push(...itemsInBatch);\n    }\n\n  } catch (error) {\n   \n    console.error(`Failed to parse a batch. Error: ${error.message}. Batch content: ${batchItem.json.text}`);\n  }\n}\n\n\nreturn allParsedItems.map(item => ({ json: item }));"
+      },
+      "id": "a18a291a-6c9b-4a98-9dc0-0b58d06a15a1",
+      "name": "Parse AI Filter Results",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1840,
+        400
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "filter-condition",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.decision }}",
+              "rightValue": "YES"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8ea6fa04-6433-4260-b518-0648fbfd8d02",
+      "name": "IF: Is Content Relevant",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1968,
+        720
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n  const errorInfo = {\n    error: '工作流执行出错',\n    timestamp: new Date().toISOString(),\n    node_error: $input.item(0).json.error || '未知错误',\n    analysis_id: $('Analysis Parameters').item.json.analysis_id || 'unknown'\n  };\n  \n  console.error('工作流错误:', errorInfo);\n  return { json: errorInfo };\n} catch (e) {\n  return { \n    json: { \n      error: '严重错误: 错误处理节点也失败了',\n      timestamp: new Date().toISOString()\n    } \n  };\n}"
+      },
+      "id": "244eebb7-4620-4c43-b791-970303d42ca1",
+      "name": "Handle Filter Errors",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1744,
+        752
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "f5de00f6-b94c-406f-8544-987aacb589f6",
+      "name": "Aggregate: Relevant Items",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        -3440,
+        1104
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an information analysis expert with media literacy and news sensitivity. You will receive a JSON array where each element contains an article's content and basic metadata. Please perform a deep, structured analysis on each item and output a unified-format JSON result.\n\nAnalysis objectives:\n1. Extract the article's core information;\n2. Assess its user sentiment and dissemination (virality) potential;\n3. Provide derivative topic suggestions.\n\nPlease strictly follow the output format below and return a JSON string only — do not include any markdown markers (for example, ```json):\n\n{\n  \"analyses\": [\n    {\n      \"original_url\": \"...\",\n      \"summary\": \"one-sentence core summary\",\n      \"topic\": \"main topic of the article\",\n      \"sentiment\": \"positive | negative | mixed\",\n      \"key_arguments\": [\"point A\", \"point B\", \"point C\"],\n      \"trending_potential\": a number between 1 and 10 (based on the content's hotspot potential),\n      \"audience_interest\": a number between 1 and 10 (based on general user interest),\n      \"news_value\": a number between 1 and 10 (based on the informational/news value),\n      \"angle_suggestions\": [\"derivable topic angle 1\", \"derivable topic angle 2\"]\n    }\n  ]\n}\n\nPlease ensure:\n- Analytical dimensions are objective and neutral.\n- The output JSON strictly conforms to the format above.\n- Each analysis entry is complete with no missing fields.\n- The `original_url` field must exist and exactly match the input.\n\nKeywords: {{ $('Analysis Parameters').item.json.keyword }}\n\nArray of contents to analyze:\n{{ JSON.stringify($json.data) }}\n",
+        "batching": {}
+      },
+      "id": "bf645ac8-ff86-489f-883c-626f0e42d373",
+      "name": "AI Deep Analysis",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        -3136,
+        1104
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "id": "4d82f760-94a1-4fda-ac7a-73f5f138c40c",
+      "name": "Deep Analysis",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [
+        -3184,
+        1296
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "RkTrozQnZ8k4AhMs",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 新代码：增加了清理步骤\ntry {\n  // 1. 从 'text' 字段获取AI返回的原始字符串\n  let contentString = $input.item.json.text;\n  \n  // 2. **新增的关键步骤：清理字符串，去掉AI可能添加的markdown标记**\n  contentString = contentString.replace(/```json/g, '').replace(/```/g, '').trim();\n  \n  // 3. 解析这个干净的字符串\n  const aiResults = JSON.parse(contentString);\n  \n  // 4. 从上游的\"聚合1\"节点获取原始数据项\n  const originalItems = $('Aggregate: Relevant Items').all();\n\n  // 5. 检查AI输出是否是我们期望的格式\n  if (!aiResults.analyses || !Array.isArray(aiResults.analyses)) {\n    throw new Error(\"AI output is not in the expected format: { \\\"analyses\\\": [...] }\");\n  }\n\n  // 6. 将AI分析结果与原始数据进行匹配和合并\n  const enrichedAnalyses = aiResults.analyses.map(analysis => {\n    const originalItem = originalItems.find(item => item.json.url === analysis.original_url);\n    \n    return {\n      json: {\n        ...analysis,\n        source_info: originalItem ? {\n          type: originalItem.json.source_type,\n          weight: originalItem.json.source_weight,\n          engagement_score: originalItem.json.engagement_score || 0\n        } : {\n          type: 'unknown',\n          url: analysis.original_url\n        },\n        analysis_timestamp: new Date().toISOString()\n      }\n    };\n  });\n  \n  // 7. 返回包含所有合并后结果的数组\n  return enrichedAnalyses;\n\n} catch (error) {\n  console.error('成型分析结果节点错误:', error);\n  return [{ \n    json: { \n      error: `成型分析结果失败: ${error.message}`,\n      raw_content: $input.item.json.text || 'No raw content available'\n    } \n  }];\n}"
+      },
+      "id": "2a9374b6-dda4-4aa6-af69-8159dc889de4",
+      "name": "Structure Analysis Result",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -2736,
+        1136
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "70ff31b7-e12f-40b4-bdfa-f4b30ac3c111",
+      "name": "Aggregate: Deep Analysis Results",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        -2560,
+        1136
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ `You are a top-tier book editor and content strategist. You now have ${$json.length} structured analysis datasets (in JSON format) about “${$('Analysis Parameters').item.json.keyword}”.\n\nThe analysis data is as follows:\n${JSON.stringify($json)}\n\nBased on this data, complete the following tasks, and directly output well-formatted **HTML code** that can be used directly in an email. Please use <h1>, <h2>, <h3> for headings, use <ul> and <li> for lists, and use <strong> or <b> to highlight key points. Ensure your reply contains only pure HTML code, without any extra explanations or Markdown formatting.\n1. **Clustering Analysis**: Identify 3–5 of the most popular or core discussion topics.\n2. **Trend Prediction**: Based on user sentiment and discussion heat, predict which topic has the most potential to become viral in the future.\n3. **Topic Generation**: For each core topic, generate 2 topics with viral potential. Each topic should include:\n   - **Title (Catchy Title)**\n   - **Core Outline (Outline)**\n   - **Key Arguments (Key Arguments)**` }}\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "8edb5140-d1b6-4891-a8f1-86346e558b28",
+      "name": "AI: Synthesize Final Report",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -2384,
+        1136
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "efaa1b24-d0f7-4411-8a6b-ba28eaf88338",
+      "name": "Synthesis",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [
+        -2480,
+        1376
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "RkTrozQnZ8k4AhMs",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "27744290-a4c0-4afb-b948-bf19f3998b38",
+              "name": "report_title",
+              "type": "string",
+              "value": "={{ '【' + $('Analysis Parameters').item.json.keyword + '】Trend Analysis Report(' + $('Analysis Parameters').item.json.search_date + ')' }}"
+            },
+            {
+              "id": "9380ff58-c183-4f97-a588-35a7d06a8085",
+              "name": "report_content",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            },
+            {
+              "id": "915a7cac-30dd-44fc-8b1b-4c5fbc29cbff",
+              "name": "analysis_summary",
+              "type": "string",
+              "value": "={{ 'This analysis merged a total of ' + $('Merge: All Sources').all().length + ' original data items, and after filtering, conducted an in-depth analysis on ' + $('Aggregate: Relevant Items').item.json.data.length + ' high-value content items.' }}\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0da3a082-4bad-4031-9cae-f51a61672f55",
+      "name": "Format Report Payloads",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -2096,
+        1136
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "76202dc1-18f1-47eb-b533-14395a4c01ab",
+              "name": "final_report_text",
+              "type": "string",
+              "value": "={{ $json.report_title + '\\n\\n**Analysis Summary**:\\n' + $json.analysis_summary + '\\n\\n**Detailed Report**:\\n' + $json.report_content }}\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "765732bd-29c4-4b15-ace6-9703e1ee90df",
+      "name": "Splicing final report",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1808,
+        944
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "sendTo": "nsultana2021@icloud.com",
+        "subject": "={{ $('Format Report Payloads').item.json.report_title }}",
+        "message": "={{ $json.final_report_text }}",
+        "options": {}
+      },
+      "id": "202a9a04-c919-46a4-a79f-badd3eb4a049",
+      "name": "Send HTML Report",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -1632,
+        944
+      ],
+      "webhookId": "22ffd326-3962-4fa9-adf9-5580be6701a4",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "BAVHNoH0U8sqXr9X",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1M5emtu7T3egz9FWPn0CzjsHa0nE534ty5S_eGFF4w58",
+          "mode": "list",
+          "cachedResultName": "content Strategy report",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1M5emtu7T3egz9FWPn0CzjsHa0nE534ty5S_eGFF4w58/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1M5emtu7T3egz9FWPn0CzjsHa0nE534ty5S_eGFF4w58/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Report Title": "={{ $json.report_title }}",
+            "Analysis summary": "={{ $json.analysis_summary }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Report Title",
+              "displayName": "Report Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Analysis summary",
+              "displayName": "Analysis summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d6b677b6-5587-4bb8-bf37-73a066067de0",
+      "name": "Archive Data",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -1824,
+        1312
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "agnITpQnUDcFMt5T",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://app.scrapingbee.com/api/v1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ \"https://x.com/search?q=\" + encodeURIComponent($json.keyword) }}"
+            },
+            {
+              "name": "render_js",
+              "value": "true"
+            },
+            {
+              "name": "wait",
+              "value": "3000"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "57d94f0b-3f07-4c82-9fce-1f0967050f3d",
+      "name": "X: Search Tweets",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -3072,
+        528
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "vVhtTI6BIiFc2yNK",
+          "name": "Query Auth account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Format YouTube Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Synthesis": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI: Synthesize Final Report",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Form Trigger": {
+      "main": [
+        [
+          {
+            "node": "Analysis Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deep Analysis": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Deep Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Pre-filtering",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Deep Analysis": {
+      "main": [
+        [
+          {
+            "node": "Structure Analysis Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Pre-filtering": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Filter Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Reddit Data": {
+      "main": [
+        [
+          {
+            "node": "Merge: All Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge: All Sources": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Twitter Data": {
+      "main": [
+        [
+          {
+            "node": "Merge: All Sources",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Pre-filter Content": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Pre-filtering",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analysis Parameters": {
+      "main": [
+        [
+          {
+            "node": "YouTube: Search Videos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reddit: Search Posts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "X: Search Tweets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format YouTube Data": {
+      "main": [
+        [
+          {
+            "node": "Merge: All Sources",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Reddit: Search Posts": {
+      "main": [
+        [
+          {
+            "node": "Format Reddit Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Splicing final report": {
+      "main": [
+        [
+          {
+            "node": "Send HTML Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Report Payloads": {
+      "main": [
+        [
+          {
+            "node": "Archive Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Splicing final report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "YouTube: Search Videos": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF: Is Content Relevant": {
+      "main": [
+        [
+          {
+            "node": "Aggregate: Relevant Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Filter Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Filter Results": {
+      "main": [
+        [
+          {
+            "node": "IF: Is Content Relevant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate: Relevant Items": {
+      "main": [
+        [
+          {
+            "node": "AI Deep Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure Analysis Result": {
+      "main": [
+        [
+          {
+            "node": "Aggregate: Deep Analysis Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Synthesize Final Report": {
+      "main": [
+        [
+          {
+            "node": "Format Report Payloads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate: Deep Analysis Results": {
+      "main": [
+        [
+          {
+            "node": "AI: Synthesize Final Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "X: Search Tweets": {
+      "main": [
+        [
+          {
+            "node": "Parse Twitter Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6a0b9d5f-6471-4226-a3a1-c01231bca861",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "98b510ca4dbbabb609e24c83189c67f6ae0083179272377aca703df4038b384f"
+  },
+  "id": "oGNxNgWkNvnAAaft",
+  "tags": []
+}

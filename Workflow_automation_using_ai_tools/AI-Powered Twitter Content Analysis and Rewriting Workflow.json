@@ -1,0 +1,525 @@
+{
+  "name": "Twitter",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://api.twitterapi.io/twitter/tweet/advanced_search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "Tech news"
+            },
+            {
+              "name": "queryType",
+              "value": "Top"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "new1_c7a7e5512cd449bb9119757c96fa290e"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1216,
+        16
+      ],
+      "id": "bad00231-d0d5-45c6-a164-b8b162cddc05",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "tweets",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        16
+      ],
+      "id": "e1cc107c-af3f-4484-a6a6-474302ac3c41",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze this tweet: \n{{ $json.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a tweet quality analyzer. For each tweet provided, evaluate its completeness and quality.\n\nTASK: Analyze the tweet and return ONLY two values:\n1. Completion Status: \"S\" (successfully completed) or \"N\" (not completed/incomplete)\n2. Quality Rating: A number from 5-10 (where 10 is highest quality)\n\nEVALUATION CRITERIA:\n- **Completeness**: Does the tweet provide actual value/information, not just a teaser?\n- **Self-contained**: Can readers get meaningful information WITHOUT clicking links?\n- **Content delivery**: If it promises specific items (like \"10 tools\"), does it deliver them?\n- **Clickbait check**: Is it just a headline that forces link clicks for basic info?\n- **Standalone value**: Does the tweet have worth even if the link is broken?\n\nAUTOMATIC \"N\" (Not Complete) IF:\n- Lists/promises items but doesn't provide them\n- Pure clickbait with no actual information\n- Requires link click to understand the basic message\n- Teaser-only content with no substance\n\nOUTPUT FORMAT (exact format required):\nStatus: [S or N]\nRating: [5-10]\n\nExample outputs:\nStatus: S\nRating: 8\n\nStatus: N\nRating: 6"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -560,
+        32
+      ],
+      "id": "8db94ace-8e21-4efa-aee1-753acc34135c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"Status\": \"S\",\n\t\"Rating\": \"6\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -464,
+        352
+      ],
+      "id": "ea3f212c-9d2e-48da-bdd7-c6a07d85b874",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -816,
+        16
+      ],
+      "id": "8ccb2f8a-5713-40f0-99a8-3d2e3e116240",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "438cb07f-21e4-4a3c-be5a-f3f5c08af90f",
+              "leftValue": "={{ $json.output.Status }}",
+              "rightValue": "S",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "501a6c6d-8a6a-4db5-b502-e5404a4c9b3b",
+              "leftValue": "={{ $json.output.Rating.toNumber() }}",
+              "rightValue": 8,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "bb8dc310-a87f-44b5-affc-2131f05303af",
+              "leftValue": "={{ $('Loop Over Items').item.json.createdAt\n    .toDateTime()\n    .setZone('Asia/Kolkata')     \n    .toFormat('yyyy-LL-dd HH:mm:ss') }}",
+              "rightValue": "2025-06-19T00:00:00",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -272,
+        16
+      ],
+      "id": "4818cc53-761d-4fc3-95b6-4de6913d1340",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1BeETGKlzL7Hd_IAy0y7lZ-Ulo2pTWuriQ9tBZgXtK6I",
+          "mode": "list",
+          "cachedResultName": "x tweets",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BeETGKlzL7Hd_IAy0y7lZ-Ulo2pTWuriQ9tBZgXtK6I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BeETGKlzL7Hd_IAy0y7lZ-Ulo2pTWuriQ9tBZgXtK6I/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "engagement strategy": "={{ $json.output[\"ENGAGEMENT STRATEGY\"] }}",
+            "original analysis": "={{ $json.output[\"ORIGINAL ANALYSIS\"] }}",
+            "tweet modified": "={{ $json.output[\"REWRITTEN TWEET\"] }}",
+            "tweet original": "={{ $('Loop Over Items').item.json.text }}",
+            "media": "={{ $('Loop Over Items').item.json.extendedEntities.media[0].media_url_https }}",
+            "url link": "={{ $('Loop Over Items').item.json.url }}",
+            "likes": "={{ $('Loop Over Items').item.json.likeCount }}",
+            "date": "={{ $('Loop Over Items').item.json.createdAt\n    .toDateTime()\n    .setZone('Asia/Kolkata')     \n    .toFormat('yyyy-LL-dd') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tweet original",
+              "displayName": "tweet original",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tweet modified",
+              "displayName": "tweet modified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url link",
+              "displayName": "url link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "original analysis",
+              "displayName": "original analysis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "engagement strategy",
+              "displayName": "engagement strategy",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "media",
+              "displayName": "media",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "likes",
+              "displayName": "likes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        368,
+        0
+      ],
+      "id": "380672ef-e34c-41e3-a33f-243b31b0a83c",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pF2CcSw9COIj9WOV",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Research and rewrite this tweet to be original and valuable:\n\nOriginal tweet: \"{{ $('Loop Over Items').item.json.text }}\"\n\nMake it completely different but covering the same topic with actual useful information. ",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an expert tweet researcher and content creator. Your task is to take an original tweet concept and create a completely original, engaging tweet with actual valuable content.\n\nPROCESS:\n1. RESEARCH: Understand the topic thoroughly\n2. ANALYZE: Extract the core value proposition\n3. CREATE: Write original content with real information\n4. OPTIMIZE: Ensure maximum engagement potential\n\nREQUIREMENTS:\n- Provide ACTUAL valuable information (not clickbait)\n- Make it standalone (no link dependency)\n- Keep it under 280 characters\n- Use engaging but authentic tone\n- Include specific details/examples\n- Make it completely different from original\n- Ensure it's plagiarism-free and original\n\nCONTENT RULES:\n- If original mentions \"10 tools\" - actually list 3-5 tools with brief descriptions\n- If about tips - provide actual actionable tips\n- If about trends - include specific examples or data\n- Always deliver on what you promise in the tweet\n\nWRITING STYLE REQUIREMENTS:\n- **Plain text only** - NO images, GIFs, or media\n- **Minimal hashtags** - Only use if directly relevant to content (max 1-2)\n- **No generic hashtags** like #motivation #success #entrepreneur\n- **Mediator/Curator tone** - Write as someone sharing/explaining others' work, NOT as the creator\n- **Third-person perspective** - \"This tool does X\" not \"I built X\" or \"We created X\"\n- **Educator voice** - Explain the significance to your audience\n- **Value-first approach** - Lead with the benefit/insight\n- **Simple formatting** - Use line breaks and bullet points (• or -) for readability\n- **Observer commentary** - Add your perspective on why it matters\n\nMEDIATOR LANGUAGE PATTERNS:\n✅ \"This new AI tool...\"\n✅ \"Someone just built...\"\n✅ \"Here's why this matters...\"\n✅ \"This changes everything because...\"\n✅ \"Just discovered this approach...\"\n✅ \"This team figured out how to...\"\n\n❌ \"I created...\"\n❌ \"We built...\"\n❌ \"My new tool...\"\n❌ \"Our solution...\"\n\nOUTPUT FORMAT:\n{\nORIGINAL ANALYSIS: [Brief analysis of what the original was trying to achieve],\nREWRITTEN TWEET: [Your original 280-character tweet with actual content],\nENGAGEMENT STRATEGY: [Why this version will perform better]\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a5558fcc-4894-46ab-9551-7c8c42fb951f",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"ORIGINAL ANALYSIS\": \"\",\n\t\"REWRITTEN TWEET\":\"\",\n   \"ENGAGEMENT STRATEGY\":\"\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        240
+      ],
+      "id": "cdb9010d-b7c8-4dd0-b43a-1b1d21f8c164",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1408,
+        16
+      ],
+      "id": "c5536ba1-4d85-4dec-be3b-0bed650af4a1",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        304
+      ],
+      "id": "7825c6ae-55d9-48fd-889f-a3eacae8b8db",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "chYkaI9nIz4ccSsC",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        320
+      ],
+      "id": "2eb2e2f0-f0a7-449e-9952-f1caa83dc21b",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "chYkaI9nIz4ccSsC",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2f163686-df32-467d-a28a-44bb302fab94",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3a4ba8ab3556586419b856ad3e16c5a3f85a65fac589a0e56e64299894c4d493"
+  },
+  "id": "k9iocGRR93rTVUV6",
+  "tags": []
+}

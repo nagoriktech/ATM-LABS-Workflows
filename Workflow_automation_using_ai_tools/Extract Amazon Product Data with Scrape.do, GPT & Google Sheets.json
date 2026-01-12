@@ -1,0 +1,512 @@
+{
+  "name": "Extract Amazon Product Data with Scrape.do, GPT & Google Sheets",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "be100963-9e9f-4476-8582-3f3b9bc19d84",
+      "name": "When clicking Test workflow",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        624,
+        400
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {
+          "maxTokens": 500,
+          "responseFormat": "json_object",
+          "temperature": 0
+        }
+      },
+      "id": "b9f951d7-d35e-46ea-8baa-dbf7db36e4d5",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1696,
+        448
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "Tv5GJdP4QO6RDPCY",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1lemzcGGKaLXKUmP4jl7gSWcYrAbnoajkHnhv171Edys",
+          "mode": "list",
+          "cachedResultName": "Amazon",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lemzcGGKaLXKUmP4jl7gSWcYrAbnoajkHnhv171Edys/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 447670248,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lemzcGGKaLXKUmP4jl7gSWcYrAbnoajkHnhv171Edys/edit#gid=447670248"
+        },
+        "options": {}
+      },
+      "id": "ec424321-3100-44aa-a7f9-55607a1f29da",
+      "name": "1. Get Product URLs from Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        848,
+        400
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pRREoPysXbFJnhqS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "a923a770-1759-49b3-8fb8-64deb9c892d5",
+      "name": "2. Loop Through Each URL",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        1072,
+        400
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "url": "=https://api.scrape.do/?token=f0b8c8bdcd2e44be9c15c881456a95a785b24e8113a&url={{ $json.Products }}&geoCode=us&render=false",
+        "options": {
+          "response": {
+            "response": {}
+          },
+          "timeout": 60000
+        }
+      },
+      "id": "99554052-628f-4e78-afc4-9bad41f7011f",
+      "name": "3. Scrape Product Page HTML",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1296,
+        272
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "productTitle",
+              "cssSelector": "#productTitle, h1[data-automation-id=\"product-title\"], .product-title"
+            },
+            {
+              "key": "price",
+              "cssSelector": ".a-price .a-offscreen, .a-price-whole, .a-price-fraction, .priceToPay .a-price .a-offscreen"
+            },
+            {
+              "key": "rating",
+              "cssSelector": ".a-icon-alt, [data-hook=\"average-star-rating\"], .a-star-medium .a-icon-alt"
+            },
+            {
+              "key": "reviewCount",
+              "cssSelector": "[data-hook=\"total-review-count\"], .a-link-normal[href*=\"customerReviews\"], #acrCustomerReviewText"
+            },
+            {
+              "key": "featureBullets",
+              "cssSelector": "#feature-bullets ul, .a-unordered-list.a-nostyle.a-vertical.feature"
+            },
+            {
+              "key": "productDescription",
+              "cssSelector": "#productDescription, [data-feature-name=\"productDescription\"], .product-description"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5e7101f0-45df-4e07-8758-957e0c4ec388",
+      "name": "4. Extract Raw Data Elements",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        1520,
+        272
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json, null, 2) }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Extract Amazon product data and return ONLY valid JSON.\n\nInput: {{ $json }}\n\nExtraction rules:\n\noutput.name → from productTitle\n\noutput.description → use featureBullets (joined) or productDescription; truncate to 150 characters; if empty, use \"No description\"\n\noutput.rating → extract numeric value from rating (e.g., \"4.5 out of 5 stars\" → 4.5); if missing, use null\n\noutput.reviews → extract numeric value from reviewCount (e.g., \"1,234 ratings\" → 1234); if missing, use null\n\noutput.price → from price; if missing, use null\n\noutput.imageUrl → main product image URL (if multiple, use the first one); if none, use null\n\noutput.allImageUrls → array of all image URLs (if none, use an empty array [])\n\nReturn exact JSON:\n{\n  \"output\": {\n    \"name\": \"product title here\",\n    \"description\": \"description here or No description\",\n    \"rating\": 4.5,\n    \"reviews\": 1234,\n    \"price\": \"$29.99\",\n    \"imageUrl\": \"https://example.com/main.jpg\",\n    \"allImageUrls\": [\"https://example.com/1.jpg\", \"https://example.com/2.jpg\"]\n  }\n}\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "9bd0b74d-09ff-4671-a1da-1cd596db93cd",
+      "name": "5. Clean & Structure Data with AI",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        1744,
+        272
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1lemzcGGKaLXKUmP4jl7gSWcYrAbnoajkHnhv171Edys",
+          "mode": "list",
+          "cachedResultName": "Amazon",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lemzcGGKaLXKUmP4jl7gSWcYrAbnoajkHnhv171Edys/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lemzcGGKaLXKUmP4jl7gSWcYrAbnoajkHnhv171Edys/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.name }}",
+            "Description": "={{ $json.description }}",
+            "Rating": "={{ $json.rating }}",
+            "Reviews": "={{ $json.reviews }}",
+            "Price": "={{ $json.price }}",
+            "imageUrl": "={{ $json.imageUrl }}",
+            "output.allImageUrls": "={{ $json.allImageUrls }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Rating",
+              "displayName": "Rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reviews",
+              "displayName": "Reviews",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "output.imageUrl",
+              "displayName": "output.imageUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "imageUrl",
+              "displayName": "imageUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "output.allImageUrls",
+              "displayName": "output.allImageUrls",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "26b73801-6446-440e-bb53-bcc5df531215",
+      "name": "7. Save Product Data to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2320,
+        272
+      ],
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pRREoPysXbFJnhqS",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Amazon Scraper with Scrape.do API\n\n### Setup Instructions:\n\n1. **Get Scrape.do API Token:**\n   - Sign up at https://scrape.do\n   - Get your API token from the dashboard\n\n2. **Set up Workflow Variables:**\n   - SCRAPEDO_TOKEN: Your Scrape.do API token\n   - WEB_SHEET_ID: Google Sheet document ID\n   - TRACK_SHEET_GID: Sheet name/ID with URLs to scrape\n   - RESULTS_SHEET_GID: Sheet name/ID for results\n\n3. **Google Sheets Setup:**\n   - Create a Google Sheet with two tabs\n   - First tab: Add Amazon product URLs in a column named 'url'\n   - Second tab: Will store results (name, description, rating, reviews, price)\n   - Share the sheet with your service account email\n\n4. **Credentials:**\n   - Add Google Sheets OAuth2 credentials\n   - Add OpenRouter API credentials (for GPT-4)\n\n### Features:\n- Uses Scrape.do to bypass Amazon's anti-bot protection\n- Extracts product data using pattern matching and AI\n- Handles pagination with Split In Batches\n- Saves structured data to Google Sheets\n\n### Scrape.do Advantages:\n- No need for complex proxy rotation\n- Automatic CAPTCHA handling\n- Better success rate than BrightData\n- Simple API integration",
+        "height": 896,
+        "width": 528
+      },
+      "id": "b65e665c-dcc1-4391-9c83-44c4b2d53229",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => item.json.output ? { json: item.json.output } : item);\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2096,
+        272
+      ],
+      "id": "90a456e7-b9d0-4a3d-99a1-f63a9a08beb2",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "chatId": "6617255993",
+        "text": "=Product: {{ $json.Name }}\nDescription: {{ $json.Description }}\nRating: {{ $json.Rating }}\nReviews: {{ $json.Reviews }}\nPrice: {{ $('Code in JavaScript').item.json.price }}\n\nURL: {{ $('2. Loop Through Each URL').item.json.Products }}\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2544,
+        272
+      ],
+      "id": "722dd3c5-7d8d-438d-aee4-5c2d474c7148",
+      "name": "Send a text message",
+      "webhookId": "57abef9f-c317-4b17-8ed1-967b6abd0109",
+      "credentials": {
+        "telegramApi": {
+          "id": "w95Vkcyop8EytPo0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "692402940633636",
+        "recipientPhoneNumber": "+880 1531-392872",
+        "textBody": "=Product: {{ $('7. Save Product Data to Google Sheets').item.json.Name }}\nDescription: {{ $('7. Save Product Data to Google Sheets').item.json.Description }}\nRating: {{ $('7. Save Product Data to Google Sheets').item.json.Rating }}\nReviews: {{ $('7. Save Product Data to Google Sheets').item.json.Reviews }}\nPrice: {{ $('Code in JavaScript').item.json.price }}\n\nURL: {{ $('2. Loop Through Each URL').item.json.Products }}\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        2768,
+        400
+      ],
+      "id": "8b1dc84d-ad84-451d-a10c-84fde525e035",
+      "name": "Send message",
+      "webhookId": "81193b53-38b3-43da-a2de-3296bff5ee42",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "oqiQ0OTYmceKKVBk",
+          "name": "WhatsApp account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "5. Clean & Structure Data with AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Loop Through Each URL": {
+      "main": [
+        [],
+        [
+          {
+            "node": "3. Scrape Product Page HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Scrape Product Page HTML": {
+      "main": [
+        [
+          {
+            "node": "4. Extract Raw Data Elements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking Test workflow": {
+      "main": [
+        [
+          {
+            "node": "1. Get Product URLs from Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Extract Raw Data Elements": {
+      "main": [
+        [
+          {
+            "node": "5. Clean & Structure Data with AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5. Clean & Structure Data with AI": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "7. Save Product Data to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Get Product URLs from Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "2. Loop Through Each URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "7. Save Product Data to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message": {
+      "main": [
+        [
+          {
+            "node": "2. Loop Through Each URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "40fa182c-4fa5-44f0-825d-dd4ea4497497",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7ae231d5a92eb748d26d32057909897e96a0e49a938f8c7913f7497f81fe3781"
+  },
+  "id": "ixIHD9VLipMs0SuG",
+  "tags": []
+}

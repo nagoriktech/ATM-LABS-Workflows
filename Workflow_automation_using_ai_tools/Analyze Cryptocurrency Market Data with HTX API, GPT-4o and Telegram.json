@@ -1,0 +1,832 @@
+{
+  "name": "Analyze Cryptocurrency Market Data with HTX API, GPT-4o and Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "f6978381-b1f7-4a0d-bfa1-772aa1a3e8c0",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        -3136,
+        1232
+      ],
+      "webhookId": "5efb4c0e-a995-4dff-8b82-0b876786d0da",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "hkggKKxNuqkNxHIC",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "if ($input.first().json.message.from.id !== 6617255993) { // Replace with your actual ID\n  return {unauthorized: true};\n} else {\n  // Return the original data when authorized\n  return $input.all();\n}"
+      },
+      "id": "a080ecce-58b4-4509-bd1d-ebbe35f147a6",
+      "name": "User Authentication (Replace Telegram ID)",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -2816,
+        1232
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "47598bf1-e55f-4cc0-ae75-272085e7ce02",
+              "name": "=sessionId",
+              "type": "string",
+              "value": "={{ $json.message.chat.id }}"
+            },
+            {
+              "id": "daa49d74-e55e-47bc-ac52-8686d591ab83",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $json.message.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bc134961-bb35-45d5-8707-9351ad2a65a9",
+      "name": "Adds \"SessionId\"",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -2544,
+        1232
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "0285e7fe-c08f-4979-bc0e-f46c796cb8aa",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -1232,
+        1232
+      ],
+      "webhookId": "1030ef2a-578d-47aa-90c8-bd9dfebad15f",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "hkggKKxNuqkNxHIC",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: assumes incoming message in `item.json.message`\nconst input = $json.output;\nconst chunkSize = 4000;\n\n// Function to split text\nfunction splitMessage(text, size) {\n  const result = [];\n  for (let i = 0; i < text.length; i += size) {\n    result.push(text.substring(i, i + size));\n  }\n  return result;\n}\n\n// Logic\nif (input.length <= chunkSize) {\n  return [{ json: { message: input } }];\n} else {\n  const chunks = splitMessage(input, chunkSize);\n  return chunks.map(chunk => ({ json: { message: chunk } }));\n}"
+      },
+      "id": "1ef1be5f-885c-4bb3-add8-d4a5fff77220",
+      "name": "Splits message is more than 4000 characters",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1664,
+        1232
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "## Trigger Incoming Telegram Command\nNode: Telegram Trigger\n**Listens for new Telegram messages** from users.\nTriggers the full agent process and passes raw user input downstream.",
+        "height": 460,
+        "color": 4
+      },
+      "id": "2aba7de1-76bb-45ab-a1fd-e47510fee54f",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3200,
+        960
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Validate User Access\nNode: User **Authentication\nChecks incoming Telegram ID** against the approved user list.",
+        "height": 460,
+        "color": 2
+      },
+      "id": "572fe4e5-acc4-48bd-a791-2a0598b3d212",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2880,
+        960
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Generate Session Metadata\nNode: Add S**essionId\nCreates a sessionId using the Telegram chat_id**.\nThis is passed into all downstream tools for memory and workflow routing.",
+        "height": 460,
+        "color": 5
+      },
+      "id": "e815e034-e901-4a7b-b2ae-9777c79a7985",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2592,
+        960
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Main AI Agent: Data Fetcher (HTX)\n\n**Node: HTX Data Agent**\nThis is the **core orchestrator**. It uses OpenAI **only to format and present raw HTX market data**, not to analyze or generate strategies.\n\nIt has direct **HTTP request access** to the **HTX REST API** (`https://api.huobi.pro`) and retrieves:\n\n* **Live Price (Aggregated Ticker)** — `/market/detail/merged`\n  Returns best bid/ask + last trade price, volume, turnover.\n\n* **24h Market Summary** — `/market/detail`\n  Rolling 24-hour stats: open, high, low, close, volume, amount, count.\n\n* **Market Depth** — `/market/depth`\n  Order book bids/asks up to requested step/levels.\n\n* **Full Order Book** — `/market/fullMbp`\n  Complete market depth, up to **5000 levels**, refreshed once per second.\n\n* **Last Trade** — `/market/trade`\n  The latest executed trade.\n\n* **Recent Trades** — `/market/history/trade`\n  Most recent trades list.\n\n* **Klines (Candlesticks)** — `/market/history/kline`\n  Supports multiple intervals (`1s, 1min, 5min, 15min, 1day, 1week, 1mon, 1year`, etc.).\n  The AI chooses the correct interval keyword (`seconds, minutes, days, weeks, months, years`).\n\n",
+        "height": 932,
+        "width": 480,
+        "color": 7
+      },
+      "id": "b3ae4f0b-a6bc-474b-82a7-3ba2015b67e4",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2320,
+        496
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Handle Telegram Message Limits\nNode: Code (split logic)\nChecks if the **GPT output exceeds 4000 characters**.\nIf so, it splits the message into safe chunks and passes them on sequentially.",
+        "height": 460,
+        "width": 260,
+        "color": 5
+      },
+      "id": "c0f1da69-0a5b-4702-80d9-5616917d2b5e",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1744,
+        960
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Send Final Report to Telegram\nNode: Telegram sendMessage\nSends **formatted HTML report (or split chunks)** directly to the authenticated user via Telegram bot.",
+        "height": 460,
+        "color": 4
+      },
+      "id": "5d75a611-0925-4ffe-b9c9-9e72ba9c21cf",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1296,
+        960
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## GPT Model for Reasoning\nNode: OpenAI Chat Model\nModel: **gpt-4o-mini**\nUsed to:\n\nInterpret signal values\n\nGenerate structured HTML\n\n**Recommend spot and leverage trades**\n\n",
+        "height": 540
+      },
+      "id": "7d49dde0-2d87-48ec-b13d-5f060e7adbb8",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3472,
+        1632
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### **Order Book Depth**\n\n**Endpoint:** `GET /market/depth`\n\n**What it does:** Returns the **order book snapshot** (bids/asks) for a trading pair up to the requested depth level.\n\n**Params:**\n- `symbol` (STRING, required) → e.g., `btcusdt` (lowercase, no dash)\n- `type` (STRING, required) → depth aggregation level (`step0`–`step5`)\n  - `step0` = no aggregation (full precision)\n  - `step1` = aggregated to 1 decimal place\n  - … up to `step5`\n- `depth` (INT, optional) → max entries per side (default 20, max 150)\n\n**Returns:** `ts`, `tick.bids: [[price, qty], ...]`, `tick.asks: [[price, qty], ...]`\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\ntype   = $fromAI('parameters1_Value', 'step0', 'string')\ndepth  = $fromAI('parameters2_Value', 20, 'number')\n```\n\n**Notes:** For lightweight quick book snapshot, use `step0` with smaller depth (20/50).",
+        "height": 1076,
+        "color": 6
+      },
+      "id": "c20f022d-1cf8-4a43-91d9-94d867f9b7f0",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2608,
+        1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### **Best Bid/Ask (Order Book Ticker)**\n\n**Endpoint:** `GET /market/detail/merged`\n\n**What it does:** Returns the best **bid/ask** snapshot along with the latest trade price for a symbol.\n\n**Params:**\n- `symbol` (STRING, required) → e.g., `btcusdt` (lowercase, no dash)\n\n**Returns:** `tick.bid` = `[price, qty]`, `tick.ask` = `[price, qty]`\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\n```\n\n**Notes:** Use lowercase symbols without `-` or `/` (e.g., `btcusdt`).",
+        "height": 868,
+        "color": 6
+      },
+      "id": "eb2582e2-d306-4b77-b55a-afeb17de03b8",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2000,
+        1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Short-Term Memory Module\nNode: **Simple Memory\nStores the sessionId**, symbol, and other state data.\nUseful for:\n\nMulti-turn Telegram interactions\n\nTracking indicator agreement across timeframes\n\n",
+        "height": 540,
+        "color": 3
+      },
+      "id": "58bdcf7b-381e-472e-8fef-1e6439bb13e2",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3200,
+        1632
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "3125d5d0-3f46-4f20-ac04-03b1209bf505",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -3120,
+        1728
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### **24h Stats (Ticker Detail)**\n\n**Endpoint:** `GET /market/detail`\n**What it does:** Returns the **24h rolling summary** for a single HTX spot symbol: **open/high/low/close**, **amount (base volume)**, **vol (quote turnover)**, and **trade count**.\n\n**Params:**\n- `symbol` (STRING, required) → e.g., `btcusdt` (lowercase, no dash)\n\n**Returns (core fields):** `ts`, `tick.open`, `tick.close`, `tick.high`, `tick.low`, `tick.amount`, `tick.vol`, `tick.count`.\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\n```\n\n**Notes:** For all symbols at once, use `GET /market/tickers`.\n",
+        "height": 884,
+        "color": 6
+      },
+      "id": "a706f7a6-864e-4555-b835-b7eccc866b23",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2912,
+        1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n ### **Price (Latest)**\n\n**Endpoint:** `GET /market/detail/merged`\n\n**What it does:** Returns the **latest trade price**, best bid/ask, and other snapshot details for a symbol.\n\n**Params:**\n- `symbol` (STRING, required) → e.g., `btcusdt` (lowercase, no dash)\n\n**Returns:** `tick.close` = last trade price, plus bid/ask/volumes.\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\n```\n\n**Notes:** Use lowercase symbols without `-` or `/` (e.g., `btcusdt`).",
+        "height": 820,
+        "color": 6
+      },
+      "id": "1e69bf9b-c629-49b7-9bf4-4fd1c2cc464e",
+      "name": "Sticky Note11",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2320,
+        1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### **Klines (Candles)**\n\n**Endpoint:** `GET /market/history/kline`\n\n**What it does:** Returns candlestick data for a symbol/interval.\n\n**Params:**\n- `symbol` (STRING, required) → lowercase (e.g., `btcusdt`)\n- `period` (ENUM, required — e.g., `1min,5min,15min,30min,60min,4hour,1day,1mon,1week,1year`)\n- `size` (INT, optional, default 20, max 2000)\n\n**Returns (array per candle):** `[id, open, close, low, high, amount, vol, count]`\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\nperiod = $fromAI('parameters1_Value', '15min', 'string')\nsize   = $fromAI('parameters2_Value', 20, 'number')\n```\n\n**Notes:**\n- Use lowercase symbols without `-` (e.g., `btcusdt`).\n- If no `size` provided, defaults to 20 latest candles.",
+        "height": 1060,
+        "color": 6
+      },
+      "id": "348003b5-e281-44a5-acef-fa4d2a6b97c8",
+      "name": "Sticky Note12",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1664,
+        1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### **Merged Ticker (Bid/Ask/Last)**\n\n**Endpoint:** `GET /market/detail/merged`\n**What it does:** Returns best bid/ask and last price for a symbol. Use Calculator to derive a midpoint `(bid+ask)/2` if you need an average.\n\n**Params:** `symbol` (STRING, required) → lowercase, no dash (e.g., `btcusdt`)\n\n**Returns (key fields):** `tick.bid`, `tick.ask`, `tick.close`, `tick.high`, `tick.low`, `tick.amount`, `tick.vol`, `ts`\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\n```\n\n**Notes:** HTX has no direct avg-price endpoint; this is the canonical ticker to pair with Calculator for midpoint.",
+        "height": 900,
+        "color": 6
+      },
+      "id": "e984f9bc-e8e1-4212-8e5d-43918d5903ef",
+      "name": "Sticky Note13",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1328,
+        1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### **Recent Trades**\n\n**Endpoint:** `GET /market/history/trade`\n**What it does:** Returns the most recent trades for a given symbol.\n\n**Params:**\n* `symbol` (STRING, required) → lowercase, no dash (e.g., `btcusdt`)\n* `size` (INT, default 100, max 2000 — we set default 100)\n\n**Returns:** array of trade batches → each batch has `data: [{id, price, amount, direction, ts}]`\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\nsize   = $fromAI('parameters1_Value', 100, 'number')\n```\n\n**Notes:** Unlike Binance, HTX nests trades inside `data` arrays per batch.",
+        "height": 868,
+        "color": 6
+      },
+      "id": "7a5a151b-ca92-4ab1-94ec-b935219df2ee",
+      "name": "Sticky Note14",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -992,
+        1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "fa41cf5a-1132-447b-9b14-d1251e40534b",
+      "name": "Calculator",
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "position": [
+        -608,
+        1584
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "description": "### 🏷 Tool: **Think**\n\n**Purpose:**\n\n* Lightweight **reasoning helper**.\n* Lets the AI Agent process intermediate logic, format outputs, or decide how to combine multiple API results before sending the final report.\n* Does not fetch data itself.\n\n**Use cases:**\n\n* Clean/reshape JSON from Binance endpoints\n* Extract only the needed fields (e.g., `lastPrice`, `volume`)\n* Help prepare data for Telegram message formatting\n\n**n8n setup notes:**\n\n* No API call, just an **AI Tool** node.\n* Connect upstream API results → Think → Report Agent."
+      },
+      "id": "38dd6875-0f5c-4b5d-8fdb-d94a0dfde40d",
+      "name": "Think",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "position": [
+        -320,
+        1584
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### **Calculator**\n\n**Purpose:**\n\n* Perform **math operations** inside the workflow.\n* Supports add/subtract/multiply/divide, percentages, rounding, etc.\n\n**Use cases:**\n\n* Calculate spreads (ask – bid)\n* Compute % changes from open vs. last price\n* Normalize volumes or confidence scores\n\n**n8n setup notes:**\n\n* Node: `Calculator` (n8n built-in)\n* Input fields can come from Binance API JSON\n* Output can be chained into Think → Final Report\n",
+        "height": 836,
+        "color": 6
+      },
+      "id": "fe201c82-a91d-4cac-891e-d5bce31dbd3a",
+      "name": "Sticky Note15",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -688,
+        1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### **Think**\n\n**Purpose:**\n\n* Lightweight **reasoning helper**.\n* Lets the AI Agent process intermediate logic, format outputs, or decide how to combine multiple API results before sending the final report.\n* Does not fetch data itself.\n\n**Use cases:**\n\n* Clean/reshape JSON from Binance endpoints\n* Extract only the needed fields (e.g., `lastPrice`, `volume`)\n* Help prepare data for Telegram message formatting\n\n**n8n setup notes:**\n\n* No API call, just an **AI Tool** node.\n* Connect upstream API results → Think → Report Agent.",
+        "height": 932,
+        "color": 6
+      },
+      "id": "31c3d02d-a5f2-4f85-86c4-b8fc0347aa73",
+      "name": "Sticky Note16",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        1504
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message }}",
+        "options": {
+          "systemMessage": "You are the **HTX Spot Market Data Agent**.\n\nYou have **HTTP request access** to the official **HTX REST API** (`https://api.huobi.pro`) to retrieve spot market data for any requested trading pair.\n\nYour job is to **fetch and present raw market data only**.  \nYou do **not** analyze, predict, or recommend.\n Available Endpoints\n\n1. **Live Price (Aggregated Ticker)**  \n   `GET /market/detail/merged`  \n   • Returns best bid/ask, last trade price, volume, turnover.\n\n2. **24h Market Summary**  \n   `GET /market/detail`  \n   • 24h stats: open, high, low, close, volume, amount, count.\n\n3. **Market Depth**  \n   `GET /market/depth`  \n   • Order book bids/asks (step/levels configurable).\n\n4. **Full Order Book**  \n   `GET /market/fullMbp`  \n   • Complete market depth (up to 5000 levels).\n\n5. **Last Trade**  \n   `GET /market/trade`  \n   • Most recent single trade.\n\n6. **Recent Trades**  \n   `GET /market/history/trade`  \n   • List of recent trades.\n\n7. **Klines (Candlesticks)**  \n   `GET /market/history/kline`  \n   • Multiple intervals supported (`1s, 1min, 5min, 15min, 1day, 1week, 1mon, 1year`).  \n   • The AI automatically selects the correct interval (`seconds, minutes, days, weeks, months, years`).\n\nOutput Format\n\nAlways respond in **clean, structured text** (Telegram HTML). Example:\n\n\nBTC-USDT — HTX Spot Data\n\nPrice\n• Last: 58000.12\n• Change (24h): +2.4%\n\n24h Stats\n• Open: 56500 • High: 58500 • Low: 56200\n• Volume: 12,430 BTC • Turnover: 720M USDT\n\nOrder Book (Top 5)\n• Bids: \\[57990 x 0.5], \\[57980 x 1.2], …\n• Asks: \\[58010 x 0.8], \\[58020 x 1.5], …\n\nKlines (15m, latest 5)\n• O/H/L/C: 57800 / 58020 / 57750 / 57990\n Rules\n\n* Always **call the correct HTX API endpoint**.  \n* Do **not** fabricate or calculate values (except simple formatting).  \n* Do **not** output raw JSON.  \n* Do **not** give advice, predictions, or strategies.  \n* If data is missing, output `N/A`.\n\nFormat the data, stats and the message properly and well-formatted visual manner for a telegram message. \n"
+        }
+      },
+      "id": "8f7e085c-4606-4332-afef-c9a7608e3742",
+      "name": "HTX AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -2224,
+        1232
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "toolDescription": "### 🏷 Tool: **24h Stats (Ticker Detail)**\n\n**Endpoint:** `GET /market/detail`\n**What it does:** Returns the **24h rolling summary** for a single HTX spot symbol: **open/high/low/close**, **amount (base volume)**, **vol (quote turnover)**, and **trade count**.\n\n**Params:**\n- `symbol` (STRING, required) → e.g., `btcusdt` (lowercase, no dash)\n\n**Returns (core fields):** `ts`, `tick.open`, `tick.close`, `tick.high`, `tick.low`, `tick.amount`, `tick.vol`, `tick.count`.\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\n```\n\n**Notes:** For all symbols at once, use `GET /market/tickers`.\n",
+        "url": "https://api.huobi.pro/market/detail",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "symbol",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `btcusdt`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9d2ea3e9-eb9b-4a31-abdf-20a5cac5f3c8",
+      "name": "24h Stats",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "position": [
+        -2832,
+        1600
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "### 🏷 Tool: **Order Book Depth**\n\n**Endpoint:** `GET /market/depth`\n\n**What it does:** Returns the **order book snapshot** (bids/asks) for a trading pair up to the requested depth level.\n\n**Params:**\n- `symbol` (STRING, required) → e.g., `btcusdt` (lowercase, no dash)\n- `type` (STRING, required) → depth aggregation level (`step0`–`step5`)\n  - `step0` = no aggregation (full precision)\n  - `step1` = aggregated to 1 decimal place\n  - … up to `step5`\n- `depth` (INT, optional) → max entries per side (default 20, max 150)\n\n**Returns:** `ts`, `tick.bids: [[price, qty], ...]`, `tick.asks: [[price, qty], ...]`\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\ntype   = $fromAI('parameters1_Value', 'step0', 'string')\ndepth  = $fromAI('parameters2_Value', 20, 'number')\n```\n\n**Notes:** For lightweight quick book snapshot, use `step0` with smaller depth (20/50).",
+        "url": "https://api.huobi.pro/market/depth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "symbol",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `btcusdt`, 'string') }}"
+            },
+            {
+              "name": "type",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', `step0`, 'string') }}"
+            },
+            {
+              "name": "depth",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', `20`, 'number') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "49a91a19-f3fe-4a55-8fb6-c0ca0b3e75a9",
+      "name": "Order Book Depth",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "position": [
+        -2528,
+        1600
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "### 🏷 Tool: **Price (Latest)**\n\n**Endpoint:** `GET /market/detail/merged`\n\n**What it does:** Returns the **latest trade price**, best bid/ask, and other snapshot details for a symbol.\n\n**Params:**\n- `symbol` (STRING, required) → e.g., `btcusdt` (lowercase, no dash)\n\n**Returns:** `tick.close` = last trade price, plus bid/ask/volumes.\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\n```\n\n**Notes:** Use lowercase symbols without `-` or `/` (e.g., `btcusdt`).",
+        "url": "https://api.huobi.pro/market/detail/merged",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "symbol",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `btcusdt`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "94d34785-eb6a-4cb9-a281-048a6191220e",
+      "name": "Price (Latest)",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "position": [
+        -2240,
+        1600
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "### 🏷 Tool: **Best Bid/Ask (Order Book Ticker)**\n\n**Endpoint:** `GET /market/detail/merged`\n\n**What it does:** Returns the best **bid/ask** snapshot along with the latest trade price for a symbol.\n\n**Params:**\n- `symbol` (STRING, required) → e.g., `btcusdt` (lowercase, no dash)\n\n**Returns:** `tick.bid` = `[price, qty]`, `tick.ask` = `[price, qty]`\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\n```\n\n**Notes:** Use lowercase symbols without `-` or `/` (e.g., `btcusdt`).",
+        "url": "https://api.huobi.pro/market/detail/merged",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "symbol",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `btcusdt`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2097be58-4821-4aba-a9f4-96a33310781a",
+      "name": "Best Bid/Ask",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "position": [
+        -1920,
+        1600
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "### 🏷 Tool: **Klines (Candles)**\n\n**Endpoint:** `GET /market/history/kline`\n\n**What it does:** Returns candlestick data for a symbol/interval.\n\n**Params:**\n- `symbol` (STRING, required) → lowercase (e.g., `btcusdt`)\n- `period` (ENUM, required — e.g., `1min,5min,15min,30min,60min,4hour,1day,1mon,1week,1year`)\n- `size` (INT, optional, default 20, max 2000)\n\n**Returns (array per candle):** `[id, open, close, low, high, amount, vol, count]`\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\nperiod = $fromAI('parameters1_Value', '15min', 'string')\nsize   = $fromAI('parameters2_Value', 20, 'number')\n```\n\n**Notes:**\n- Use lowercase symbols without `-` (e.g., `btcusdt`).\n- If no `size` provided, defaults to 20 latest candles.",
+        "url": "https://api.huobi.pro/market/history/kline",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "symbol",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `btcusdt`, 'string') }}"
+            },
+            {
+              "name": "period",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', `15min`, 'string') }}"
+            },
+            {
+              "name": "size",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters2_Value', `20`, 'number') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b8eb9d04-3121-4e90-a652-d591883afaf0",
+      "name": "Klines (Candles)",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "position": [
+        -1584,
+        1584
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "### 🏷 Tool: **Merged Ticker (Bid/Ask/Last)**\n\n**Endpoint:** `GET /market/detail/merged`\n**What it does:** Returns best bid/ask and last price for a symbol. Use Calculator to derive a midpoint `(bid+ask)/2` if you need an average.\n\n**Params:** `symbol` (STRING, required) → lowercase, no dash (e.g., `btcusdt`)\n\n**Returns (key fields):** `tick.bid`, `tick.ask`, `tick.close`, `tick.high`, `tick.low`, `tick.amount`, `tick.vol`, `ts`\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\n```\n\n**Notes:** HTX has no direct avg-price endpoint; this is the canonical ticker to pair with Calculator for midpoint.",
+        "url": "https://api.huobi.pro/market/detail/merged",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "symbol",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `btcusdt`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f4740c7d-1d7e-4728-a2f8-61753efc998f",
+      "name": "Average Price",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "position": [
+        -1248,
+        1584
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "toolDescription": "### 🏷 Tool: **Recent Trades**\n\n**Endpoint:** `GET /market/history/trade`\n**What it does:** Returns the most recent trades for a given symbol.\n\n**Params:**\n* `symbol` (STRING, required) → lowercase, no dash (e.g., `btcusdt`)\n* `size` (INT, default 100, max 2000 — we set default 100)\n\n**Returns:** array of trade batches → each batch has `data: [{id, price, amount, direction, ts}]`\n\n**n8n query mapping:**\n```txt\nsymbol = $fromAI('parameters0_Value', 'btcusdt', 'string')\nsize   = $fromAI('parameters1_Value', 100, 'number')\n```\n\n**Notes:** Unlike Binance, HTX nests trades inside `data` arrays per batch.",
+        "url": "https://api.huobi.pro/market/history/trade",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "symbol",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `btcusdt`, 'string') }}"
+            },
+            {
+              "name": "size",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', `100`, 'number') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a52c1834-1be7-4763-9291-64125acd8ebb",
+      "name": "Recent Trades",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "position": [
+        -912,
+        1584
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "content": "# 🧠 HTX Spot Market Data AI Agent – Full System Documentation\n\nA specialized AI automation system for **HTX (Huobi) spot market data retrieval**.\nIt fetches and formats **live market data** only — **no predictions, no strategies**.\nOutputs are structured into **Telegram-ready reports** for traders and analysts.\n\n---\n\n## 🧩 Included Workflows\n\nYou must install and activate **all of the following workflows/tools** for the system to function:\n\n| ✅ Workflow / Tool Name | 📌 Function Description                                                                  |\n| ---------------------- | ---------------------------------------------------------------------------------------- |\n| HTX AI Agent           | Core orchestrator. Calls HTX REST APIs and formats raw data into Telegram-ready reports. |\n| 24h Stats Tool         | Pulls rolling 24-hour OHLC, volume, and trade count for a symbol.                        |\n| Price (Latest) Tool    | Fetches the latest trade price and best bid/ask.                                         |\n| Best Bid/Ask Tool      | Returns top-of-book bid/ask snapshot.                                                    |\n| Order Book Depth Tool  | Retrieves order book bids/asks with configurable depth aggregation.                      |\n| Klines (Candles) Tool  | Returns OHLCV candlestick data for configurable intervals (1m–1y).                       |\n| Recent Trades Tool     | Shows most recent executed trades.                                                       |\n| Average Price Tool     | Computes midpoint between bid/ask using Calculator (HTX has no direct avg-price).        |\n| Calculator             | Performs math inside workflow (e.g., spreads, % changes).                                |\n| Think                  | Lightweight reasoning helper (JSON cleanup, formatting).                                 |\n| Simple Memory          | Stores `sessionId` and symbol state for continuity across Telegram interactions.         |\n\n---\n\n## ⚙️ Installation Instructions\n\n### Step 1: Import Workflows\n\n* Open **n8n Editor UI**\n* Import the JSON file(s) provided (`HTX AI Agent v1.02.json`)\n* Activate the workflows\n\n### Step 2: Set Credentials\n\n* **OpenAI API Credential** → for GPT-4.1-mini (formatting only)\n* **Telegram API Credential** → Bot key for sending/receiving messages\n* **HTX Market Data** → No auth required (public endpoints)\n\n### Step 3: Configure Webhook & Auth\n\n* Update the **Telegram ID Check node** with your personal Telegram ID\n* Only this ID can trigger the agent\n\n### Step 4: Deploy & Test\n\n* Send a symbol (e.g., `btcusdt`) to your Telegram bot\n* Agent retrieves live data and formats into a clean HTML report\n\n---\n\n## 🖥️ System Workflow Overview\n\n```\n[Telegram Trigger]\n→ [User Authentication]\n→ [Add SessionId + Memory]\n→ [HTX AI Agent]\n   ↳ (24h Stats, Price, Best Bid/Ask, Order Book, Klines, Trades)\n   ↳ (Calculator + Think for cleanup/formatting)\n→ [Split Messages > 4000 chars]\n→ [Telegram SendMessage]\n```\n\n---\n\n## 📬 Telegram Output Style\n\n```html\n<b>HTX Market Data – BTCUSDT</b>\n\n<b>Price</b>\n• Last: 58,000.12\n• Best Bid: 57,990 | Best Ask: 58,010\n\n<b>24h Stats</b>\n• Open: 56,500 | High: 58,500 | Low: 56,200\n• Volume: 12,430 BTC | Turnover: 720M USDT\n\n<b>Order Book (Top 5)</b>\n• Bids: [57,990 x 0.5], [57,980 x 1.2] …\n• Asks: [58,010 x 0.8], [58,020 x 1.5] …\n\n<b>Klines (15m, last 3)</b>\n• O/H/L/C: 57,800 / 58,020 / 57,750 / 57,990\n```\n\n---\n\n## ⚠️ Rules\n\n* Only fetch and format data — **no trading signals or advice**\n* Always use lowercase symbols (e.g., `btcusdt`)\n* Do not output raw JSON — must be formatted for Telegram\n* If data missing → show `N/A`\n\n---\n\n## 🚀 Support & Licensing\n\n🔗 **Don Jayamaha – LinkedIn**\n[linkedin.com/in/donjayamahajr](http://linkedin.com/in/donjayamahajr)\n\n© 2025 Treasurium Capital Limited Company. All rights reserved.\nThis system architecture, prompts, and workflow structure are proprietary and protected by **U.S. copyright law**.\nReuse or resale prohibited without license.\n\n",
+        "height": 2464,
+        "width": 1200
+      },
+      "id": "f3a2368e-073b-43c1-aacb-df1388f4385b",
+      "name": "Sticky Note17",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "=gpt-4o-mini",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -2368,
+        1440
+      ],
+      "id": "2aff136e-89b9-48c3-9891-3258951e8deb",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "MpzfGESfeXbJMoQ5",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "HTX AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "24h Stats": {
+      "ai_tool": [
+        [
+          {
+            "node": "HTX AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "HTX AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Best Bid/Ask": {
+      "ai_tool": [
+        [
+          {
+            "node": "HTX AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTX AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Splits message is more than 4000 characters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Average Price": {
+      "ai_tool": [
+        [
+          {
+            "node": "HTX AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recent Trades": {
+      "ai_tool": [
+        [
+          {
+            "node": "HTX AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "HTX AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Price (Latest)": {
+      "ai_tool": [
+        [
+          {
+            "node": "HTX AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adds \"SessionId\"": {
+      "main": [
+        [
+          {
+            "node": "HTX AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Klines (Candles)": {
+      "ai_tool": [
+        [
+          {
+            "node": "HTX AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order Book Depth": {
+      "ai_tool": [
+        [
+          {
+            "node": "HTX AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "User Authentication (Replace Telegram ID)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User Authentication (Replace Telegram ID)": {
+      "main": [
+        [
+          {
+            "node": "Adds \"SessionId\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Splits message is more than 4000 characters": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "HTX AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d826792e-5dce-4c37-b8ff-0460b3f97fd8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "edb67d3a7f9d12c7abb88f04023272f13c5753dec2ada987b4428826f48ef7ab"
+  },
+  "id": "f6wegTON4OVoNXLK",
+  "tags": []
+}
